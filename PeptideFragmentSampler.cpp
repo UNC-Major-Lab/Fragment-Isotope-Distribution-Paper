@@ -5,6 +5,9 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #include <OpenMS/CHEMISTRY/AASequence.h>
 #include <OpenMS/CHEMISTRY/ResidueDB.h>
