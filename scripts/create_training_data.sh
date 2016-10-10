@@ -47,6 +47,7 @@ endif
 set ROOT_DIR = "/netscr/dennisg/MSFragmentDeisotoper/S${S}_CS${CS}_Se${Se}_CSe${CSe}"
 set NUM_SAMPLES = "100"
 set MAX_SAMPLED_MASS = "8500"
+set MAX_ISOTOPE = "5"
 
 mkdir -p $ROOT_DIR
 
@@ -64,7 +65,7 @@ mkdir ${ROOT_DIR}/spline/hist/
 mkdir ${ROOT_DIR}/spline/res3D/
 mkdir ${ROOT_DIR}/spline/scatter/
 
-~/Fragment-Isotope-Distribution-Paper/build/PeptideFragmentSampler ${ROOT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMPLES $S $CS $Se $CSe
+~/Fragment-Isotope-Distribution-Paper/build/PeptideFragmentSampler ${ROOT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMPLES $S $CS $Se $CSe $MAX_ISOTOPE
 
 chmod 775 ${ROOT_DIR}/data/*
 
