@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<class>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:annotation>
+  		<xs:documentation xlm:lang="en">
+			XML Schema for tensor-product splines that approximate the isotopic distributions of MS/MS fragments.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:element name="models" type="modelsType"/>
+
+	<xs:complexType name="modelsType">
+		<xs:sequence minOccurs="1">
+			<xs:element name="model" type="individualModelType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="individualModelType">
+		<xs:attribute name="S" type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="CS" type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="Se" type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="CSe" type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="PrecursorIndex" type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="FragmentIndex" type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="OrderX" type="xs:positiveInteger" use="required"/>
+		<xs:attribute name="OrderY" type="xs:positiveInteger" use="required"/>
+		
+		<xs:sequence>
+			<xs:element name="breaksFragmentMassArrayBinary" type="xs:base64Binary" use="required">
+				<xs:attribute name="precision" type="xs:nonNegativeInteger" use="required"/>
+				<xs:attribute name="endian" type="xs:string" use="required"/>
+				<xs:attribute name="length" type="xs:positiveInteger" use="required"/>
+			</xs:element>
+		
+			<xs:element name="breaksPrecursorMassArrayBinary" type="xs:base64Binary" use="required">
+				<xs:attribute name="precision" type="xs:nonNegativeInteger" use="required"/>
+				<xs:attribute name="endian" type="xs:string" use="required"/>
+				<xs:attribute name="length" type="xs:positiveInteger" use="required"/>
+			</xs:element>
+		
+			<xs:element name="coefficientsArrayBinary" type="xs:base64Binary" use="required">
+				<xs:attribute name="precision" type="xs:nonNegativeInteger" use="required"/>
+				<xs:attribute name="endian" type="xs:string" use="required"/>
+				<xs:attribute name="length" type="xs:positiveInteger" use="required"/>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+</xs:schema>
+
+<models>
