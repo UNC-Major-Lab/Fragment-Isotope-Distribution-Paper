@@ -52,13 +52,13 @@ if (OpenMS_FOUND)
     add_definitions(${OPENMS_DEFINITIONS})
 
     ## library with additional classes from above
-    #add_library(my_custom_lib STATIC ${my_sources})
+    add_library(my_custom_lib STATIC ${my_sources})
 
     ## add targets for the executables
     foreach(i ${my_executables})
         add_executable(${i} ${i}.cpp)
         ## link executables against OpenMS
-        target_link_libraries(${i} OpenMS)
+        target_link_libraries(${i} OpenMS my_custom_lib)
     endforeach(i)
 
 
