@@ -12,8 +12,7 @@ foreach file (${ROOT_DIR}/data/*)
     if (-d $file) then
         echo "Skipping $file (is a directory)"
     else
-	bsub -q day -J "single.sh" -o "/netscr/dennisg/single.log.%J" -M 20 "./single_model.sh $file $S $CS $Se $CSe $max_mass"
-	exit
+	    bsub -q day -J "single.sh" -o "/netscr/dennisg/single.log.%J" -M 20 "./single_model.sh $file $S $CS $Se $CSe $max_mass"
     endif
 end
 
