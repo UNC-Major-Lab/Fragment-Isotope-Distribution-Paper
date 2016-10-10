@@ -26,7 +26,7 @@ std::mt19937 gen(rd());
 std::uniform_int_distribution<> dis_AA(0, AMINO_ACIDS.length()-1);
 std::uniform_int_distribution<> dis_S(0, AMINO_ACIDS_SULFUR.length()-1);
 
-int max_depth = 6;
+int max_depth;
 
 OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
     OpenMS::AASequence random_peptide;
@@ -60,7 +60,7 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
     return random_peptide;
 }
 
-void create_fragments(OpenMS::AASequence &p, std::ofstream outfiles[max_depth][max_depth], int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
+void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
     int num_fragments = p.size()-1;
 
     int tot_left_SSe = std::max(num_sulfurs + num_selenium,1);
@@ -98,8 +98,9 @@ void create_fragments(OpenMS::AASequence &p, std::ofstream outfiles[max_depth][m
 void sample_fragment_isotopic_distributions(std::string base_path, float max_mass, int num_samples, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
 
     // create all output files and write header to each
-    std::ofstream outfiles[max_depth][max_depth];
+    std::ofstream** outfiles = new std::ofstream*[max_depth];
     for (int precursor_isotope = 1; precursor_isotope < max_depth; ++precursor_isotope) {
+        outfiles[precursor_isotope] = new std::ofstream[max_depth];
         for (int fragment_isotope = 0; fragment_isotope <= precursor_isotope; ++fragment_isotope) {
             std::string filename = "Precursor" + std::to_string(precursor_isotope) + "_" +
                                    "Fragment" + std::to_string(fragment_isotope) + ".tab";
@@ -130,7 +131,9 @@ void sample_fragment_isotopic_distributions(std::string base_path, float max_mas
         for (int fragment_isotope = 0; fragment_isotope <= precursor_isotope; ++fragment_isotope) {
             outfiles[precursor_isotope][fragment_isotope].close();
         }
+        delete[] outfiles[precursor_isotope];
     }
+    delete[] outfiles;
 }
 
 void usage()
