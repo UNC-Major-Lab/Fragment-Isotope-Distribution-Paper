@@ -90,8 +90,8 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
     double frag_mass = fragment.getMonoWeight();
 
     OpenMS::EmpiricalFormula ef_f = pep.getFormula();
-    ef_f = pep.getFormula(OpenMS::Residue::ResidueType::BIon,2);
-    ef_f = pep.getFormula(OpenMS::Residue::ResidueType::YIon,1);
+    ef_f = pep.getFormula(OpenMS::Residue::ResidueType::BIon,0);
+    ef_f = pep.getFormula(OpenMS::Residue::ResidueType::YIon,0);
 
     std::vector<UInt> isolated_precursor_isotopes(1,0);
     for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
@@ -154,7 +154,8 @@ void testTheoreticalPeptide(AASequence& pep)
     }
 }
 
-void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& digestor) {
+void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& digestor)
+{
     static Size MIN_PEPTIDE_LENGTH = 5;
     static Size MAX_PEPTIDE_LENGTH = 80;
 
