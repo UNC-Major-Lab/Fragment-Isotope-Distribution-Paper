@@ -73,7 +73,7 @@ void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_s
         OpenMS::EmpiricalFormula b_ion = p.getPrefix(index).getFormula(OpenMS::Residue::ResidueType::BIon);
         OpenMS::EmpiricalFormula y_ion = p.getPrefix(index).getFormula(OpenMS::Residue::ResidueType::YIon);
 
-        for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope)
+        for (int precursor_isotope = 1; precursor_isotope < max_depth; ++precursor_isotope)
         {
             std::vector<OpenMS::UInt> isolated_isotopes;
             isolated_isotopes.push_back(precursor_isotope);
