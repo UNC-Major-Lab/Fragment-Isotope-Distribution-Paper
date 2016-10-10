@@ -151,7 +151,7 @@ void usage()
 
 int main(int argc, const char ** argv) {
 
-    if (argc != 8)
+    if (argc != 9)
     {
         usage();
     }
