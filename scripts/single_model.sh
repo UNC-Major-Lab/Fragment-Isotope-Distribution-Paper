@@ -21,4 +21,5 @@ set out_models = ${ROOT_DIR}/spline/model/Precursor${precursor}_Fragment${fragme
 
 set param = "FragmentIsotopeTensorProductSpline('"${max_mass}"','"${S}"','"${CS}"','"${Se}"','"${CSe}"','"${precursor}"','"${fragment}"','"${file}"','"${out_spline}"','"${out_res_hist}"','"${out_scatter}"','"${out_res3D}"','"${out_gof}"','"${out_models}"');quit force"
 
+cd ~/Fragment-Isotope-Distribution-Paper/matlab/
 matlab -nodisplay -nosplash -nodesktop -r $param
