@@ -86,13 +86,6 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
     int num_s = fragment.getNumberOf(ElementDB::getInstance()->getElement("Sulfur"));
     int num_cs = precursor.getNumberOf(ElementDB::getInstance()->getElement("Sulfur")) - num_s;
 
-    double pep_mass = precursor.getMonoWeight();
-    double frag_mass = fragment.getMonoWeight();
-
-    OpenMS::EmpiricalFormula ef_f = pep.getFormula();
-    ef_f = pep.getFormula(OpenMS::Residue::ResidueType::BIon,0);
-    ef_f = pep.getFormula(OpenMS::Residue::ResidueType::YIon,0);
-
     std::vector<UInt> isolated_precursor_isotopes(1,0);
     for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
         isolated_precursor_isotopes.push_back(i);
