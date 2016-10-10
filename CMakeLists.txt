@@ -1,16 +1,19 @@
 ### example CMakeLists.txt to develop programs using OpenMS
-project("Example_Project_using_OpenMS")
+project("Fragment_Isotope_Distribution_Paper")
 cmake_minimum_required(VERSION 2.8.3)
 
 ## list all your executables here (a corresponding .cpp file should exist, e.g. Main.cpp)
 set(my_executables
         PeptideFragmentSampler
+        CompareToTheoretical
         )
 
 ## list all classes here, which are required by your executables
 ## (all these classes will be linked into a library)
 set(my_sources
-        PeptideFragmentSampler.cpp)
+        PeptideFragmentSampler.cpp
+        CompareToTheoretical.cpp
+        Stats.h)
 
 ## find OpenMS configuration and register target "OpenMS" (our library)
 find_package(OpenMS)
