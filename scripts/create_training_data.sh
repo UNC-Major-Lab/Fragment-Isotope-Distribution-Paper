@@ -10,6 +10,8 @@ module load gcc/4.8.1
 module load r/3.2.2
 module load matlab
 
+source config.csh
+
 echo $LSB_JOBINDEX
 
 set index = $LSB_JOBINDEX
@@ -44,29 +46,26 @@ else if ($LSB_JOBINDEX <= 16) then
     set S = `expr 7 - $index`
 endif
 
-set ROOT_DIR = "/netscr/dennisg/MSFragmentDeisotoper/S${S}_CS${CS}_Se${Se}_CSe${CSe}"
-set NUM_SAMPLES = "100"
-set MAX_SAMPLED_MASS = "8500"
-set MAX_ISOTOPE = "5"
+set OUT_DIR = ${ROOT_OUT_DIR}"/S${S}_CS${CS}_Se${Se}_CSe${CSe}"
 
-mkdir -p $ROOT_DIR
+mkdir -p $OUT_DIR
 
-rm -r ${ROOT_DIR}/data/
+rm -r ${OUT_DIR}/data/
 
-mkdir ${ROOT_DIR}/data/
+mkdir ${OUT_DIR}/data/
 
-rm -r ${ROOT_DIR}/spline/
+rm -r ${OUT_DIR}/spline/
 
-mkdir ${ROOT_DIR}/spline/
-mkdir ${ROOT_DIR}/spline/3D/
-mkdir ${ROOT_DIR}/spline/model/
-mkdir ${ROOT_DIR}/spline/gof/
-mkdir ${ROOT_DIR}/spline/hist/
-mkdir ${ROOT_DIR}/spline/res3D/
-mkdir ${ROOT_DIR}/spline/scatter/
+mkdir ${OUT_DIR}/spline/
+mkdir ${OUT_DIR}/spline/3D/
+mkdir ${OUT_DIR}/spline/model/
+mkdir ${OUT_DIR}/spline/gof/
+mkdir ${OUT_DIR}/spline/hist/
+mkdir ${OUT_DIR}/spline/res3D/
+mkdir ${OUT_DIR}/spline/scatter/
 
-~/Fragment-Isotope-Distribution-Paper/build/PeptideFragmentSampler ${ROOT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMPLES $S $CS $Se $CSe $MAX_ISOTOPE
+${BUILD_DIR}/PeptideFragmentSampler ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMPLES $S $CS $Se $CSe $MAX_ISOTOPE
 
-chmod 775 ${ROOT_DIR}/data/*
+chmod 775 ${OUT_DIR}/data/*
 
-./submit_models.sh $S $CS $Se $CSe $MAX_SAMPLED_MASS
+${SOURCE_DIR}/scripts/submit_models.sh $S $CS $Se $CSe $MAX_SAMPLED_MASS
