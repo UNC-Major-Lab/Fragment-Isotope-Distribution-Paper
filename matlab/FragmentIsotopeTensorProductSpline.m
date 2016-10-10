@@ -100,14 +100,6 @@ function FragmentIsotopeTensorProductSpline(max_sampled_mass,S,CS,Se,CSe,precurs
 	sp_pp_y = fn2fm(sp_y,'pp');
 	sp_pp_x = fn2fm(sp_x,'pp');
 	
-	size(sp_pp_y.coefs)
-	sp_pp_y.coefs
-	size(sp_pp_x.coefs)
-	sp_pp_x.coefs	
-
-	sp_pp_y.breaks
-	sp_pp_x.breaks
-
 	% Create a tensor product spline in the B-spline format (better for creation)
 	sp = spap2({knots_x, knots_y},[order, order], {X,Y}, Z);
 	% Convert from B-spline to piecewise polynomial (pp) format. (better for evaluation)
