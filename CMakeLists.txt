@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.8.3)
 set(my_executables
         PeptideFragmentSampler
         CompareToTheoretical
+        DistributionCompare
         )
 
 ## list all classes here, which are required by your executables
@@ -13,7 +14,10 @@ set(my_executables
 set(my_sources
         PeptideFragmentSampler.cpp
         CompareToTheoretical.cpp
-        Stats.h)
+        DistributionCompare.cpp
+        Stats.h
+        Ion.h
+        Ion.cpp)
 
 ## find OpenMS configuration and register target "OpenMS" (our library)
 find_package(OpenMS)
