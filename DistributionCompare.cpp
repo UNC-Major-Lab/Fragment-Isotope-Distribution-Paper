@@ -5,6 +5,7 @@
 #include <OpenMS/ANALYSIS/ID/IDMapper.h>
 #include <OpenMS/CHEMISTRY/TheoreticalSpectrumGenerator.h>
 #include "Ion.h"
+#include "Stats.h"
 #include <OpenMS/CHEMISTRY/IsotopeDistribution.h>
 #include <OpenMS/MATH/STATISTICS/StatisticFunctions.h>
 #include <fstream>
@@ -154,14 +155,25 @@ double computeCC(const std::vector<std::pair<double, double> > &obsDist,
 double computeX2(const std::vector<std::pair<double, double> > &obsDist,
                  const std::vector<std::pair<double, double> > &theoDist)
 {
-    //chi-squared statistic
-    double x2 = 0;
+    //vector to hold observed proportions
+    std::vector<double> obsProp;
+    //vector to hold theoretical proportions
+    std::vector<double> theoProp;
 
-    for (int i = 0; i < obsDist.size(); ++i) {
-        x2 += pow(obsDist[i].second - theoDist[i].second, 2) / theoDist[i].second;
+    //check they are both the same size
+    if (obsDist.size() != theoDist.size()) {
+        return 0;
     }
 
-    return x2;
+    //fill proportions vectors from distribution parameters
+    for (int i = 0; i < obsDist.size(); ++i) {
+        obsProp.push_back(obsDist[i].second);
+        theoProp.push_back(theoDist[i].second);
+    }
+
+    //compute pearsons correlation coefficient
+    return Stats::chiSquared(obsProp.begin(), obsProp.end(),
+                             theoProp.begin(), theoProp.end());
 }
 
 void usage(){
