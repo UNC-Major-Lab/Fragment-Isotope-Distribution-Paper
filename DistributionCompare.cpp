@@ -15,7 +15,7 @@ const double ppm = 20 * 0.000001;   //acquisition mz error for peak matching
 const double neutron = 1.008701;    //mass of neutron
 //const double mzWindow = 0.8;        //1/2 of the isolation window used for precursure ion
 
-void theoreticalDistribution(std::vector<std::pair<double, double> > &theoDist, Ion &ion, const OpenMS::Int pepCharge)
+void theoreticalDistribution(std::vector<std::pair<double, double> > &theoDist, Ion &ion, const OpenMS::Int &pepCharge)
 {
 
     //search depth of 1 reports only monoisotopic peak
@@ -49,9 +49,9 @@ void theoreticalDistribution(std::vector<std::pair<double, double> > &theoDist, 
 }
 
 void conditionalDistribution(std::vector<std::pair<double, double> > &condDist,
-                             const Ion ion,
-                             const OpenMS::AASequence precursorSequence,
-                             const OpenMS::Int precursorCharge)
+                             const Ion &ion,
+                             const OpenMS::AASequence &precursorSequence,
+                             const OpenMS::Int &precursorCharge)
 {
     //create vector of precursor isotopes
     std::vector<OpenMS::UInt> preIsotopes;
@@ -127,8 +127,8 @@ void scaleDistribution(std::vector<std::pair<double, double> > &obsDist)
     }
 }
 
-double computeCC(const std::vector<std::pair<double, double> > obsDist,
-                 const std::vector<std::pair<double, double> > theoDist)
+double computeCC(const std::vector<std::pair<double, double> > &obsDist,
+                 const std::vector<std::pair<double, double> > &theoDist)
 {
     //vector to hold observed proportions
     std::vector<double> obsProp;
@@ -151,8 +151,8 @@ double computeCC(const std::vector<std::pair<double, double> > obsDist,
                                                        theoProp.begin(), theoProp.end());
 }
 
-double computeX2(const std::vector<std::pair<double, double> > obsDist,
-                 const std::vector<std::pair<double, double> > theoDist)
+double computeX2(const std::vector<std::pair<double, double> > &obsDist,
+                 const std::vector<std::pair<double, double> > &theoDist)
 {
     //chi-squared statistic
     double x2 = 0;
