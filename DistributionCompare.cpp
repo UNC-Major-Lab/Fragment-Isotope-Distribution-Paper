@@ -250,9 +250,10 @@ int main(int argc, char * argv[])
     int numPrecursAtCharge[10] = {0};
 
     //output file for distribution comparison results
+    const std::string scoreFileName = "distributionScores.out";
     std::ofstream distributionScoreFile;
     try {
-        distributionScoreFile.open(dataDir + "distributionScores.out");
+        distributionScoreFile.open(dataDir + scoreFileName);
     } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
         usage();
@@ -272,9 +273,10 @@ int main(int argc, char * argv[])
 
     /*
     //output file for ion identification data
+    const std::string ionFileName = "ions.out";
     std::ofstream ionFile;
     try {
-        ionFile.open(dataDir + "ions.out");
+        ionFile.open(dataDir + ionFileName);
     } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
         usage();
@@ -438,7 +440,7 @@ int main(int argc, char * argv[])
                         //write ion information to file
                         //ionFile << true << "\n";        //ion found
 
-
+                        /*
                         //report complete distributions
                         if (completeFlag && obsDist.size() >= 4) {
 
@@ -457,7 +459,7 @@ int main(int argc, char * argv[])
                             std::cout << "openX2= " << openX2;
                             std::cout << " condX2= " << condX2 << std::endl;
                             std::cout << "***************************" << std::endl;
-                        }
+                        }*/
                     }
                 }//ion loop
                 /*
@@ -483,7 +485,7 @@ int main(int argc, char * argv[])
     }//spectra loop
 
     for (int i = 0; i < 10; ++i) {
-        std::cout << "Number of precursers at charge " << i << ": ";
+        std::cout << "Number of precursors at charge " << i << ": ";
         std::cout << numPrecursAtCharge[i] << std::endl;
     }
     std::cout << "Number of matched monoisotopic ions: " << numMatchedIons << std::endl;
@@ -501,7 +503,9 @@ int main(int argc, char * argv[])
     }
 
     //close output files
+    std::cout << "Distribution comparison scorefile written to: " + scoreFileName << std::endl;
     distributionScoreFile.close();
+    //std::cout << "Complete ion file written to: " + ionFileName << std::endl;
     //ionFile.close();
 
     return 0;
