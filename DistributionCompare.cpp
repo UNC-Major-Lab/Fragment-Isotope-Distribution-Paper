@@ -11,6 +11,7 @@
 #include <fstream>
 
 //global variables
+const double FDR_threshold = 0.01;  //False discovery rate threshold (%/100)
 const int maxSearchDepth = 7;       //maximum isotope distribution search depth
 const double ppm = 20 * 0.000001;   //acquisition mz error for peak matching
 const double neutron = 1.008701;    //mass of neutron
@@ -171,9 +172,33 @@ double computeX2(const std::vector<std::pair<double, double> > &obsDist,
         theoProp.push_back(theoDist[i].second);
     }
 
-    //compute pearsons correlation coefficient
+    //compute chi squared statistic
     return Stats::chiSquared(obsProp.begin(), obsProp.end(),
                              theoProp.begin(), theoProp.end());
+}
+
+double computeVD(const std::vector<std::pair<double, double> > &obsDist,
+                 const std::vector<std::pair<double, double> > &theoDist)
+{
+    //vector to hold observed proportions
+    std::vector<double> obsProp;
+    //vector to hold theoretical proportions
+    std::vector<double> theoProp;
+
+    //check they are both the same size
+    if (obsDist.size() != theoDist.size()) {
+        return 0;
+    }
+
+    //fill proportions vectors from distribution parameters
+    for (int i = 0; i < obsDist.size(); ++i) {
+        obsProp.push_back(obsDist[i].second);
+        theoProp.push_back(theoDist[i].second);
+    }
+
+    //compute total variation distance
+    return Stats::totalVariationDistance(obsProp.begin(), obsProp.end(),
+                                         theoProp.begin(), theoProp.end());
 }
 
 void usage(){
@@ -248,6 +273,8 @@ int main(int argc, char * argv[])
     int numMatchedAtDepth[maxSearchDepth] = {0};
     int numCompleteDists[maxSearchDepth] = {0};
     int numPrecursAtCharge[10] = {0};
+    int numPeptideHits = 0;
+    int numPeptideHitsBelowFDR = 0;
 
     //output file for distribution comparison results
     const std::string scoreFileName = "distributionScores.out";
@@ -268,6 +295,8 @@ int main(int argc, char * argv[])
     distributionScoreFile << "conditionalPearsonCC\t";        //pearsonCC for Dennis's conditional distribution
     distributionScoreFile << "openMSChiSquared\t";            //chi-squared for OpenMS distribution
     distributionScoreFile << "conditionalChiSquared\t";       //chi-squared for Dennis's cond. distribution
+    distributionScoreFile << "openMSTotVarDist\t";            //total variation distance for OpenMS distribution
+    distributionScoreFile << "conditionalTotVarDist\t";       //total variation distance for cond. distribution
     distributionScoreFile << "completeFlag\t";                //full ion distribution identified in spectra
     distributionScoreFile << "completeAtDepth\n";             //ion distribution complete up to depth
 
@@ -317,6 +346,15 @@ int main(int argc, char * argv[])
 
             //loop through each peptide hit
             for (int pepHitIndex = 0; pepHitIndex < pepHits.size(); ++pepHitIndex) {
+                ++numPeptideHits;
+
+                //if peptide score is above FDR threshold, skip to next peptide
+                if (pepHits[pepHitIndex].getScore() >= FDR_threshold) {
+                    continue;
+                }
+
+                ++numPeptideHitsBelowFDR;
+
                 //get AASequence and charge from peptide hit
                 const OpenMS::AASequence pepSeq = pepHits[pepHitIndex].getSequence();
                 const OpenMS::Int pepCharge = pepHits[pepHitIndex].getCharge();
@@ -407,6 +445,12 @@ int main(int argc, char * argv[])
                         //compute chi-squared with observed to Conditional
                         double condX2 = computeX2(obsDist, condDist);
 
+                        //compute total variation distance with observed to OpenMS
+                        double openVD = computeVD(obsDist, theoDist);
+
+                        //compute total variation distance with observed to Conditional
+                        double condVD = computeVD(obsDist, condDist);
+
                         //report on matched ion distribution depth
                         bool completeFlag = true;
                         int completeAtDepth = 0;
@@ -434,6 +478,8 @@ int main(int argc, char * argv[])
                         distributionScoreFile << condCC << "\t";            //pearsonCC for Dennis's conditional distribution
                         distributionScoreFile << openX2 << "\t";            //chi-squared for OpenMS distribution
                         distributionScoreFile << condX2 << "\t";            //chi-squared for Dennis's cond. distribution
+                        distributionScoreFile << openVD << "\t";            //tot. variation dist. for OpenMS dist.
+                        distributionScoreFile << condVD << "\t";            //tot. variation dist. for cond. dist.
                         distributionScoreFile << completeFlag << "\t";      //complete distribution found
                         distributionScoreFile << completeAtDepth << "\n";   //complete distribution up to depth
 
@@ -501,6 +547,11 @@ int main(int argc, char * argv[])
         std::cout << "Number of complete distributions of depth " << i << ": ";
         std::cout << numCompleteDists[i] << std::endl;
     }
+
+    //report on peptide hits
+    std::cout << "Peptide hits: " << numPeptideHits << std::endl;
+    std::cout << "Peptdie hits below FDR: " << numPeptideHitsBelowFDR << std::endl;
+    std::cout << "Peptide hits below FDR/peptide hits: " << numPeptideHitsBelowFDR / double(numPeptideHits) << std::endl;
 
     //close output files
     std::cout << "Distribution comparison scorefile written to: " + scoreFileName << std::endl;
