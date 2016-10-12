@@ -129,6 +129,24 @@ void scaleDistribution(std::vector<std::pair<double, double> > &obsDist)
     }
 }
 
+bool distributionValid(std::vector<std::pair<double, double> > &dist)
+{
+    //only check if distribution is at least 3 deep
+    if (dist.size() < 3) {
+        return true;
+    }
+
+    //loop from end of distribution up to the m1 peak
+    for (int i = dist.size() - 1; i > 1; --i) {
+        //if intensity at m_i is greater than intensity at m_i-1
+        if (dist[i].second > dist[i-1].second) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 double computeCC(const std::vector<std::pair<double, double> > &obsDist,
                  const std::vector<std::pair<double, double> > &theoDist)
 {
@@ -288,6 +306,7 @@ int main(int argc, char * argv[])
     }
     //headers for distribution score output file
     distributionScoreFile << "ionID\t";                       //ion ID of monoisotopic ion
+    distributionScoreFile << "distributionValid\t";           //check for valid distribution
     distributionScoreFile << "distributionMonoWeight\t";      //ion distribution monoisotopic weight
     distributionScoreFile << "ionCharge\t";                   //ion distribtuion charge
     distributionScoreFile << "searchDepth\t";                 //distribution search depth
@@ -413,6 +432,9 @@ int main(int argc, char * argv[])
                     } else {
                         //ion found
                         ++numMatchedIons;
+                        //write ion information to file
+                        ionFile << true << "\n";        //ion found
+
                         //ionFound.push_back(TRUE);
                         //vector for theoretical isotope distribution <mz, probability>
                         std::vector<std::pair<double, double> > theoDist;
@@ -471,6 +493,7 @@ int main(int argc, char * argv[])
 
                         //write distribution results to file
                         distributionScoreFile << ionID << "\t";             //ion ID
+                        distributionScoreFile << distributionValid(obsDist) << "\t";      //valid distribution flag
                         distributionScoreFile << ionList[ionIndex].monoWeight << "\t";    //ion distribution monoisotopic weight
                         distributionScoreFile << ionList[ionIndex].charge << "\t";        //ion distribution charge
                         distributionScoreFile << theoDist.size() << "\t";                 //distribution search depth
@@ -482,9 +505,6 @@ int main(int argc, char * argv[])
                         distributionScoreFile << condVD << "\t";            //tot. variation dist. for cond. dist.
                         distributionScoreFile << completeFlag << "\t";      //complete distribution found
                         distributionScoreFile << completeAtDepth << "\n";   //complete distribution up to depth
-
-                        //write ion information to file
-                        ionFile << true << "\n";        //ion found
 
                         /*
                         //report complete distributions
