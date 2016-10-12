@@ -300,7 +300,7 @@ int main(int argc, char * argv[])
     distributionScoreFile << "completeFlag\t";                //full ion distribution identified in spectra
     distributionScoreFile << "completeAtDepth\n";             //ion distribution complete up to depth
 
-    /*
+
     //output file for ion identification data
     const std::string ionFileName = "ions.out";
     std::ofstream ionFile;
@@ -326,7 +326,7 @@ int main(int argc, char * argv[])
     ionFile << "ionMZ\t";               //ion mz
     ionFile << "ionSearchTolerance\t";  //ion search tolerance
     ionFile << "ionFoundFlag\n";        //ion not found
-    */
+
 
     //Loop through all spectra
     for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex) {
@@ -388,7 +388,7 @@ int main(int argc, char * argv[])
                     //find nearest peak to ion mz within tolerance
                     OpenMS::Int peakIndex = msExperiment.getSpectrum(specIndex).findNearest(mz, tol);
 
-                    /*
+
                     //write ion information to file
                     ionFile << ionID << "\t";           //unique ion ID
                     ionFile << specIndex << "\t";       //spectrum index
@@ -403,13 +403,13 @@ int main(int argc, char * argv[])
                     ionFile << ionList[ionIndex].monoWeight << "\t";    //ion weight
                     ionFile << mz << "\t";              //ion mz
                     ionFile << tol << "\t";             //ion search tolerance
-                    */
+
 
                     if (peakIndex == -1) {
                         //ion not found
                         //ionFound.push_back(FALSE);
                         //write ion information to file
-                        //ionFile << false << "\n";       //ion not found
+                        ionFile << false << "\n";       //ion not found
                     } else {
                         //ion found
                         ++numMatchedIons;
@@ -484,7 +484,7 @@ int main(int argc, char * argv[])
                         distributionScoreFile << completeAtDepth << "\n";   //complete distribution up to depth
 
                         //write ion information to file
-                        //ionFile << true << "\n";        //ion found
+                        ionFile << true << "\n";        //ion found
 
                         /*
                         //report complete distributions
@@ -556,8 +556,8 @@ int main(int argc, char * argv[])
     //close output files
     std::cout << "Distribution comparison scorefile written to: " + scoreFileName << std::endl;
     distributionScoreFile.close();
-    //std::cout << "Complete ion file written to: " + ionFileName << std::endl;
-    //ionFile.close();
+    std::cout << "Complete ion file written to: " + ionFileName << std::endl;
+    ionFile.close();
 
     return 0;
 }
