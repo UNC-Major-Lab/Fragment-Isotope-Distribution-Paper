@@ -11,18 +11,19 @@
 #include <fstream>
 
 //global variables
-const double FDR_threshold = 0.01;  //False discovery rate threshold (%/100)
-const int maxSearchDepth = 7;       //maximum isotope distribution search depth
-const double ppm = 20 * 0.000001;   //acquisition mz error for peak matching
-const double neutron = 1.008701;    //mass of neutron
-const double mzWindow = 1.6;        //the isolation window used for precursor ion collection
+const double FDR_THRESHOLD = 0.01;          //False discovery rate threshold (%/100)
+const double ERROR_PPM = 20 * 0.000001;     //acquisition mz error for peak matching
+const double NEUTRON_MASS = 1.008701;       //mass of a neutron
+const double ISOLATION_WINDOW_MZ = 1.6;     //the isolation window used for precursor ion collection
 
 /**
  * Function to determine which precursor isotopes were captured within the ms2 isolation window
- * @param precursorIsotopes
- * @param precursorSeq
- * @param precursorCharge
- * @param ms2mz
+ * @param precursorIsotopes a vector of ints to be filled with the representation of which precursor isotopes were
+ * captured in the isolation window. A vector <0, 1, 2> would represent the m0, m1, and m2 isotopes of an isotopic
+ * distribution. Vector will be cleared before being filled with int values.
+ * @param precursorSeq amino acid sequence of the precursor peptide identified from current MS2 spectrum
+ * @param precursorCharge the charge of the precursor peptide ion identified from current MS2 spectrum
+ * @param ms2mz the mz center of the isolation window used for current MS2 spectrum
  */
 void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const OpenMS::AASequence &precursorSeq,
                             const OpenMS::Int &precursorCharge, const double ms2mz)
@@ -31,13 +32,13 @@ void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const 
     double precursorMZ = precursorSeq.getMonoWeight(OpenMS::Residue::Full, precursorCharge) / precursorCharge;
 
     //distance between isotopic peaks based on precursor charge
-    double isotopicStep = neutron / precursorCharge;
+    double isotopicStep = NEUTRON_MASS / precursorCharge;
 
     //ms2 isolation window centered on which precursor isotope
     int centeredPrecursorIsotope = int(std::round((ms2mz - precursorMZ) / isotopicStep));
 
     //number of isotopes to either side of centered precursor isotope that are captured in isolation window
-    int isotopesCapturedPerSide = int( std::floor( (mzWindow / 2) / isotopicStep ) );
+    int isotopesCapturedPerSide = int( std::floor( (ISOLATION_WINDOW_MZ / 2) / isotopicStep ) );
 
     //starting isotope of the distribution captured in the isolation window
     int startingIsotope;
@@ -59,18 +60,26 @@ void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const 
     }
 }
 
-void theoreticalDistribution(std::vector<std::pair<double, double> > &theoDist,
-                             const std::vector<OpenMS::UInt> &precursorIsotopes, const Ion &ion)
+/**
+ * Compute the theoretical fragment isotopic distribution based on the precursor isotope distribution calculator.
+ * @param theoDist a vector to be filled with the theoretical isotopic distribution. Composed of a vector of pairs
+ * <double, double> the first being the mz of each isotope, the second the probability of seeing the peak (equivalent
+ * to the peak abundance within the distribution). Vector will be cleared before being filled with distribution.
+ * @param searchDepth how many isotope peaks to report in the distribution. Search depth must be greater than 0. A
+ * search depth of 1 reports only the monoisotopic peak. A search depth of 2 reports m0 and m1 peaks. ect.
+ * @param ion the Ion from which the monoisotopic peak will be based.
+ */
+void precursorIsotopeDist(std::vector<std::pair<double, double> > &theoDist,
+                          const int searchDepth, const Ion &ion)
 {
-
-    //search depth of 1 reports only monoisotopic peak
-    int searchDepth = precursorIsotopes.size();
-
     //search depth 0 reports all possible!
     //based on previous checks, this shouldn't be tested
     if (searchDepth == 0) {
         return;
     }
+
+    //clear vector for distribution
+    theoDist.clear();
 
     //compute isotopic distribution and get vector of isotope peaks
     std::vector<std::pair<OpenMS::Size, double> > theoPeakList =
@@ -83,7 +92,7 @@ void theoreticalDistribution(std::vector<std::pair<double, double> > &theoDist,
     for (int i = 0; i < theoPeakList.size(); ++i) {
 
         //compute mz of isotope peak
-        double isoMZ = ionMZ + ( neutron / ion.charge ) * i;
+        double isoMZ = ionMZ + ( NEUTRON_MASS / ion.charge ) * i;
 
         //set theoretical distribution pair
         std::pair<double, double> theo;
@@ -94,19 +103,27 @@ void theoreticalDistribution(std::vector<std::pair<double, double> > &theoDist,
 }
 
 /**
- *
- * @param condDist
- * @param precursorIsotopes
- * @param ion
- * @param precursorSequence
- * @param precursorCharge
+ * Compute the theoretical fragment isotopic distribution based on the conditional fragment isotope distribution
+ * calculator.
+ * @param condDist a vector to be filled with the theoretical isotopic distribution. Composed of a vector of pairs
+ * <double, double> the first being the mz of each isotope, the second the probability of seeing the peak (equivalent
+ * to the peak abundance within the distribution). Vector will be cleared before being filled with distribution.
+ * @param precursorIsotopes a vector representation of which precurosor isotopes were isolated within the ms2
+ * isolation window. A vector <0, 1, 2> would represent the m0, m1, and m2 isotopes of an isotopic
+ * distribution.
+ * @param ion the Ion from which the monoisotopic peak will be based.
+ * @param precursorSequence the amino acid sequence of the precursor peptide that was fragmented.
+ * @param precursorCharge the charge of the precursor peptide that was fragmented.
  */
-void conditionalDistribution(std::vector<std::pair<double, double> > &condDist,
-                             const std::vector<OpenMS::UInt> &precursorIsotopes,
-                             const Ion &ion,
-                             const OpenMS::AASequence &precursorSequence,
-                             const OpenMS::Int &precursorCharge)
+void conditionalFragmentIsotopeDist(std::vector<std::pair<double, double> > &condDist,
+                                    const std::vector<OpenMS::UInt> &precursorIsotopes,
+                                    const Ion &ion,
+                                    const OpenMS::AASequence &precursorSequence,
+                                    const OpenMS::Int &precursorCharge)
 {
+    //clear vector for distribution
+    condDist.clear();
+
     //compute conditional isotopic distribution and get vector of isotope peaks
     std::vector<std::pair<OpenMS::Size, double> > condPeakList =
             ion.formula.getConditionalFragmentIsotopeDist(
@@ -119,7 +136,7 @@ void conditionalDistribution(std::vector<std::pair<double, double> > &condDist,
     for (int i = 0; i < condPeakList.size(); ++i) {
 
         //compute mz of isotope peak
-        double isoMZ = ionMZ + ( neutron / ion.charge ) * i;
+        double isoMZ = ionMZ + ( NEUTRON_MASS / ion.charge ) * i;
 
         //set theoretical distribution pair
         std::pair<double, double> theo;
@@ -129,6 +146,15 @@ void conditionalDistribution(std::vector<std::pair<double, double> > &condDist,
     }
 }
 
+/**
+ * Identifies an isotope distribution within a mass spectrum based on the theoretical distribution mz values.
+ * @param obsDist a vector to be filled with the observed isotope distribution. Composed of a vector of pairs
+ * <double, double> the first being the mz of each isotope, the second being the intensity of the peak. An
+ * intensity of 0 means the peak was not found in the spectrum. Vector will be cleared before being filled
+ * with the distribution.
+ * @param theoDist the theoretical isotopic distribution of which peaks will be searched.
+ * @param spec the MS2 spectrum from which peaks will be located.
+ */
 void observedDistribution(std::vector<std::pair<double, double> > &obsDist,
                           std::vector<std::pair<double, double> > &theoDist,
                           const OpenMS::MSSpectrum<OpenMS::Peak1D> &spec)
@@ -137,7 +163,7 @@ void observedDistribution(std::vector<std::pair<double, double> > &obsDist,
     for (int i = 0; i < theoDist.size(); ++i) {
 
         //calculate search tolerance
-        double tol = ppm * theoDist[i].first;
+        double tol = ERROR_PPM * theoDist[i].first;
 
         //find index of actual peak in spectrum
         OpenMS::Int isoPeakIndex = spec.findNearest(theoDist[i].first, tol);
@@ -159,6 +185,13 @@ void observedDistribution(std::vector<std::pair<double, double> > &obsDist,
     }
 }
 
+/**
+ * Scales an isotopic distribution of peaks based on raw intensity to relative intensity which sum to 1 accross
+ * all peaks in the distribution.
+ * @param obsDist a vector of observed peaks within an isotopic distribution. Composed of a vector of pairs
+ * <double, double> the first being the mz of each isotope, the second being the raw intensity of the peak.
+ * Vector will be modified to contain scaled intensity values instead of raw intensity values.
+ */
 void scaleDistribution(std::vector<std::pair<double, double> > &obsDist)
 {
     //sum intensities across distribution
@@ -173,6 +206,12 @@ void scaleDistribution(std::vector<std::pair<double, double> > &obsDist)
     }
 }
 
+/**
+ * Check an isotopic distribution of greater than 3 peaks to see if peaks follow a typical descending distribution.
+ * @param dist a vector of observed peaks within an isotopic distribution. Composed of a vector of pairs
+ * <double, double> the first being the mz of each isotope, the second being the intensity or abundance of the peak.
+ * @return true if the distribution peaks decrease in intensity or abundance past the m1 peak. False otherwise.
+ */
 bool distributionValid(std::vector<std::pair<double, double> > &dist)
 {
     //only check if distribution is at least 3 deep
@@ -330,9 +369,9 @@ int main(int argc, char * argv[])
     //reporting variables
     int ionID = 0;
     int numMatchedIons = 0;
-    int numSearchedAtDepth[maxSearchDepth] = {0};
-    int numMatchedAtDepth[maxSearchDepth] = {0};
-    int numCompleteDists[maxSearchDepth] = {0};
+    int numSearchedAtDepth[10] = {0};
+    int numMatchedAtDepth[10] = {0};
+    int numCompleteDists[10] = {0};
     int numPrecursAtCharge[10] = {0};
     int numPeptideHits = 0;
     int numPeptideHitsBelowFDR = 0;
@@ -414,7 +453,7 @@ int main(int argc, char * argv[])
                 ++numPeptideHits;
 
                 //if peptide score is above FDR threshold, skip to next peptide
-                if (pepHits[pepHitIndex].getScore() >= FDR_threshold) {
+                if (pepHits[pepHitIndex].getScore() >= FDR_THRESHOLD) {
                     continue;
                 }
 
@@ -448,7 +487,7 @@ int main(int argc, char * argv[])
                     double mz = ionList[ionIndex].monoWeight / ionList[ionIndex].charge;
 
                     //compute search peak matching tolerance
-                    double tol = ppm * mz;
+                    double tol = ERROR_PPM * mz;
 
                     //find nearest peak to ion mz within tolerance
                     OpenMS::Int peakIndex = msExperiment.getSpectrum(specIndex).findNearest(mz, tol);
@@ -471,7 +510,6 @@ int main(int argc, char * argv[])
 
                     if (peakIndex == -1) {
                         //ion not found
-                        //ionFound.push_back(FALSE);
                         //write ion information to file
                         ionFile << false << "\n";       //ion not found
                     } else {
@@ -480,7 +518,6 @@ int main(int argc, char * argv[])
                         //write ion information to file
                         ionFile << true << "\n";        //ion found
 
-                        //ionFound.push_back(TRUE);
                         //vector for theoretical isotope distribution <mz, probability>
                         std::vector<std::pair<double, double> > theoDist;
                         //vector for conditional fragment isotope distribution <mz, probability>
@@ -494,10 +531,11 @@ int main(int argc, char * argv[])
                         whichPrecursorIsotopes(precursorIsotopes, pepSeq, pepCharge, ms2mz);
 
                         //fill theoretical isotope distribution vector
-                        theoreticalDistribution(theoDist, precursorIsotopes, ionList[ionIndex]);
+                        precursorIsotopeDist(theoDist, precursorIsotopes.size(), ionList[ionIndex]);
 
                         //fill conditional isotope distribution vector
-                        conditionalDistribution(condDist, precursorIsotopes, ionList[ionIndex], pepSeq, pepCharge);
+                        conditionalFragmentIsotopeDist(condDist, precursorIsotopes, ionList[ionIndex], pepSeq,
+                                                       pepCharge);
 
                         //match theoretical distribution with observed peaks
                         observedDistribution(obsDist, theoDist, spec);
@@ -578,42 +616,24 @@ int main(int argc, char * argv[])
                         }
                     }
                 }//ion loop
-                /*
-                //report each ion found
-                std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
-                std::cout << "Looking at spectrum: " << specIndex << std::endl;
-                //report on ions found
-                for (int j = 0; j < ionList.size(); ++j) {
-                    //report
-                    if (ionFound[j] == TRUE) {
-                        std::cout << "Looking at ion# " << j;
-                        std::cout << " seq: " << ionList[j].sequence;
-                        std::cout << " type: " << ionList[j].type;
-                        std::cout << " charge: " << ionList[j].charge;
-                        std::cout << " weight: " << ionList[j].monoWeight;
-                        std::cout << " mz: " << ionList[j].monoWeight / ionList[j].charge;
-                        std::cout << " found: " << ionFound[j];
-                        std::cout << std::endl;
-                    }
-                }*/
             }//peptide hit loop
         }//PSM loop
-    }//spectra loop
+    }//spectrum loop
 
     for (int i = 0; i < 10; ++i) {
         std::cout << "Number of precursors at charge " << i << ": ";
         std::cout << numPrecursAtCharge[i] << std::endl;
     }
     std::cout << "Number of matched monoisotopic ions: " << numMatchedIons << std::endl;
-    for (int i = 0; i < maxSearchDepth; ++i) {
+    for (int i = 0; i < 10; ++i) {
         std::cout << "Number of isotope spectra searched at depth " << i << ": ";
         std::cout << numSearchedAtDepth[i] << std::endl;
     }
-    for (int i = 0; i < maxSearchDepth; ++i) {
+    for (int i = 0; i < 10; ++i) {
         std::cout << "Number of ions matched at isotope " << i << ": ";
         std::cout << numMatchedAtDepth[i] << std::endl;
     }
-    for (int i = 0; i < maxSearchDepth; ++i) {
+    for (int i = 0; i < 10; ++i) {
         std::cout << "Number of complete distributions of depth " << i << ": ";
         std::cout << numCompleteDists[i] << std::endl;
     }
