@@ -127,9 +127,9 @@ void exactConditionalFragmentIsotopeDist(std::vector<std::pair<double, double> >
     condDist.clear();
 
     //compute conditional isotopic distribution and get vector of isotope peaks
+    OpenMS::EmpiricalFormula precursorFormula = precursorSequence.getFormula(OpenMS::Residue::Full, precursorCharge);
     std::vector<std::pair<OpenMS::Size, double> > condPeakList =
-            ion.formula.getConditionalFragmentIsotopeDist(
-                    precursorSequence.getFormula(OpenMS::Residue::Full, precursorCharge),precursorIsotopes).getContainer();
+            ion.formula.getConditionalFragmentIsotopeDist(precursorFormula, precursorIsotopes).getContainer();
 
     //ion mz
     double ionMZ = ion.monoWeight / ion.charge;
@@ -515,28 +515,26 @@ int main(int argc, char * argv[])
     distributionScoreFile << "distributionMonoWeight\t";      //ion distribution monoisotopic weight
     distributionScoreFile << "ionCharge\t";                   //ion distribtuion charge
     distributionScoreFile << "searchDepth\t";                 //distribution search depth
-
-    distributionScoreFile << "exactPrecursorCC\t";             //pearsonCC for OpenMS distribution
-    distributionScoreFile << "exactCondFragmentCC\t";        //pearsonCC for Dennis's conditional distribution
+    distributionScoreFile << "completeFlag\t";                //full ion distribution identified in spectra
+    distributionScoreFile << "completeAtDepth\n";             //ion distribution complete up to depth
+    //Pearson CC statistics
+    distributionScoreFile << "exactPrecursorCC\t";
+    distributionScoreFile << "exactCondFragmentCC\t";
     distributionScoreFile << "approxPrecursorFromWeightCC\t";
     distributionScoreFile << "approxFragmentFromWeightCC\t";
     distributionScoreFile << "approxFragmentFromWeightAndSCC\t";
-
-    distributionScoreFile << "exactPrecursorX2\t";            //chi-squared for OpenMS distribution
-    distributionScoreFile << "exactCondFragmentX2\t";       //chi-squared for Dennis's cond. distribution
+    //Chi-sqaured statistics
+    distributionScoreFile << "exactPrecursorX2\t";
+    distributionScoreFile << "exactCondFragmentX2\t";
     distributionScoreFile << "approxPrecursorFromWeightX2\t";
     distributionScoreFile << "approxFragmentFromWeightX2\t";
     distributionScoreFile << "approxFragmentFromWeightAndSX2\t";
-
-    distributionScoreFile << "exactPrecursorVD\t";            //total variation distance for OpenMS distribution
-    distributionScoreFile << "exactCondFragmentVD\t";       //total variation distance for cond. distribution
+    //total variation distance statistics
+    distributionScoreFile << "exactPrecursorVD\t";
+    distributionScoreFile << "exactCondFragmentVD\t";
     distributionScoreFile << "approxPrecursorFromWeightVD\t";
     distributionScoreFile << "approxFragmentFromWeightVD\t";
     distributionScoreFile << "approxFragmentFromWeightAndSVD\t";
-
-    distributionScoreFile << "completeFlag\t";                //full ion distribution identified in spectra
-    distributionScoreFile << "completeAtDepth\n";             //ion distribution complete up to depth
-
 
     //output file for ion identification data
     const std::string ionFileName = "ions.out";
@@ -656,11 +654,11 @@ int main(int argc, char * argv[])
                         //vector for exact conditional fragment isotope distribution <mz, probability>
                         std::vector<std::pair<double, double> > exactConditionalFragmentDist;
 
-                        //vector for approximate precursor isotope distribution from peptide weight <mz, probability>
+                        //vector for approx. precursor isotope distribution from peptide weight <mz, probability>
                         std::vector<std::pair<double, double> > approxPrecursorFromWeightDist;
-                        //vector for approximate fragment isotope distribution from peptide weight <mz, probability>
+                        //vector for approx. fragment isotope distribution from peptide weight <mz, probability>
                         std::vector<std::pair<double, double> > approxFragmentFromWeightDist;
-                        //vector for approximate fragment isotope distribution from peptide weight and sulfurs <mz, probability>
+                        //vector for approx. fragment isotope dist. from peptide weight and sulfurs <mz, probability>
                         std::vector<std::pair<double, double> > approxFragmentFromWeightAndSulfurDist;
 
                         //vector for observed isotope distribution <mz, intensity>
@@ -670,23 +668,36 @@ int main(int argc, char * argv[])
 
                         //fill precursor isotopes vector
                         whichPrecursorIsotopes(precursorIsotopes,
-                                               pepSeq.getMonoWeight(OpenMS::Residue::Full, pepCharge), pepCharge, ms2mz);
+                                               pepSeq.getMonoWeight(OpenMS::Residue::Full, pepCharge),
+                                               pepCharge, ms2mz);
 
                         //fill exact theoretical precursor isotope distribution vector
-                        exactPrecursorIsotopeDist(exactPrecursorDist, precursorIsotopes.size(), ionList[ionIndex]);
+                        exactPrecursorIsotopeDist(exactPrecursorDist,
+                                                  precursorIsotopes.size(),
+                                                  ionList[ionIndex]);
                         //fill exact conditional isotope distribution vector
-                        exactConditionalFragmentIsotopeDist(exactConditionalFragmentDist, precursorIsotopes,
-                                                            ionList[ionIndex], pepSeq, pepCharge);
+                        exactConditionalFragmentIsotopeDist(exactConditionalFragmentDist,
+                                                            precursorIsotopes,
+                                                            ionList[ionIndex],
+                                                            pepSeq,
+                                                            pepCharge);
 
                         //fill approx precursor isotope distribution
-                        approxPrecursorFromWeightIsotopeDist(approxPrecursorFromWeightDist, precursorIsotopes,
+                        approxPrecursorFromWeightIsotopeDist(approxPrecursorFromWeightDist,
+                                                             precursorIsotopes,
                                                              ionList[ionIndex]);
                         //fill approx fragment isotope distribution
-                        approxFragmentFromWeightIsotopeDist(approxFragmentFromWeightDist, precursorIsotopes,
-                                                            ionList[ionIndex], pepSeq, pepCharge);
+                        approxFragmentFromWeightIsotopeDist(approxFragmentFromWeightDist,
+                                                            precursorIsotopes,
+                                                            ionList[ionIndex],
+                                                            pepSeq,
+                                                            pepCharge);
                         //fill approx fragment isotope distribution with sulfurs
-                        approxFragmentFromWeightAndSIsotopeDist(approxFragmentFromWeightAndSulfurDist, precursorIsotopes,
-                                                                ionList[ionIndex], pepSeq, pepCharge);
+                        approxFragmentFromWeightAndSIsotopeDist(approxFragmentFromWeightAndSulfurDist,
+                                                                precursorIsotopes,
+                                                                ionList[ionIndex],
+                                                                pepSeq,
+                                                                pepCharge);
 
                         //match theoretical distribution with observed peaks
                         observedDistribution(observedDist, exactPrecursorDist, spec);
@@ -700,7 +711,8 @@ int main(int argc, char * argv[])
                         //compute pearsonCC for approximate distributions
                         double approxPrecursorFromWeightCC = computeCC(observedDist, approxPrecursorFromWeightDist);
                         double approxFragmentFromWeightCC = computeCC(observedDist, approxFragmentFromWeightDist);
-                        double approxFragmentFromWeightAndSulfurCC = computeCC(observedDist, approxFragmentFromWeightAndSulfurDist);
+                        double approxFragmentFromWeightAndSulfurCC = computeCC(observedDist,
+                                                                               approxFragmentFromWeightAndSulfurDist);
 
                         //compute chi-squared with observed to OpenMS
                         double exactPrecursorX2 = computeX2(observedDist, exactPrecursorDist);
@@ -709,7 +721,8 @@ int main(int argc, char * argv[])
                         //compute chi-squared for approximate distributions
                         double approxPrecursorFromWeightX2 = computeX2(observedDist, approxPrecursorFromWeightDist);
                         double approxFragmentFromWeightX2 = computeX2(observedDist, approxFragmentFromWeightDist);
-                        double approxFragmentFromWeightAndSulfurX2 = computeX2(observedDist, approxFragmentFromWeightAndSulfurDist);
+                        double approxFragmentFromWeightAndSulfurX2 = computeX2(observedDist,
+                                                                               approxFragmentFromWeightAndSulfurDist);
 
                         //compute total variation distance with observed to OpenMS
                         double exactPrecursorVD = computeVD(observedDist, exactPrecursorDist);
@@ -718,7 +731,8 @@ int main(int argc, char * argv[])
                         //compute total variation distance for approximate distributions
                         double approxPrecursorFromWeightVD = computeVD(observedDist, approxPrecursorFromWeightDist);
                         double approxFragmentFromWeightVD = computeVD(observedDist, approxFragmentFromWeightDist);
-                        double approxFragmentFromWeightAndSulfurVD = computeVD(observedDist, approxFragmentFromWeightAndSulfurDist);
+                        double approxFragmentFromWeightAndSulfurVD = computeVD(observedDist,
+                                                                               approxFragmentFromWeightAndSulfurDist);
 
                         //report on matched ion distribution depth
                         bool completeFlag = true;
@@ -739,44 +753,49 @@ int main(int argc, char * argv[])
                         }
 
                         //write distribution results to file
-                        distributionScoreFile << ionID << "\t";             //ion ID
-                        distributionScoreFile << distributionValid(observedDist) << "\t";      //valid distribution flag
-                        distributionScoreFile << ionList[ionIndex].monoWeight << "\t";    //ion distribution monoisotopic weight
+                        distributionScoreFile << ionID << "\t";                           //ion ID
+                        distributionScoreFile << distributionValid(observedDist) << "\t"; //valid distribution flag
+                        distributionScoreFile << ionList[ionIndex].monoWeight << "\t";    //ion dist. mono weight
                         distributionScoreFile << ionList[ionIndex].charge << "\t";        //ion distribution charge
-                        distributionScoreFile << exactPrecursorDist.size() << "\t";                 //distribution search depth
-
-                        distributionScoreFile << exactPrecursorCC << "\t";            //pearsonsCC for OpenMS distribution
-                        distributionScoreFile << exactCondFragmentCC << "\t";            //pearsonCC for Dennis's conditional distribution
+                        distributionScoreFile << exactPrecursorDist.size() << "\t";       //distribution search depth
+                        distributionScoreFile << completeFlag << "\t";                    //complete dist. found
+                        distributionScoreFile << completeAtDepth << "\n";                 //complete dist. up to depth
+                        //Pearson CC for exact and approximate distributions
+                        distributionScoreFile << exactPrecursorCC << "\t";
+                        distributionScoreFile << exactCondFragmentCC << "\t";
                         distributionScoreFile << approxPrecursorFromWeightCC << "\t";
                         distributionScoreFile << approxFragmentFromWeightCC << "\t";
                         distributionScoreFile << approxFragmentFromWeightAndSulfurCC << "\t";
-
-                        distributionScoreFile << exactPrecursorX2 << "\t";            //chi-squared for OpenMS distribution
-                        distributionScoreFile << exactCondFragmentX2 << "\t";            //chi-squared for Dennis's cond. distribution
+                        //Chi-sqaured for exact and approximate distributions
+                        distributionScoreFile << exactPrecursorX2 << "\t";
+                        distributionScoreFile << exactCondFragmentX2 << "\t";
                         distributionScoreFile << approxPrecursorFromWeightX2 << "\t";
                         distributionScoreFile << approxFragmentFromWeightX2 << "\t";
                         distributionScoreFile << approxFragmentFromWeightAndSulfurX2 << "\t";
-
-                        distributionScoreFile << exactPrecursorVD << "\t";            //tot. variation dist. for OpenMS dist.
-                        distributionScoreFile << exactCondFragmentVD << "\t";            //tot. variation dist. for cond. dist.
+                        //Total variation distance for exact and approximate distributions
+                        distributionScoreFile << exactPrecursorVD << "\t";
+                        distributionScoreFile << exactCondFragmentVD << "\t";
                         distributionScoreFile << approxPrecursorFromWeightVD << "\t";
                         distributionScoreFile << approxFragmentFromWeightVD << "\t";
                         distributionScoreFile << approxFragmentFromWeightAndSulfurVD << "\t";
-
-                        distributionScoreFile << completeFlag << "\t";      //complete distribution found
-                        distributionScoreFile << completeAtDepth << "\n";   //complete distribution up to depth
 
                         /*
                         //report complete distributions
                         if (completeFlag && observedDist.size() >= 5) {
 
                             for (int i = 0; i < exactPrecursorDist.size(); ++i) {
-                                std::cout << "Obs: mz: " << observedDist[i].first << " prop: " << observedDist[i].second;
-                                std::cout << " ExactPrec: mz: " << exactPrecursorDist[i].first << " prop: " << exactPrecursorDist[i].second;
-                                std::cout << " ExactFrag: mz: " << exactConditionalFragmentDist[i].first << " prop: " << exactConditionalFragmentDist[i].second;
-                                std::cout << " ApproxPrec: mz: " << approxPrecursorFromWeightDist[i].first << " prop: " << approxPrecursorFromWeightDist[i].second;
-                                std::cout << " ApproxFrag: mz: " << approxFragmentFromWeightDist[i].first << " prop: " << approxFragmentFromWeightDist[i].second;
-                                std::cout << " ApproxFragS: mz: " << approxFragmentFromWeightAndSulfurDist[i].first << " prop: " << approxFragmentFromWeightAndSulfurDist[i].second;
+                                std::cout << "Obs: mz: " << observedDist[i].first;
+                                std::cout << " prop: " << observedDist[i].second;
+                                std::cout << " ExactPrec: mz: " << exactPrecursorDist[i].first;
+                                std::cout << " prop: " << exactPrecursorDist[i].second;
+                                std::cout << " ExactFrag: mz: " << exactConditionalFragmentDist[i].first;
+                                std::cout << " prop: " << exactConditionalFragmentDist[i].second;
+                                std::cout << " ApproxPrec: mz: " << approxPrecursorFromWeightDist[i].first;
+                                std::cout << " prop: " << approxPrecursorFromWeightDist[i].second;
+                                std::cout << " ApproxFrag: mz: " << approxFragmentFromWeightDist[i].first;
+                                std::cout << " prop: " << approxFragmentFromWeightDist[i].second;
+                                std::cout << " ApproxFragS: mz: " << approxFragmentFromWeightAndSulfurDist[i].first;
+                                std::cout << " prop: " << approxFragmentFromWeightAndSulfurDist[i].second;
                                 std::cout << std::endl;
                             }
                             //std::cout << "OpenMS Score: " << openMSScore << std::endl;
