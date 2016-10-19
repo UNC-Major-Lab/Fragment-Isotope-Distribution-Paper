@@ -4,6 +4,7 @@
 #include <OpenMS/FORMAT/IdXMLFile.h>
 #include <OpenMS/ANALYSIS/ID/IDMapper.h>
 #include <OpenMS/CHEMISTRY/TheoreticalSpectrumGenerator.h>
+#include <OpenMS/CHEMISTRY/ElementDB.h>
 #include "Ion.h"
 #include "Stats.h"
 #include <OpenMS/CHEMISTRY/IsotopeDistribution.h>
@@ -15,21 +16,22 @@ const double FDR_THRESHOLD = 0.01;          //False discovery rate threshold (%/
 const double ERROR_PPM = 20 * 0.000001;     //acquisition mz error for peak matching
 const double NEUTRON_MASS = 1.008701;       //mass of a neutron
 const double ISOLATION_WINDOW_MZ = 1.6;     //the isolation window used for precursor ion collection
+const OpenMS::ElementDB* ELEMENTS = OpenMS::ElementDB::getInstance();
 
 /**
  * Function to determine which precursor isotopes were captured within the ms2 isolation window
  * @param precursorIsotopes a vector of ints to be filled with the representation of which precursor isotopes were
  * captured in the isolation window. A vector <0, 1, 2> would represent the m0, m1, and m2 isotopes of an isotopic
  * distribution. Vector will be cleared before being filled with int values.
- * @param precursorSeq amino acid sequence of the precursor peptide identified from current MS2 spectrum
+ * @param precursorMonoWeight mono isotopic weight of the precursor peptide
  * @param precursorCharge the charge of the precursor peptide ion identified from current MS2 spectrum
  * @param ms2mz the mz center of the isolation window used for current MS2 spectrum
  */
-void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const OpenMS::AASequence &precursorSeq,
+void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const double precursorMonoWeight,
                             const OpenMS::Int &precursorCharge, const double ms2mz)
 {
     //mz of precursor peptide
-    double precursorMZ = precursorSeq.getMonoWeight(OpenMS::Residue::Full, precursorCharge) / precursorCharge;
+    double precursorMZ = precursorMonoWeight / precursorCharge;
 
     //distance between isotopic peaks based on precursor charge
     double isotopicStep = NEUTRON_MASS / precursorCharge;
@@ -61,7 +63,7 @@ void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const 
 }
 
 /**
- * Compute the theoretical fragment isotopic distribution based on the precursor isotope distribution calculator.
+ * Compute the exact theoretical fragment isotopic distribution based on the precursor isotope distribution calculator.
  * @param theoDist a vector to be filled with the theoretical isotopic distribution. Composed of a vector of pairs
  * <double, double> the first being the mz of each isotope, the second the probability of seeing the peak (equivalent
  * to the peak abundance within the distribution). Vector will be cleared before being filled with distribution.
@@ -69,8 +71,8 @@ void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const 
  * search depth of 1 reports only the monoisotopic peak. A search depth of 2 reports m0 and m1 peaks. ect.
  * @param ion the Ion from which the monoisotopic peak will be based.
  */
-void precursorIsotopeDist(std::vector<std::pair<double, double> > &theoDist,
-                          const int searchDepth, const Ion &ion)
+void exactPrecursorIsotopeDist(std::vector<std::pair<double, double> > &theoDist,
+                               const int searchDepth, const Ion &ion)
 {
     //search depth 0 reports all possible!
     //based on previous checks, this shouldn't be tested
@@ -103,7 +105,7 @@ void precursorIsotopeDist(std::vector<std::pair<double, double> > &theoDist,
 }
 
 /**
- * Compute the theoretical fragment isotopic distribution based on the conditional fragment isotope distribution
+ * Compute the exact theoretical fragment isotopic distribution based on the conditional fragment isotope distribution
  * calculator.
  * @param condDist a vector to be filled with the theoretical isotopic distribution. Composed of a vector of pairs
  * <double, double> the first being the mz of each isotope, the second the probability of seeing the peak (equivalent
@@ -115,11 +117,11 @@ void precursorIsotopeDist(std::vector<std::pair<double, double> > &theoDist,
  * @param precursorSequence the amino acid sequence of the precursor peptide that was fragmented.
  * @param precursorCharge the charge of the precursor peptide that was fragmented.
  */
-void conditionalFragmentIsotopeDist(std::vector<std::pair<double, double> > &condDist,
-                                    const std::vector<OpenMS::UInt> &precursorIsotopes,
-                                    const Ion &ion,
-                                    const OpenMS::AASequence &precursorSequence,
-                                    const OpenMS::Int &precursorCharge)
+void exactConditionalFragmentIsotopeDist(std::vector<std::pair<double, double> > &condDist,
+                                         const std::vector<OpenMS::UInt> &precursorIsotopes,
+                                         const Ion &ion,
+                                         const OpenMS::AASequence &precursorSequence,
+                                         const OpenMS::Int &precursorCharge)
 {
     //clear vector for distribution
     condDist.clear();
@@ -143,6 +145,126 @@ void conditionalFragmentIsotopeDist(std::vector<std::pair<double, double> > &con
         theo.first = isoMZ;
         theo.second = condPeakList[i].second;
         condDist.push_back(theo);
+    }
+}
+
+void approxPrecursorFromWeightIsotopeDist(std::vector<std::pair<double, double> > &approxDist,
+                                          const std::vector<OpenMS::UInt> &precursorIsotopes,
+                                          const Ion &fragmentIon)
+{
+    //clear vector for distribution
+    approxDist.clear();
+
+    //construct distribution of depth at the maximum precursor isotope isolated
+    OpenMS::IsotopeDistribution fragmentDist(precursorIsotopes.back() + 1);
+
+    //estimate from fragment average weight
+    fragmentDist.estimateFromPeptideWeight(fragmentIon.formula.getAverageWeight());
+
+    //get isotope vector
+    std::vector<std::pair<OpenMS::Size, double> > isotopePeaks = fragmentDist.getContainer();
+
+    //ion mz
+    double ionMZ = fragmentIon.monoWeight / fragmentIon.charge;
+
+    //loop through calculated isotopic distribution, fill with actual mz values
+    for (int i = 0; i < isotopePeaks.size(); ++i) {
+
+        //compute mz of isotope peak
+        double isoMZ = ionMZ + ( NEUTRON_MASS / fragmentIon.charge ) * i;
+
+        //set distribution pair
+        std::pair<double, double> theo;
+        theo.first = isoMZ;
+        theo.second = isotopePeaks[i].second;
+        approxDist.push_back(theo);
+    }
+}
+
+void approxFragmentFromWeightIsotopeDist(std::vector<std::pair<double, double> > &approxDist,
+                                         const std::vector<OpenMS::UInt> &precursorIsotopes,
+                                         const Ion &fragmentIon,
+                                         const OpenMS::AASequence &precursorSequence,
+                                         const OpenMS::Int &precursorCharge)
+{
+    //clear vector for distribution
+    approxDist.clear();
+
+    //precursor average weight
+    double precursorAvgWeight = precursorSequence.getAverageWeight(OpenMS::Residue::Full, precursorCharge);
+    //fragment average weight
+    double fragmentAvgWeight = fragmentIon.sequence.getAverageWeight(OpenMS::Residue::Full, fragmentIon.charge);
+
+    //construct distribution
+    OpenMS::IsotopeDistribution fragmentDist(precursorIsotopes.back() + 1);
+
+    //estimate approx distribution from peptide weight
+    fragmentDist.estimateForFragmentFromPeptideWeight(precursorAvgWeight, fragmentAvgWeight, precursorIsotopes);
+
+    //get isotope vector
+    std::vector<std::pair<OpenMS::Size, double> > isotopePeaks = fragmentDist.getContainer();
+
+    //ion mz
+    double ionMZ = fragmentIon.monoWeight / fragmentIon.charge;
+
+    //loop through calculated isotopic distribution, fill with actual mz values
+    for (int i = 0; i < isotopePeaks.size(); ++i) {
+
+        //compute mz of isotope peak
+        double isoMZ = ionMZ + ( NEUTRON_MASS / fragmentIon.charge ) * i;
+
+        //set distribution pair
+        std::pair<double, double> theo;
+        theo.first = isoMZ;
+        theo.second = isotopePeaks[i].second;
+        approxDist.push_back(theo);
+    }
+}
+
+void approxFragmentFromWeightAndSIsotopeDist(std::vector<std::pair<double, double> > &approxDist,
+                                             const std::vector<OpenMS::UInt> &precursorIsotopes,
+                                             const Ion &fragmentIon,
+                                             const OpenMS::AASequence &precursorSequence,
+                                             const OpenMS::Int &precursorCharge)
+{
+    //clear vector for distribution
+    approxDist.clear();
+
+    //precursor average weight
+    double precursorAvgWeight = precursorSequence.getAverageWeight(OpenMS::Residue::Full, precursorCharge);
+    //precursor number of sulfurs
+    int precursorSulfurs = precursorSequence.getFormula(OpenMS::Residue::Full,
+                                                        precursorCharge).getNumberOf(ELEMENTS->getElement("Sulfur"));
+    //fragment average weight
+    double fragmentAvgWeight = fragmentIon.sequence.getAverageWeight(OpenMS::Residue::Full, fragmentIon.charge);
+    //fragment number of sulfurs
+    int fragmentSulfurs = fragmentIon.formula.getNumberOf(ELEMENTS->getElement("Sulfur"));
+
+    //construct distribution
+    OpenMS::IsotopeDistribution fragmentDist(precursorIsotopes.back() + 1);
+
+    //estimate approx distribution from peptide weight
+    fragmentDist.estimateForFragmentFromPeptideWeightAndS(precursorAvgWeight, precursorSulfurs,
+                                                          fragmentAvgWeight, fragmentSulfurs,
+                                                          precursorIsotopes);
+
+    //get isotope vector
+    std::vector<std::pair<OpenMS::Size, double> > isotopePeaks = fragmentDist.getContainer();
+
+    //ion mz
+    double ionMZ = fragmentIon.monoWeight / fragmentIon.charge;
+
+    //loop through calculated isotopic distribution, fill with actual mz values
+    for (int i = 0; i < isotopePeaks.size(); ++i) {
+
+        //compute mz of isotope peak
+        double isoMZ = ionMZ + ( NEUTRON_MASS / fragmentIon.charge ) * i;
+
+        //set distribution pair
+        std::pair<double, double> theo;
+        theo.first = isoMZ;
+        theo.second = isotopePeaks[i].second;
+        approxDist.push_back(theo);
     }
 }
 
@@ -264,7 +386,7 @@ double computeX2(const std::vector<std::pair<double, double> > &obsDist,
 
     //check they are both the same size
     if (obsDist.size() != theoDist.size()) {
-        return 0;
+        return -1;
     }
 
     //fill proportions vectors from distribution parameters
@@ -288,7 +410,7 @@ double computeVD(const std::vector<std::pair<double, double> > &obsDist,
 
     //check they are both the same size
     if (obsDist.size() != theoDist.size()) {
-        return 0;
+        return -1;
     }
 
     //fill proportions vectors from distribution parameters
@@ -312,6 +434,7 @@ void usage(){
 
 int main(int argc, char * argv[])
 {
+    //check for correct number of command line arguments
     if (argc != 4) {
         usage();
         return 0;
@@ -518,24 +641,42 @@ int main(int argc, char * argv[])
                         //write ion information to file
                         ionFile << true << "\n";        //ion found
 
-                        //vector for theoretical isotope distribution <mz, probability>
+                        //vector for exact theoretical precursor isotope distribution <mz, probability>
                         std::vector<std::pair<double, double> > theoDist;
-                        //vector for conditional fragment isotope distribution <mz, probability>
+                        //vector for exact conditional fragment isotope distribution <mz, probability>
                         std::vector<std::pair<double, double> > condDist;
+
+                        //vector for approximate precursor isotope distribution from peptide weight <mz, probability>
+                        std::vector<std::pair<double, double> > approxPrecursorDist;
+                        //vector for approximate fragment isotope distribution from peptide weight <mz, probability>
+                        std::vector<std::pair<double, double> > approxFragmentDist;
+                        //vector for approximate fragment isotope distribution from peptide weight and sulfurs <mz, probability>
+                        std::vector<std::pair<double, double> > approxFragmentSulfurDist;
+
                         //vector for observed isotope distribution <mz, intensity>
                         std::vector<std::pair<double, double> > obsDist;
                         //vector for precursor isotopes captured in isolation window
                         std::vector<OpenMS::UInt> precursorIsotopes;
 
                         //fill precursor isotopes vector
-                        whichPrecursorIsotopes(precursorIsotopes, pepSeq, pepCharge, ms2mz);
+                        whichPrecursorIsotopes(precursorIsotopes,
+                                               pepSeq.getMonoWeight(OpenMS::Residue::Full, pepCharge), pepCharge, ms2mz);
 
-                        //fill theoretical isotope distribution vector
-                        precursorIsotopeDist(theoDist, precursorIsotopes.size(), ionList[ionIndex]);
+                        //fill exact theoretical precurosr isotope distribution vector
+                        exactPrecursorIsotopeDist(theoDist, precursorIsotopes.size(), ionList[ionIndex]);
 
-                        //fill conditional isotope distribution vector
-                        conditionalFragmentIsotopeDist(condDist, precursorIsotopes, ionList[ionIndex], pepSeq,
-                                                       pepCharge);
+                        //fill exact conditional isotope distribution vector
+                        exactConditionalFragmentIsotopeDist(condDist, precursorIsotopes, ionList[ionIndex], pepSeq,
+                                                            pepCharge);
+
+                        //fill approx precursor isotope distribution
+                        approxPrecursorFromWeightIsotopeDist(approxPrecursorDist, precursorIsotopes, ionList[ionIndex]);
+                        //fill approx fragment isotope distribution
+                        approxFragmentFromWeightIsotopeDist(approxFragmentDist, precursorIsotopes, ionList[ionIndex],
+                                                            pepSeq, pepCharge);
+                        //fill approx fragment isotope distribution with sulfurs
+                        approxFragmentFromWeightAndSIsotopeDist(approxFragmentSulfurDist, precursorIsotopes,
+                                                                ionList[ionIndex], pepSeq, pepCharge);
 
                         //match theoretical distribution with observed peaks
                         observedDistribution(obsDist, theoDist, spec);
@@ -594,7 +735,7 @@ int main(int argc, char * argv[])
                         distributionScoreFile << completeFlag << "\t";      //complete distribution found
                         distributionScoreFile << completeAtDepth << "\n";   //complete distribution up to depth
 
-
+                        /*
                         //report complete distributions
                         if (completeFlag && obsDist.size() >= 4) {
 
@@ -613,7 +754,7 @@ int main(int argc, char * argv[])
                             std::cout << "openX2= " << openX2;
                             std::cout << " condX2= " << condX2 << std::endl;
                             std::cout << "***************************" << std::endl;
-                        }
+                        }*/
                     }
                 }//ion loop
             }//peptide hit loop
