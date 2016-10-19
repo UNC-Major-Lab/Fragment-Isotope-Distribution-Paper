@@ -516,7 +516,7 @@ int main(int argc, char * argv[])
     distributionScoreFile << "ionCharge\t";                   //ion distribtuion charge
     distributionScoreFile << "searchDepth\t";                 //distribution search depth
     distributionScoreFile << "completeFlag\t";                //full ion distribution identified in spectra
-    distributionScoreFile << "completeAtDepth\n";             //ion distribution complete up to depth
+    distributionScoreFile << "completeAtDepth\t";             //ion distribution complete up to depth
     //Pearson CC statistics
     distributionScoreFile << "exactPrecursorCC\t";
     distributionScoreFile << "exactCondFragmentCC\t";
@@ -534,7 +534,7 @@ int main(int argc, char * argv[])
     distributionScoreFile << "exactCondFragmentVD\t";
     distributionScoreFile << "approxPrecursorFromWeightVD\t";
     distributionScoreFile << "approxFragmentFromWeightVD\t";
-    distributionScoreFile << "approxFragmentFromWeightAndSVD\t";
+    distributionScoreFile << "approxFragmentFromWeightAndSVD\n";
 
     //output file for ion identification data
     const std::string ionFileName = "ions.out";
@@ -759,7 +759,7 @@ int main(int argc, char * argv[])
                         distributionScoreFile << ionList[ionIndex].charge << "\t";        //ion distribution charge
                         distributionScoreFile << exactPrecursorDist.size() << "\t";       //distribution search depth
                         distributionScoreFile << completeFlag << "\t";                    //complete dist. found
-                        distributionScoreFile << completeAtDepth << "\n";                 //complete dist. up to depth
+                        distributionScoreFile << completeAtDepth << "\t";                 //complete dist. up to depth
                         //Pearson CC for exact and approximate distributions
                         distributionScoreFile << exactPrecursorCC << "\t";
                         distributionScoreFile << exactCondFragmentCC << "\t";
@@ -777,7 +777,7 @@ int main(int argc, char * argv[])
                         distributionScoreFile << exactCondFragmentVD << "\t";
                         distributionScoreFile << approxPrecursorFromWeightVD << "\t";
                         distributionScoreFile << approxFragmentFromWeightVD << "\t";
-                        distributionScoreFile << approxFragmentFromWeightAndSulfurVD << "\t";
+                        distributionScoreFile << approxFragmentFromWeightAndSulfurVD << "\n";
 
                         /*
                         //report complete distributions
