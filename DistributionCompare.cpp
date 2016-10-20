@@ -547,7 +547,26 @@ int main(int argc, char * argv[])
     distributionScoreFile << "exactCondFragmentVD\t";
     distributionScoreFile << "approxPrecursorFromWeightVD\t";
     distributionScoreFile << "approxFragmentFromWeightVD\t";
-    distributionScoreFile << "approxFragmentFromWeightAndSVD\n";
+    distributionScoreFile << "approxFragmentFromWeightAndSVD\t";
+
+    //Pearson CC statistics
+    distributionScoreFile << "exactPrecursorCC_norm\t";
+    distributionScoreFile << "exactCondFragmentCC_norm\t";
+    distributionScoreFile << "approxPrecursorFromWeightCC_norm\t";
+    distributionScoreFile << "approxFragmentFromWeightCC_norm\t";
+    distributionScoreFile << "approxFragmentFromWeightAndSCC_norm\t";
+    //Chi-sqaured statistics
+    distributionScoreFile << "exactPrecursorX2_norm\t";
+    distributionScoreFile << "exactCondFragmentX2_norm\t";
+    distributionScoreFile << "approxPrecursorFromWeightX2_norm\t";
+    distributionScoreFile << "approxFragmentFromWeightX2_norm\t";
+    distributionScoreFile << "approxFragmentFromWeightAndSX2_norm\t";
+    //total variation distance statistics
+    distributionScoreFile << "exactPrecursorVD_norm\t";
+    distributionScoreFile << "exactCondFragmentVD_norm\t";
+    distributionScoreFile << "approxPrecursorFromWeightVD_norm\t";
+    distributionScoreFile << "approxFragmentFromWeightVD_norm\t";
+    distributionScoreFile << "approxFragmentFromWeightAndSVD_norm\n";
 
     //output file for ion identification data
     const std::string ionFileName = "ions.out";
@@ -577,6 +596,7 @@ int main(int argc, char * argv[])
     ionFile << "ionSearchTolerance\t";  //ion search tolerance
     ionFile << "ionFoundFlag\n";        //ion not found
 
+    std::cout << "Searching for isotope distributions..." << std::endl;
 
     //Loop through all spectra
     for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex) {
@@ -804,7 +824,93 @@ int main(int argc, char * argv[])
                         distributionScoreFile << exactCondFragmentVD << "\t";
                         distributionScoreFile << approxPrecursorFromWeightVD << "\t";
                         distributionScoreFile << approxFragmentFromWeightVD << "\t";
-                        distributionScoreFile << approxFragmentFromWeightAndSulfurVD << "\n";
+                        distributionScoreFile << approxFragmentFromWeightAndSulfurVD << "\t";
+
+                        ////////////////////////////////////////////////////////////////////////
+                        //Normalize predicted distributions to observed depth, recompute and output to file
+                        ///////////////////////////////////////////////////////////////////////
+
+                        //vector for exact theoretical precursor isotope distribution <mz, probability>
+                        std::vector<std::pair<double, double> > exactPrecursorDist_norm;
+                        //vector for exact conditional fragment isotope distribution <mz, probability>
+                        std::vector<std::pair<double, double> > exactConditionalFragmentDist_norm;
+
+                        //vector for approx. precursor isotope distribution from peptide weight <mz, probability>
+                        std::vector<std::pair<double, double> > approxPrecursorFromWeightDist_norm;
+                        //vector for approx. fragment isotope distribution from peptide weight <mz, probability>
+                        std::vector<std::pair<double, double> > approxFragmentFromWeightDist_norm;
+                        //vector for approx. fragment isotope dist. from peptide weight and sulfurs <mz, probability>
+                        std::vector<std::pair<double, double> > approxFragmentFromWeightAndSulfurDist_norm;
+
+                        //vector for observed isotope distribution <mz, intensity>
+                        std::vector<std::pair<double, double> > observedDist_norm;
+
+                        //truncate vectors to include only up to complete depth
+                        for (int k = 0; k < completeAtDepth; ++k) {
+                            exactPrecursorDist_norm.push_back(exactPrecursorDist[k]);
+                            exactConditionalFragmentDist_norm.push_back(exactConditionalFragmentDist[k]);
+                            approxPrecursorFromWeightDist_norm.push_back(approxPrecursorFromWeightDist[k]);
+                            approxFragmentFromWeightDist_norm.push_back(approxFragmentFromWeightDist[k]);
+                            approxFragmentFromWeightAndSulfurDist_norm.push_back(approxFragmentFromWeightAndSulfurDist[k]);
+                            observedDist_norm.push_back(observedDist[k]);
+                        }
+
+                        //scale distributions to re-normalize
+                        scaleDistribution(exactPrecursorDist_norm);
+                        scaleDistribution(exactConditionalFragmentDist_norm);
+                        scaleDistribution(approxPrecursorFromWeightDist_norm);
+                        scaleDistribution(approxFragmentFromWeightDist_norm);
+                        scaleDistribution(approxFragmentFromWeightAndSulfurDist_norm);
+                        scaleDistribution(observedDist_norm);
+
+                        //compute pearsonCC with observed to exact precursor dist
+                        double exactPrecursorCC_norm = computeCC(observedDist_norm, exactPrecursorDist_norm);
+                        //compute pearsonCC with observed to exact conditional fragment dist
+                        double exactCondFragmentCC_norm = computeCC(observedDist_norm, exactConditionalFragmentDist_norm);
+                        //compute pearsonCC for approximate distributions
+                        double approxPrecursorFromWeightCC_norm = computeCC(observedDist_norm, approxPrecursorFromWeightDist_norm);
+                        double approxFragmentFromWeightCC_norm = computeCC(observedDist_norm, approxFragmentFromWeightDist_norm);
+                        double approxFragmentFromWeightAndSulfurCC_norm = computeCC(observedDist_norm,
+                                                                               approxFragmentFromWeightAndSulfurDist_norm);
+
+                        //compute chi-squared with observed to OpenMS
+                        double exactPrecursorX2_norm = computeX2(observedDist_norm, exactPrecursorDist_norm);
+                        //compute chi-squared with observed to Conditional
+                        double exactCondFragmentX2_norm = computeX2(observedDist_norm, exactConditionalFragmentDist_norm);
+                        //compute chi-squared for approximate distributions
+                        double approxPrecursorFromWeightX2_norm = computeX2(observedDist_norm, approxPrecursorFromWeightDist_norm);
+                        double approxFragmentFromWeightX2_norm = computeX2(observedDist_norm, approxFragmentFromWeightDist_norm);
+                        double approxFragmentFromWeightAndSulfurX2_norm = computeX2(observedDist_norm,
+                                                                               approxFragmentFromWeightAndSulfurDist_norm);
+
+                        //compute total variation distance with observed to OpenMS
+                        double exactPrecursorVD_norm = computeVD(observedDist_norm, exactPrecursorDist_norm);
+                        //compute total variation distance with observed to Conditional
+                        double exactCondFragmentVD_norm = computeVD(observedDist_norm, exactConditionalFragmentDist_norm);
+                        //compute total variation distance for approximate distributions
+                        double approxPrecursorFromWeightVD_norm = computeVD(observedDist_norm, approxPrecursorFromWeightDist_norm);
+                        double approxFragmentFromWeightVD_norm = computeVD(observedDist_norm, approxFragmentFromWeightDist_norm);
+                        double approxFragmentFromWeightAndSulfurVD_norm = computeVD(observedDist_norm,
+                                                                               approxFragmentFromWeightAndSulfurDist_norm);
+
+                        //Pearson CC for exact and approximate distributions
+                        distributionScoreFile << exactPrecursorCC_norm << "\t";
+                        distributionScoreFile << exactCondFragmentCC_norm << "\t";
+                        distributionScoreFile << approxPrecursorFromWeightCC_norm << "\t";
+                        distributionScoreFile << approxFragmentFromWeightCC_norm << "\t";
+                        distributionScoreFile << approxFragmentFromWeightAndSulfurCC_norm << "\t";
+                        //Chi-sqaured for exact and approximate distributions
+                        distributionScoreFile << exactPrecursorX2_norm << "\t";
+                        distributionScoreFile << exactCondFragmentX2_norm << "\t";
+                        distributionScoreFile << approxPrecursorFromWeightX2_norm << "\t";
+                        distributionScoreFile << approxFragmentFromWeightX2_norm << "\t";
+                        distributionScoreFile << approxFragmentFromWeightAndSulfurX2_norm << "\t";
+                        //Total variation distance for exact and approximate distributions
+                        distributionScoreFile << exactPrecursorVD_norm << "\t";
+                        distributionScoreFile << exactCondFragmentVD_norm << "\t";
+                        distributionScoreFile << approxPrecursorFromWeightVD_norm << "\t";
+                        distributionScoreFile << approxFragmentFromWeightVD_norm << "\t";
+                        distributionScoreFile << approxFragmentFromWeightAndSulfurVD_norm << "\n";
 
                         /*
                         //report complete distributions
@@ -855,6 +961,7 @@ int main(int argc, char * argv[])
         }//PSM loop
     }//spectrum loop
 
+    /*
     for (int i = 0; i < 10; ++i) {
         std::cout << "Number of precursors at charge " << i << ": ";
         std::cout << numPrecursAtCharge[i] << std::endl;
@@ -873,10 +980,12 @@ int main(int argc, char * argv[])
         std::cout << numCompleteDists[i] << std::endl;
     }
 
+
     //report on peptide hits
     std::cout << "Peptide hits: " << numPeptideHits << std::endl;
     std::cout << "Peptdie hits below FDR: " << numPeptideHitsBelowFDR << std::endl;
     std::cout << "Peptide hits below FDR/peptide hits: " << numPeptideHitsBelowFDR / double(numPeptideHits) << std::endl;
+    */
 
     //close output files
     std::cout << "Distribution comparison scorefile written to: " + scoreFileName << std::endl;
