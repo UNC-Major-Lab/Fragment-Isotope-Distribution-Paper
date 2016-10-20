@@ -160,6 +160,8 @@ void approxPrecursorFromWeightIsotopeDist(std::vector<std::pair<double, double> 
 
     //estimate from fragment average weight
     fragmentDist.estimateFromPeptideWeight(fragmentIon.formula.getAverageWeight());
+    //re-normalize distribution
+    fragmentDist.renormalize();
 
     //get isotope vector
     std::vector<std::pair<OpenMS::Size, double> > isotopePeaks = fragmentDist.getContainer();
@@ -200,6 +202,8 @@ void approxFragmentFromWeightIsotopeDist(std::vector<std::pair<double, double> >
 
     //estimate approx distribution from peptide weight
     fragmentDist.estimateForFragmentFromPeptideWeight(precursorAvgWeight, fragmentAvgWeight, precursorIsotopes);
+    //re-normalize distribution
+    fragmentDist.renormalize();
 
     //get isotope vector
     std::vector<std::pair<OpenMS::Size, double> > isotopePeaks = fragmentDist.getContainer();
@@ -247,6 +251,8 @@ void approxFragmentFromWeightAndSIsotopeDist(std::vector<std::pair<double, doubl
     fragmentDist.estimateForFragmentFromPeptideWeightAndS(precursorAvgWeight, precursorSulfurs,
                                                           fragmentAvgWeight, fragmentSulfurs,
                                                           precursorIsotopes);
+    //re-normalize distribution
+    fragmentDist.renormalize();
 
     //get isotope vector
     std::vector<std::pair<OpenMS::Size, double> > isotopePeaks = fragmentDist.getContainer();
@@ -517,6 +523,13 @@ int main(int argc, char * argv[])
     distributionScoreFile << "searchDepth\t";                 //distribution search depth
     distributionScoreFile << "completeFlag\t";                //full ion distribution identified in spectra
     distributionScoreFile << "completeAtDepth\t";             //ion distribution complete up to depth
+
+    distributionScoreFile << "numPrecursorIsotopes\t";
+    distributionScoreFile << "precursorIsotopes\t";
+
+    distributionScoreFile << "precursorSulfurs\t";
+    distributionScoreFile << "fragmentSulfurs\t";
+
     //Pearson CC statistics
     distributionScoreFile << "exactPrecursorCC\t";
     distributionScoreFile << "exactCondFragmentCC\t";
@@ -553,6 +566,8 @@ int main(int argc, char * argv[])
     ionFile << "peptideHitIndex\t";     //peptide hit index
     ionFile << "precursorSequence\t";   //precursor peptide sequence
     ionFile << "precursorCharge\t";     //precursor peptide charge
+    ionFile << "precursorMZ\t";
+    ionFile << "ms2mz\t";
     ionFile << "ionSequence\t";         //ion sequence
     ionFile << "ionType\t";             //ion type
     ionFile << "ionCharge\t";           //ion charge
@@ -630,6 +645,8 @@ int main(int argc, char * argv[])
                     ionFile << pepHitIndex << "\t";     //peptide hit index
                     ionFile << pepSeq << "\t";          //precursor peptide sequence
                     ionFile << pepCharge << "\t";       //precursor peptide charge
+                    ionFile << pepSeq.getMonoWeight(OpenMS::Residue::Full, pepCharge) / pepCharge << "\t";
+                    ionFile << ms2mz << "\t";
                     ionFile << ionList[ionIndex].sequence << "\t";      //ion sequence
                     ionFile << ionList[ionIndex].type << "\t";          //ion type
                     ionFile << ionList[ionIndex].charge << "\t";        //ion charge
@@ -673,7 +690,7 @@ int main(int argc, char * argv[])
 
                         //fill exact theoretical precursor isotope distribution vector
                         exactPrecursorIsotopeDist(exactPrecursorDist,
-                                                  precursorIsotopes.size(),
+                                                  precursorIsotopes.back() + 1,
                                                   ionList[ionIndex]);
                         //fill exact conditional isotope distribution vector
                         exactConditionalFragmentIsotopeDist(exactConditionalFragmentDist,
@@ -760,6 +777,16 @@ int main(int argc, char * argv[])
                         distributionScoreFile << exactPrecursorDist.size() << "\t";       //distribution search depth
                         distributionScoreFile << completeFlag << "\t";                    //complete dist. found
                         distributionScoreFile << completeAtDepth << "\t";                 //complete dist. up to depth
+
+                        distributionScoreFile << precursorIsotopes.size() << "\t";
+                        for (int j = 0; j < precursorIsotopes.size(); ++j) {
+                            distributionScoreFile << precursorIsotopes[j] << "|";
+                        }
+                        distributionScoreFile << "\t";
+
+                        distributionScoreFile << pepSeq.getFormula(OpenMS::Residue::Full, pepCharge).getNumberOf(ELEMENTS->getElement("Sulfur")) << "\t";
+                        distributionScoreFile << ionList[ionIndex].sequence.getFormula(ionList[ionIndex].type, ionList[ionIndex].charge).getNumberOf(ELEMENTS->getElement("Sulfur")) << "\t";
+
                         //Pearson CC for exact and approximate distributions
                         distributionScoreFile << exactPrecursorCC << "\t";
                         distributionScoreFile << exactCondFragmentCC << "\t";
@@ -781,9 +808,9 @@ int main(int argc, char * argv[])
 
                         /*
                         //report complete distributions
-                        if (completeFlag && observedDist.size() >= 5) {
+                        if (approxPrecursorFromWeightVD < 0) {
 
-                            for (int i = 0; i < exactPrecursorDist.size(); ++i) {
+                            for (int i = 0; i < observedDist.size(); ++i) {
                                 std::cout << "Obs: mz: " << observedDist[i].first;
                                 std::cout << " prop: " << observedDist[i].second;
                                 std::cout << " ExactPrec: mz: " << exactPrecursorDist[i].first;
@@ -798,8 +825,21 @@ int main(int argc, char * argv[])
                                 std::cout << " prop: " << approxFragmentFromWeightAndSulfurDist[i].second;
                                 std::cout << std::endl;
                             }
-                            //std::cout << "OpenMS Score: " << openMSScore << std::endl;
-                            //std::cout << "Cond Score: " << condScore << std::endl;
+                            std::cout << "obsDist size: " << observedDist.size() << std::endl;
+                            std::cout << "exactPrec size: " << exactPrecursorDist.size() << std::endl;
+                            std::cout << "exactFrag size: " << exactConditionalFragmentDist.size() << std::endl;
+                            std::cout << "approxPrec size: " << approxPrecursorFromWeightDist.size() << std::endl;
+                            std::cout << "approxFrag size: " << approxFragmentFromWeightDist.size() << std::endl;
+                            std::cout << "approxFragS size: " << approxFragmentFromWeightAndSulfurDist.size() << std::endl;
+                            std::cout << "precursor charge: " << pepCharge << std::endl;
+                            std::cout << "precursor isotopes size: " << precursorIsotopes.size() << std::endl;
+                            std::cout << "precursor isotopes: ";
+                            for (int j = 0; j < precursorIsotopes.size(); ++j) {
+                                std::cout << precursorIsotopes[j] << " ";
+                            }
+                            std::cout << std::endl;
+                            std::cout << "***************************" << std::endl;
+
 
                             //report pearsonCC
                             std::cout << "exactPrecursorCC= " << exactPrecursorCC;
@@ -807,6 +847,7 @@ int main(int argc, char * argv[])
                             std::cout << "exactPrecursorX2= " << exactPrecursorX2;
                             std::cout << " exactCondFragmentX2= " << exactCondFragmentX2 << std::endl;
                             std::cout << "***************************" << std::endl;
+
                         }*/
                     }
                 }//ion loop
