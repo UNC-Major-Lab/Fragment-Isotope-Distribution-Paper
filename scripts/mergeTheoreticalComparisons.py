@@ -7,6 +7,7 @@ from math import floor
 from math import isnan
 
 root_dir = sys.argv[1]
+bin_size = float(sys.argv[2])
 
 comp2iso2bin2count = dict()
 
@@ -15,12 +16,12 @@ for f in os.listdir(root_dir):
     if os.path.isfile(fp) and ".out" in f:
         infile = open(fp)
         for line in infile:
-            [pcc, man, chi, pep_mass, frag_mass, iso, num_s, num_cs, comp] = line.strip().split("\t")
+            [pcc, man, chi, iso, comp] = line.strip().split("\t")
             if not comp2iso2bin2count.has_key(comp):
                 comp2iso2bin2count[comp] = dict()
             if not comp2iso2bin2count[comp].has_key(iso):
                 comp2iso2bin2count[comp][iso] = defaultdict(int)
-            bin = round(float(man),2)
+            bin = round(float(man)/bin_size)*bin_size
             comp2iso2bin2count[comp][iso][bin]+=1
 
 for comp in comp2iso2bin2count:

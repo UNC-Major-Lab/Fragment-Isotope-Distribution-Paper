@@ -11,7 +11,8 @@ module load r/3.2.2
 
 source config.csh
 
+set BIN_SIZE = 0.01
 set IN_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
 
-python ${SOURCE_DIR}/scripts/mergeTheoreticalComparisons.py $IN_DIR > ${IN_DIR}"/hist.txt"
+python ${SOURCE_DIR}/scripts/mergeTheoreticalComparisons.py $IN_DIR $BIN_SIZE > ${IN_DIR}"/hist.txt"
 
