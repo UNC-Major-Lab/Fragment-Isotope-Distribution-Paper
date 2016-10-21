@@ -170,7 +170,11 @@ void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& 
     {
         if (peptides[j].size() >= MIN_PEPTIDE_LENGTH && peptides[j].size() <= MAX_PEPTIDE_LENGTH)
         {
-            testTheoreticalPeptide(peptides[j]);
+	    String p = peptides[j].toString();
+	    if (!p.hasSubstring("U") && !p.hasSubstring("B") && !p.hasSubstring("Z") && !p.hasSubstring("J") && !p.hasSubstring("X"))
+	    {            
+		testTheoreticalPeptide(peptides[j]);
+	    }
         }
     }
 }
