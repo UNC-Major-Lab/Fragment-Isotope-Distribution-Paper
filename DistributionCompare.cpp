@@ -19,53 +19,34 @@ const double ISOLATION_WINDOW_MZ = 1.6;     //the isolation window used for prec
 const OpenMS::ElementDB* ELEMENTS = OpenMS::ElementDB::getInstance();   //element database
 
 /**
- * Function to determine which precursor isotopes were captured within the ms2 isolation window
- * @param precursorIsotopes a vector of ints to be filled with the representation of which precursor isotopes were
- * captured in the isolation window. A vector <0, 1, 2> would represent the m0, m1, and m2 isotopes of an isotopic
- * distribution. Vector will be cleared before being filled with int values.
- * @param precursorMonoWeight mono isotopic weight of the precursor peptide
- * @param precursorCharge the charge of the precursor peptide ion identified from current MS2 spectrum
- * @param ms2mz the mz center of the isolation window used for current MS2 spectrum
+ *
+ * @param precursorIsotopes
+ * @param precursorInfo
+ * @param precursorIon
+ * @param offset
  */
 void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const OpenMS::Precursor precursorInfo,
                             const Ion precursorIon, const double offset)
 {
-    //isolation window size
-    double isolationWindow = precursorInfo.getIsolationWindowLowerOffset() + precursorInfo.getIsolationWindowUpperOffset();
+    //isolation window lower cutoff
+    double lowerCutoff = precursorInfo.getMZ() - precursorInfo.getIsolationWindowLowerOffset() + offset;
+    //isolation window upper cutoff
+    double upperCutoff = precursorInfo.getMZ() + precursorInfo.getIsolationWindowUpperOffset() + offset;
 
-    //distance between isotopic peaks based on precursor charge
-    double isotopicStep = NEUTRON_MASS / precursorInfo.getCharge();
+    //distance between isotope peaks
+    double isotopeStep = NEUTRON_MASS / precursorIon.charge;
+    //max number of isotopes in window
+    int maxSteps = int(std::ceil((upperCutoff - lowerCutoff) / isotopeStep));
 
-    //number of steps in offset
-    int stepsInOffset = int(std::round(offset / isotopicStep));
-
-    //ms2 isolation window centered on which precursor isotope
-    int centeredPrecursorIsotope = int(std::round((precursorInfo.getMZ() - precursorIon.mz) / isotopicStep));
-
-    //number of isotopes to either side of centered precursor isotope that are captured in isolation window
-    int isotopesCapturedPerSide = int( std::floor( (isolationWindow / 2) / isotopicStep ) );
-
-    //starting isotope of the distribution captured in the isolation window
-    int startingIsotope;
-    if (isotopesCapturedPerSide > centeredPrecursorIsotope) {
-        startingIsotope = 0;
-    } else {
-        startingIsotope = centeredPrecursorIsotope - isotopesCapturedPerSide;
-    }
-
-    //ending isotope of the distribution captured in the isolation window
-    int endingIsotope = centeredPrecursorIsotope + isotopesCapturedPerSide;
-
-    //adjust starting and ending isotope based on offset
-    startingIsotope += stepsInOffset;
-    endingIsotope += stepsInOffset;
-
-    //clear precursor isotopes vector
-    precursorIsotopes.clear();
-    //fill precursor isotopes vector
-    for (int i = startingIsotope; i <= endingIsotope; ++i) {
-        OpenMS::UInt isoPeak = i;
-        precursorIsotopes.push_back(isoPeak);
+    //loop through each isotope of precursor ion
+    for (int m = 0; m < maxSteps; ++m) {
+        //calculate current peak mz
+        double peakMZ = precursorIon.monoMz + (m * isotopeStep);
+        //check of peak mz falls winthin window
+        if ((peakMZ >= lowerCutoff) && (peakMZ <= upperCutoff)) {
+            OpenMS::UInt isoPeak = m;
+            precursorIsotopes.push_back(isoPeak);
+        }
     }
 }
 
@@ -659,7 +640,7 @@ int main(int argc, char * argv[])
                 if (precursorInfo.getCharge() != precursorIon.charge) {
                     //std::cout << "Warning: precursor target charge does not match PSM charge!" << std::endl;
                 }
-                if (std::abs(precursorInfo.getMZ() - precursorIon.mz) > (precursorIon.mz * ERROR_PPM)) {
+                if (std::abs(precursorInfo.getMZ() - precursorIon.monoMz) > (precursorIon.monoMz * ERROR_PPM)) {
                     //std::cout << "Warning: precursor target mz does not match PSM mz! Possible offset!" << std::endl;
                 }
 
@@ -673,10 +654,10 @@ int main(int argc, char * argv[])
                     ++ionID;
 
                     //compute search peak matching tolerance
-                    double tol = ERROR_PPM * ionList[ionIndex].mz;
+                    double tol = ERROR_PPM * ionList[ionIndex].monoMz;
 
                     //find nearest peak to ion mz within tolerance
-                    OpenMS::Int peakIndex = currentSpectrum.findNearest(ionList[ionIndex].mz, tol);
+                    OpenMS::Int peakIndex = currentSpectrum.findNearest(ionList[ionIndex].monoMz, tol);
 
                     //write ion information to file
                     ionFile << ionID << "\t";           //unique ion ID
@@ -686,7 +667,7 @@ int main(int argc, char * argv[])
 
                     ionFile << precursorIon.sequence << "\t";          //precursor peptide sequence
                     ionFile << precursorIon.charge << "\t";       //precursor peptide charge
-                    ionFile << precursorIon.mz << "\t";
+                    ionFile << precursorIon.monoMz << "\t";
 
                     ionFile << precursorInfo.getCharge() << "\t";
                     ionFile << precursorInfo.getMZ() << "\t";
@@ -698,7 +679,7 @@ int main(int argc, char * argv[])
                     ionFile << ionList[ionIndex].charge << "\t";        //ion charge
                     ionFile << ionList[ionIndex].formula << "\t";       //ion formula
                     ionFile << ionList[ionIndex].monoWeight << "\t";    //ion weight
-                    ionFile << ionList[ionIndex].mz << "\t";              //ion mz
+                    ionFile << ionList[ionIndex].monoMz << "\t";              //ion mz
 
                     ionFile << tol << "\t";             //ion search tolerance
 

@@ -12,7 +12,7 @@ Ion::Ion(OpenMS::AASequence seq, OpenMS::Residue::ResidueType type, OpenMS::Int 
     this->charge = charge;
     this->formula = seq.getFormula(type, charge);
     this->monoWeight = seq.getMonoWeight(type, charge);
-    this->mz = this->monoWeight / charge;
+    this->monoMz = this->monoWeight / charge;
 }
 
 void Ion::generateFragmentIons(std::vector<Ion> &ionList, const OpenMS::AASequence pepSeq, const OpenMS::Int pepCharge) {

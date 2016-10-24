@@ -16,7 +16,7 @@ public:
     OpenMS::Int charge;
     OpenMS::EmpiricalFormula formula;
     double monoWeight;
-    double mz;
+    double monoMz;
 
     /**
      * Ion constructor. Includes public members for sequence, type, charge, molecular formula,
