@@ -27,20 +27,23 @@ const OpenMS::ElementDB* ELEMENTS = OpenMS::ElementDB::getInstance();   //elemen
  * @param precursorCharge the charge of the precursor peptide ion identified from current MS2 spectrum
  * @param ms2mz the mz center of the isolation window used for current MS2 spectrum
  */
-void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const double precursorMonoWeight,
-                            const OpenMS::Int &precursorCharge, const double ms2mz)
+void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const OpenMS::Precursor precursorInfo,
+                            const Ion precursorIon, const double offset)
 {
-    //mz of precursor peptide
-    double precursorMZ = precursorMonoWeight / precursorCharge;
+    //isolation window size
+    double isolationWindow = precursorInfo.getIsolationWindowLowerOffset() + precursorInfo.getIsolationWindowUpperOffset();
 
     //distance between isotopic peaks based on precursor charge
-    double isotopicStep = NEUTRON_MASS / precursorCharge;
+    double isotopicStep = NEUTRON_MASS / precursorInfo.getCharge();
+
+    //number of steps in offset
+    int stepsInOffset = int(std::round(offset / isotopicStep));
 
     //ms2 isolation window centered on which precursor isotope
-    int centeredPrecursorIsotope = int(std::round((ms2mz - precursorMZ) / isotopicStep));
+    int centeredPrecursorIsotope = int(std::round((precursorInfo.getMZ() - precursorIon.mz) / isotopicStep));
 
     //number of isotopes to either side of centered precursor isotope that are captured in isolation window
-    int isotopesCapturedPerSide = int( std::floor( (ISOLATION_WINDOW_MZ / 2) / isotopicStep ) );
+    int isotopesCapturedPerSide = int( std::floor( (isolationWindow / 2) / isotopicStep ) );
 
     //starting isotope of the distribution captured in the isolation window
     int startingIsotope;
@@ -52,6 +55,10 @@ void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const 
 
     //ending isotope of the distribution captured in the isolation window
     int endingIsotope = centeredPrecursorIsotope + isotopesCapturedPerSide;
+
+    //adjust starting and ending isotope based on offset
+    startingIsotope += stepsInOffset;
+    endingIsotope += stepsInOffset;
 
     //clear precursor isotopes vector
     precursorIsotopes.clear();
@@ -431,17 +438,18 @@ double computeVD(const std::vector<std::pair<double, double> > &obsDist,
 }
 
 void usage(){
-    std::cout << "usage: SpecOps data_directory input_mzML_spectra_file input_idXML_PSM_file" << std::endl;
+    std::cout << "usage: SpecOps data_directory input_mzML_spectra_file input_idXML_PSM_file offset_mz" << std::endl;
     std::cout << "  data_directory: full path to directory containing input data";
     std::cout << " and destination for output files" << std::endl;
     std::cout << "  input_mzML_spectra_file: input .mzML file contained in the data directory" << std::endl;
     std::cout << "  input_idXML_PSM_file: input .idXML file contained in the data directory" << std::endl;
+    std::cout << "  offset_mz: precursor ion isolation window offset" << std::endl;
 }
 
 int main(int argc, char * argv[])
 {
     //check for correct number of command line arguments
-    if (argc != 4) {
+    if (argc != 5) {
         usage();
         return 0;
     }
@@ -454,6 +462,9 @@ int main(int argc, char * argv[])
     //report idXML file
     const std::string idXMLFileName = argv[3];
     std::cout << "Input idXML PSMs file: " << idXMLFileName << std::endl;
+    //report isolation window offset
+    const double offset = std::atof(argv[4]);
+    std::cout << "Isolation window offset (mz): " << offset << std::endl;
 
     //Load input mzML file into MSExperiment
     OpenMS::MzMLFile mzMLDataFile;
@@ -646,10 +657,10 @@ int main(int argc, char * argv[])
                                              pepHits[pepHitIndex].getCharge());
                 //check for precursor matching PSM peptide information
                 if (precursorInfo.getCharge() != precursorIon.charge) {
-                    std::cout << "Warning: precursor target charge does not match PSM charge!" << std::endl;
+                    //std::cout << "Warning: precursor target charge does not match PSM charge!" << std::endl;
                 }
                 if (std::abs(precursorInfo.getMZ() - precursorIon.mz) > (precursorIon.mz * ERROR_PPM)) {
-                    std::cout << "Warning: precursor target mz does not match PSM mz! Possible offset!" << std::endl;
+                    //std::cout << "Warning: precursor target mz does not match PSM mz! Possible offset!" << std::endl;
                 }
 
                 //create list of b and y ions
@@ -720,8 +731,9 @@ int main(int argc, char * argv[])
 
                         //fill precursor isotopes vector
                         whichPrecursorIsotopes(precursorIsotopes,
-                                               pepSeq.getMonoWeight(OpenMS::Residue::Full, pepCharge),
-                                               pepCharge, ms2mz);
+                                               precursorInfo,
+                                               precursorIon,
+                                               offset);
 
                         //fill exact theoretical precursor isotope distribution vector
                         exactPrecursorIsotopeDist(exactPrecursorDist,
