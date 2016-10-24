@@ -195,7 +195,7 @@ void approxFragmentFromWeightIsotopeDist(std::vector<std::pair<double, double> >
     //precursor average weight
     double precursorAvgWeight = precursorSequence.getAverageWeight(OpenMS::Residue::Full, precursorCharge);
     //fragment average weight
-    double fragmentAvgWeight = fragmentIon.sequence.getAverageWeight(OpenMS::Residue::Full, fragmentIon.charge);
+    double fragmentAvgWeight = fragmentIon.formula.getAverageWeight();
 
     //construct distribution
     OpenMS::IsotopeDistribution fragmentDist(precursorIsotopes.back() + 1);
@@ -240,7 +240,7 @@ void approxFragmentFromWeightAndSIsotopeDist(std::vector<std::pair<double, doubl
     int precursorSulfurs = precursorSequence.getFormula(OpenMS::Residue::Full,
                                                         precursorCharge).getNumberOf(ELEMENTS->getElement("Sulfur"));
     //fragment average weight
-    double fragmentAvgWeight = fragmentIon.sequence.getAverageWeight(OpenMS::Residue::Full, fragmentIon.charge);
+    double fragmentAvgWeight = fragmentIon.formula.getAverageWeight();
     //fragment number of sulfurs
     int fragmentSulfurs = fragmentIon.formula.getNumberOf(ELEMENTS->getElement("Sulfur"));
 
@@ -549,19 +549,19 @@ int main(int argc, char * argv[])
     distributionScoreFile << "approxFragmentFromWeightVD\t";
     distributionScoreFile << "approxFragmentFromWeightAndSVD\t";
 
-    //Pearson CC statistics
+    //Pearson CC statistics normalized
     distributionScoreFile << "exactPrecursorCC_norm\t";
     distributionScoreFile << "exactCondFragmentCC_norm\t";
     distributionScoreFile << "approxPrecursorFromWeightCC_norm\t";
     distributionScoreFile << "approxFragmentFromWeightCC_norm\t";
     distributionScoreFile << "approxFragmentFromWeightAndSCC_norm\t";
-    //Chi-sqaured statistics
+    //Chi-sqaured statistics normalized
     distributionScoreFile << "exactPrecursorX2_norm\t";
     distributionScoreFile << "exactCondFragmentX2_norm\t";
     distributionScoreFile << "approxPrecursorFromWeightX2_norm\t";
     distributionScoreFile << "approxFragmentFromWeightX2_norm\t";
     distributionScoreFile << "approxFragmentFromWeightAndSX2_norm\t";
-    //total variation distance statistics
+    //total variation distance statistics normalized
     distributionScoreFile << "exactPrecursorVD_norm\t";
     distributionScoreFile << "exactCondFragmentVD_norm\t";
     distributionScoreFile << "approxPrecursorFromWeightVD_norm\t";
@@ -583,16 +583,23 @@ int main(int argc, char * argv[])
     ionFile << "spectrumIndex\t";       //spectrum index
     ionFile << "PSMindex\t";            //PSM index
     ionFile << "peptideHitIndex\t";     //peptide hit index
-    ionFile << "precursorSequence\t";   //precursor peptide sequence
-    ionFile << "precursorCharge\t";     //precursor peptide charge
-    ionFile << "precursorMZ\t";
-    ionFile << "ms2mz\t";
-    ionFile << "ionSequence\t";         //ion sequence
-    ionFile << "ionType\t";             //ion type
-    ionFile << "ionCharge\t";           //ion charge
-    ionFile << "ionMolFormula\t";       //ion formula
-    ionFile << "ionMonoWeight\t";       //ion weight
-    ionFile << "ionMZ\t";               //ion mz
+
+    ionFile << "PSM_sequence\t";   //precursor peptide sequence
+    ionFile << "PSM_charge\t";     //precursor peptide charge
+    ionFile << "PSM_mz\t";
+
+    ionFile << "precursor_charge\t";
+    ionFile << "precursor_mz\t";
+    ionFile << "precursor_window_low\t";
+    ionFile << "precursor_window_high\t";
+
+    ionFile << "ion_sequence\t";         //ion sequence
+    ionFile << "ion_type\t";             //ion type
+    ionFile << "ion_charge\t";           //ion charge
+    ionFile << "ion_formula\t";       //ion formula
+    ionFile << "ion_monoWeight\t";       //ion weight
+    ionFile << "ion_mz\t";               //ion mz
+
     ionFile << "ionSearchTolerance\t";  //ion search tolerance
     ionFile << "ionFoundFlag\n";        //ion not found
 
@@ -600,22 +607,27 @@ int main(int argc, char * argv[])
 
     //Loop through all spectra
     for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex) {
-        //sort spectrum by mz
-        msExperiment.getSpectrum(specIndex).sortByPosition();
-
         //get copy of current spectrum
-        const OpenMS::MSSpectrum<OpenMS::Peak1D> spec = msExperiment.getSpectrum(specIndex);
+        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
+
+        //sort spectrum by mz
+        currentSpectrum.sortByPosition();
 
         //get peptide identifications
-        const std::vector<OpenMS::PeptideIdentification> pepIDs = spec.getPeptideIdentifications();
+        const std::vector<OpenMS::PeptideIdentification> pepIDs = currentSpectrum.getPeptideIdentifications();
 
         //Loop through each peptide identification (PSM)
         for (int pepIDIndex = 0; pepIDIndex < pepIDs.size(); ++pepIDIndex) {
             //get peptide hits
             const std::vector<OpenMS::PeptideHit> pepHits = pepIDs[pepIDIndex].getHits();
 
-            //get ms2 mz
-            double ms2mz = pepIDs[pepIDIndex].getMZ();
+
+            //check for more than one precursor
+            if (currentSpectrum.getPrecursors().size() > 1) {
+                std::cout << "Warning: more than one precursor!" << std::endl;
+            }
+            //get precursor informaiton
+            const OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
 
             //loop through each peptide hit
             for (int pepHitIndex = 0; pepHitIndex < pepHits.size(); ++pepHitIndex) {
@@ -628,53 +640,56 @@ int main(int argc, char * argv[])
 
                 ++numPeptideHitsBelowFDR;
 
-                //get AASequence and charge from peptide hit
-                const OpenMS::AASequence pepSeq = pepHits[pepHitIndex].getSequence();
-                const OpenMS::Int pepCharge = pepHits[pepHitIndex].getCharge();
-
-                //record number of precursors at each charge state
-                ++numPrecursAtCharge[pepCharge];
-
-                //if charge state 1, skip to next peptide hit
-                if (pepCharge == 1) {
-                    continue;
+                //get AASequence and charge from peptide hit for precursor ion
+                const Ion precursorIon = Ion(pepHits[pepHitIndex].getSequence(),
+                                             OpenMS::Residue::Full,
+                                             pepHits[pepHitIndex].getCharge());
+                //check for precursor matching PSM peptide information
+                if (precursorInfo.getCharge() != precursorIon.charge) {
+                    std::cout << "Warning: precursor target charge does not match PSM charge!" << std::endl;
+                }
+                if (std::abs(precursorInfo.getMZ() - precursorIon.mz) > (precursorIon.mz * ERROR_PPM)) {
+                    std::cout << "Warning: precursor target mz does not match PSM mz! Possible offset!" << std::endl;
                 }
 
                 //create list of b and y ions
                 std::vector<Ion> ionList;
-                Ion::generateFragmentIons(ionList, pepSeq, pepCharge);
+                Ion::generateFragmentIons(ionList, precursorIon.sequence, precursorIon.charge);
 
                 //loop through each ion
                 for (int ionIndex = 0; ionIndex < ionList.size(); ++ionIndex) {
                     //update ionID
                     ++ionID;
 
-                    //ion mz
-                    double mz = ionList[ionIndex].monoWeight / ionList[ionIndex].charge;
-
                     //compute search peak matching tolerance
-                    double tol = ERROR_PPM * mz;
+                    double tol = ERROR_PPM * ionList[ionIndex].mz;
 
                     //find nearest peak to ion mz within tolerance
-                    OpenMS::Int peakIndex = msExperiment.getSpectrum(specIndex).findNearest(mz, tol);
+                    OpenMS::Int peakIndex = currentSpectrum.findNearest(ionList[ionIndex].mz, tol);
 
                     //write ion information to file
                     ionFile << ionID << "\t";           //unique ion ID
                     ionFile << specIndex << "\t";       //spectrum index
                     ionFile << pepIDIndex << "\t";      //PSM index
                     ionFile << pepHitIndex << "\t";     //peptide hit index
-                    ionFile << pepSeq << "\t";          //precursor peptide sequence
-                    ionFile << pepCharge << "\t";       //precursor peptide charge
-                    ionFile << pepSeq.getMonoWeight(OpenMS::Residue::Full, pepCharge) / pepCharge << "\t";
-                    ionFile << ms2mz << "\t";
+
+                    ionFile << precursorIon.sequence << "\t";          //precursor peptide sequence
+                    ionFile << precursorIon.charge << "\t";       //precursor peptide charge
+                    ionFile << precursorIon.mz << "\t";
+
+                    ionFile << precursorInfo.getCharge() << "\t";
+                    ionFile << precursorInfo.getMZ() << "\t";
+                    ionFile << precursorInfo.getIsolationWindowLowerOffset() << "\t";
+                    ionFile << precursorInfo.getIsolationWindowUpperOffset() << "\t";
+
                     ionFile << ionList[ionIndex].sequence << "\t";      //ion sequence
                     ionFile << ionList[ionIndex].type << "\t";          //ion type
                     ionFile << ionList[ionIndex].charge << "\t";        //ion charge
                     ionFile << ionList[ionIndex].formula << "\t";       //ion formula
                     ionFile << ionList[ionIndex].monoWeight << "\t";    //ion weight
-                    ionFile << mz << "\t";              //ion mz
-                    ionFile << tol << "\t";             //ion search tolerance
+                    ionFile << ionList[ionIndex].mz << "\t";              //ion mz
 
+                    ionFile << tol << "\t";             //ion search tolerance
 
                     if (peakIndex == -1) {
                         //ion not found
@@ -716,8 +731,8 @@ int main(int argc, char * argv[])
                         exactConditionalFragmentIsotopeDist(exactConditionalFragmentDist,
                                                             precursorIsotopes,
                                                             ionList[ionIndex],
-                                                            pepSeq,
-                                                            pepCharge);
+                                                            precursorIon.sequence,
+                                                            precursorIon.charge);
 
                         //fill approx precursor isotope distribution
                         approxPrecursorFromWeightIsotopeDist(approxPrecursorFromWeightDist,
@@ -727,17 +742,17 @@ int main(int argc, char * argv[])
                         approxFragmentFromWeightIsotopeDist(approxFragmentFromWeightDist,
                                                             precursorIsotopes,
                                                             ionList[ionIndex],
-                                                            pepSeq,
-                                                            pepCharge);
+                                                            precursorIon.sequence,
+                                                            precursorIon.charge);
                         //fill approx fragment isotope distribution with sulfurs
                         approxFragmentFromWeightAndSIsotopeDist(approxFragmentFromWeightAndSulfurDist,
                                                                 precursorIsotopes,
                                                                 ionList[ionIndex],
-                                                                pepSeq,
-                                                                pepCharge);
+                                                                precursorIon.sequence,
+                                                                precursorIon.charge);
 
                         //match theoretical distribution with observed peaks
-                        observedDistribution(observedDist, exactPrecursorDist, spec);
+                        observedDistribution(observedDist, exactPrecursorDist, currentSpectrum);
                         //scale observed intensities across distribution
                         scaleDistribution(observedDist);
 
@@ -804,8 +819,11 @@ int main(int argc, char * argv[])
                         }
                         distributionScoreFile << "\t";
 
-                        distributionScoreFile << pepSeq.getFormula(OpenMS::Residue::Full, pepCharge).getNumberOf(ELEMENTS->getElement("Sulfur")) << "\t";
-                        distributionScoreFile << ionList[ionIndex].sequence.getFormula(ionList[ionIndex].type, ionList[ionIndex].charge).getNumberOf(ELEMENTS->getElement("Sulfur")) << "\t";
+                        distributionScoreFile << precursorIon.sequence.getFormula(OpenMS::Residue::Full, precursorIon.charge).
+                                getNumberOf(ELEMENTS->getElement("Sulfur")) << "\t";
+                        distributionScoreFile << ionList[ionIndex].sequence.getFormula(ionList[ionIndex].type,
+                                                                                       ionList[ionIndex].charge).
+                                getNumberOf(ELEMENTS->getElement("Sulfur")) << "\t";
 
                         //Pearson CC for exact and approximate distributions
                         distributionScoreFile << exactPrecursorCC << "\t";
