@@ -323,11 +323,11 @@ void scaleDistribution(std::vector<std::pair<double, double> > &obsDist)
 }
 
 /**
- *
- * @param dist
- * @return
+ * Check if a normalized isotope distribution is following a characteristic isotope distribution.
+ * @param dist normalized distribution where peak intensities sum to 1
+ * @return true if distribution follows a characterist rise/fall
  */
-bool distributionValid(std::vector<std::pair<double, double> > &dist)
+bool normalizedDistributionValid(const std::vector<std::pair<double, double> > &dist)
 {
     //distribution values decreasing flag
     bool valuesDecreasing = false;
@@ -336,13 +336,15 @@ bool distributionValid(std::vector<std::pair<double, double> > &dist)
     for (int i = 0; i > dist.size() - 1; --i) {
         //if values are increasing
         if (!valuesDecreasing) {
-            //check for next peak decreasing
-            if (dist[i+1].second < dist[i].second) {
+            //check for next peak decreasing and difference is greater than 5%
+            if ( (dist[i+1].second < dist[i].second) && ((dist[i].second - dist[i+1].second) > 0.05) ) {
+                //next peak is greater than 5% less than current peak, distribution is decreasing
                 valuesDecreasing = true;
             }
         } else {    //values are decreasing
-            //check for next peak increasing
-            if (dist[i+1].second > dist[i].second) {
+            //check for next peak increasing and difference is greater than 5%
+            if ( (dist[i+1].second > dist[i].second) && ((dist[i+1].second - dist[i].second) > 0.05) ) {
+                //distribution falling but next peak increases by more than 5%
                 return false;
             }
         }
@@ -804,7 +806,7 @@ int main(int argc, char * argv[])
 
                         //write distribution results to file
                         distributionScoreFile << ionID << "\t";                           //ion ID
-                        distributionScoreFile << distributionValid(observedDist) << "\t"; //valid distribution flag
+                        distributionScoreFile << normalizedDistributionValid(observedDist) << "\t"; //valid distribution flag
                         distributionScoreFile << ionList[ionIndex].monoWeight << "\t";    //ion dist. mono weight
                         distributionScoreFile << ionList[ionIndex].charge << "\t";        //ion distribution charge
                         distributionScoreFile << exactPrecursorDist.size() << "\t";       //distribution search depth
@@ -947,7 +949,7 @@ int main(int argc, char * argv[])
                                 std::cout << " prop: " << approxFragmentFromWeightAndSulfurDist[i].second;
                                 std::cout << std::endl;
                             }
-                            
+
                             std::cout << "obsDist size: " << observedDist.size() << std::endl;
                             std::cout << "exactPrec size: " << exactPrecursorDist.size() << std::endl;
                             std::cout << "exactFrag size: " << exactConditionalFragmentDist.size() << std::endl;
