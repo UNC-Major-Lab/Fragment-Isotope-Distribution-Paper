@@ -42,7 +42,7 @@ void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const 
     for (int m = 0; m < maxSteps; ++m) {
         //calculate current peak mz
         double peakMZ = precursorIon.monoMz + (m * isotopeStep);
-        //check of peak mz falls winthin window
+        //check if peak mz falls within window
         if ((peakMZ >= lowerCutoff) && (peakMZ <= upperCutoff)) {
             OpenMS::UInt isoPeak = m;
             precursorIsotopes.push_back(isoPeak);
@@ -323,26 +323,31 @@ void scaleDistribution(std::vector<std::pair<double, double> > &obsDist)
 }
 
 /**
- * Check an isotopic distribution of greater than 3 peaks to see if peaks follow a typical descending distribution.
- * @param dist a vector of observed peaks within an isotopic distribution. Composed of a vector of pairs
- * <double, double> the first being the mz of each isotope, the second being the intensity or abundance of the peak.
- * @return true if the distribution peaks decrease in intensity or abundance past the m1 peak. False otherwise.
+ *
+ * @param dist
+ * @return
  */
 bool distributionValid(std::vector<std::pair<double, double> > &dist)
 {
-    //only check if distribution is at least 3 deep
-    if (dist.size() < 3) {
-        return true;
-    }
+    //distribution values decreasing flag
+    bool valuesDecreasing = false;
 
-    //loop from end of distribution up to the m1 peak
-    for (int i = dist.size() - 1; i > 1; --i) {
-        //if intensity at m_i is greater than intensity at m_i-1
-        if (dist[i].second > dist[i-1].second) {
-            return false;
+    //loop from beginning of distribution, checking for decreasing values
+    for (int i = 0; i > dist.size() - 1; --i) {
+        //if values are increasing
+        if (!valuesDecreasing) {
+            //check for next peak decreasing
+            if (dist[i+1].second < dist[i].second) {
+                valuesDecreasing = true;
+            }
+        } else {    //values are decreasing
+            //check for next peak increasing
+            if (dist[i+1].second > dist[i].second) {
+                return false;
+            }
         }
     }
-
+    //distribution follows normal rise and fall.
     return true;
 }
 
@@ -925,7 +930,7 @@ int main(int argc, char * argv[])
 
                         /*
                         //report complete distributions
-                        if (approxPrecursorFromWeightVD < 0) {
+                        if (observedDist.size() > 4 && completeFlag == 1) {
 
                             for (int i = 0; i < observedDist.size(); ++i) {
                                 std::cout << "Obs: mz: " << observedDist[i].first;
@@ -942,6 +947,7 @@ int main(int argc, char * argv[])
                                 std::cout << " prop: " << approxFragmentFromWeightAndSulfurDist[i].second;
                                 std::cout << std::endl;
                             }
+                            
                             std::cout << "obsDist size: " << observedDist.size() << std::endl;
                             std::cout << "exactPrec size: " << exactPrecursorDist.size() << std::endl;
                             std::cout << "exactFrag size: " << exactConditionalFragmentDist.size() << std::endl;
@@ -954,6 +960,7 @@ int main(int argc, char * argv[])
                             for (int j = 0; j < precursorIsotopes.size(); ++j) {
                                 std::cout << precursorIsotopes[j] << " ";
                             }
+
                             std::cout << std::endl;
                             std::cout << "***************************" << std::endl;
 
@@ -964,8 +971,8 @@ int main(int argc, char * argv[])
                             std::cout << "exactPrecursorX2= " << exactPrecursorX2;
                             std::cout << " exactCondFragmentX2= " << exactCondFragmentX2 << std::endl;
                             std::cout << "***************************" << std::endl;
-
-                        }*/
+                            */
+                        }
                     }
                 }//ion loop
             }//peptide hit loop
