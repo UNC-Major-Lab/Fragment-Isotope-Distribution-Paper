@@ -973,8 +973,8 @@ int main(int argc, char * argv[])
                             std::cout << "exactPrecursorX2= " << exactPrecursorX2;
                             std::cout << " exactCondFragmentX2= " << exactCondFragmentX2 << std::endl;
                             std::cout << "***************************" << std::endl;
-                            */
-                        }
+
+                        }*/
                     }
                 }//ion loop
             }//peptide hit loop
