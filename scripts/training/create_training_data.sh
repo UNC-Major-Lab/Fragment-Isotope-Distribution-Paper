@@ -68,4 +68,4 @@ ${BUILD_DIR}/PeptideFragmentSampler ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMP
 
 chmod 775 ${OUT_DIR}/data/*
 
-${SOURCE_DIR}/scripts/submit_models.sh $S $CS $Se $CSe $MAX_SAMPLED_MASS
+${SOURCE_DIR}/scripts/training/submit_models.sh $S $CS $Se $CSe $MAX_SAMPLED_MASS

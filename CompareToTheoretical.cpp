@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random>
 #include <numeric>
+#include <string>
 
 #include <OpenMS/FORMAT/FASTAFile.h>
 #include <OpenMS/CHEMISTRY/AASequence.h>
@@ -17,6 +18,15 @@ using namespace OpenMS;
 std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<> dis(0, 1);
+
+bool isValidPeptide(AASequence pep) {
+    String p = pep.toString();
+    if (p.hasSubstring("U") || p.hasSubstring("B") || p.hasSubstring("Z") || p.hasSubstring("J") || p.hasSubstring("X"))
+    {
+        return false;
+    }
+    return true;
+}
 
 std::vector<double> sampleDecoy(int length)
 {
@@ -77,57 +87,70 @@ std::vector<double> calculateScores(std::vector<double>& l, std::vector<double>&
     return result;
 }
 
+void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fragment, std::vector<UInt>& isolated_precursor_isotopes,
+                              double pep_mass, double frag_mass, int num_s_prec, int num_s_frag, UInt depth, std::string label)
+{
+    IsotopeDistribution exact_fragment_dist = fragment.getConditionalFragmentIsotopeDist(precursor, isolated_precursor_isotopes);
+
+    IsotopeDistribution approx_precursor_dist(depth);
+    approx_precursor_dist.estimateFromPeptideWeight(frag_mass);
+    approx_precursor_dist.renormalize();
+
+    IsotopeDistribution approx_fragment_dist(depth);
+    approx_fragment_dist.estimateForFragmentFromPeptideWeight(pep_mass, frag_mass, isolated_precursor_isotopes);
+    approx_fragment_dist.renormalize();
+
+    IsotopeDistribution approx_fragment_S_dist(depth);
+    approx_fragment_S_dist.estimateForFragmentFromPeptideWeightAndS(pep_mass, num_s_prec, frag_mass, num_s_frag, isolated_precursor_isotopes);
+    approx_fragment_S_dist.renormalize();
+
+
+
+    std::vector<double> exact_fragment_prob =  fillProbabilities(exact_fragment_dist, depth);
+    std::vector<double> approx_precursor_prob = fillProbabilities(approx_precursor_dist, depth);
+    std::vector<double> approx_fragment_prob = fillProbabilities(approx_fragment_dist, depth);
+    std::vector<double> approx_fragment_S_prob = fillProbabilities(approx_fragment_S_dist, depth);
+
+    //std::vector<double> decoy_prob = sampleDecoy(i+1);
+    //std::vector<double> sampled_exact_fragment_prob = sampleFromDistribution(exact_fragment_prob);
+
+    std::vector<double> scores;
+
+    scores = calculateScores(exact_fragment_prob, approx_precursor_prob);
+
+    std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_precursor" << std::endl;
+
+    scores = calculateScores(exact_fragment_prob, approx_fragment_prob);
+
+    std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_fragment" << std::endl;
+
+    scores = calculateScores(exact_fragment_prob, approx_fragment_S_prob);
+
+    std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_fragment_S" << std::endl;
+}
+
 void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& precursor, EmpiricalFormula& fragment)
 {
-    static Size MAX_ISOTOPE = 3;
+    static Size MAX_ISOTOPE = 4;
     static Size LENGTH = MAX_ISOTOPE+1;
-    static Size num_processed = 0;
 
-    int num_s = fragment.getNumberOf(ElementDB::getInstance()->getElement("Sulfur"));
-    int num_cs = precursor.getNumberOf(ElementDB::getInstance()->getElement("Sulfur")) - num_s;
+    int num_s_frag = fragment.getNumberOf(ElementDB::getInstance()->getElement("Sulfur"));
+    int num_s_prec = precursor.getNumberOf(ElementDB::getInstance()->getElement("Sulfur"));
+
+    double pep_mass = precursor.getAverageWeight();
+    double frag_mass = fragment.getAverageWeight();
 
     std::vector<UInt> isolated_precursor_isotopes(1,0);
     for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
         isolated_precursor_isotopes.push_back(i);
-        IsotopeDistribution frag_dist = fragment.getConditionalFragmentIsotopeDist(precursor, isolated_precursor_isotopes);
-
-        IsotopeDistribution dist_averagine_precursor(i+1);
-        dist_averagine_precursor.estimateFromPeptideWeight(fragment.getAverageWeight());
-        dist_averagine_precursor.renormalize();
-        IsotopeDistribution dist_exact_precursor = fragment.getIsotopeDistribution(i+1);
-
-        std::vector<double> prob_averagine_precursor = fillProbabilities(dist_averagine_precursor, i+1);
-        std::vector<double> prob_exact_precursor = fillProbabilities(dist_averagine_precursor, i+1);
-        std::vector<double> prob_decoy = sampleDecoy(i+1);
-        std::vector<double> prob_exact_fragment =  fillProbabilities(frag_dist, i+1);
-        std::vector<double> prob_sampled_exact_fragment = sampleFromDistribution(prob_exact_fragment);
-
-        std::vector<double> scores;
-
-        scores = calculateScores(prob_averagine_precursor, prob_exact_fragment);
-
-        //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << pep_mass << "\t"
-        //          << frag_mass << "\t" << i << "\t" << num_s << "\t" << num_cs << "\t" << 0 << std::endl;
-
-        scores = calculateScores(prob_exact_precursor, prob_exact_fragment);
-
-        //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << pep_mass << "\t"
-        //          << frag_mass << "\t" << i << "\t" << num_s << "\t" << num_cs << "\t" << 0 << std::endl;
-
-        scores = calculateScores(prob_decoy, prob_exact_fragment);
-
-        //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << pep_mass << "\t"
-        //          << frag_mass << "\t" << i << "\t" << num_s << "\t" << num_cs << "\t" << 1 << std::endl;
-
-        scores = calculateScores(prob_sampled_exact_fragment, prob_exact_fragment);
-
-        //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << pep_mass << "\t"
-        //          << frag_mass << "\t" << i << "\t" << num_s << "\t" << num_cs << "\t" << 0 << std::endl;
+        std::string label = "0-"+std::to_string(i);
+        testTheoreticalIsolation(precursor, fragment, isolated_precursor_isotopes, pep_mass, frag_mass, num_s_prec, num_s_frag, i+1, label);
     }
 
-    num_processed++;
-    if (num_processed % 10000 == 0) {
-        std::cout << num_processed << std::endl;
+    for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
+        isolated_precursor_isotopes.clear();
+        isolated_precursor_isotopes.push_back(i);
+        testTheoreticalIsolation(precursor, fragment, isolated_precursor_isotopes, pep_mass, frag_mass, num_s_prec, num_s_frag, i+1, std::to_string(i));
     }
 }
 
@@ -156,21 +179,21 @@ void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& 
     digestor.digest(AASequence::fromString(protein.sequence), peptides);
     for (Size j = 0; j < peptides.size(); ++j)
     {
-        if (peptides[j].size() >= MIN_PEPTIDE_LENGTH && peptides[j].size() <= MAX_PEPTIDE_LENGTH)
+        if (peptides[j].size() >= MIN_PEPTIDE_LENGTH && peptides[j].size() <= MAX_PEPTIDE_LENGTH && isValidPeptide(peptides[j]))
         {
-            testTheoreticalPeptide(peptides[j]);
+    		testTheoreticalPeptide(peptides[j]);
         }
     }
 }
 
-void testTheoreticalPeptides(std::string fasta_path)
+void testTheoreticalPeptides(std::string fasta_path, int job_id, int num_jobs)
 {
     std::vector<FASTAFile::FASTAEntry> proteins;
     FASTAFile().load(fasta_path, proteins);
 
     EnzymaticDigestion digestor; // default parameters are fully tryptic with 0 missed cleavages
 
-    for (Size i = 0; i < proteins.size(); ++i)
+    for (Size i = job_id; i < proteins.size(); i+=num_jobs)
     {
         testTheoreticalProtein(proteins[i], digestor);
     }
@@ -178,6 +201,6 @@ void testTheoreticalPeptides(std::string fasta_path)
 
 int main(int argc, char * argv[])
 {
-    testTheoreticalPeptides(argv[1]);
+    testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]));
     return 0;
 }
