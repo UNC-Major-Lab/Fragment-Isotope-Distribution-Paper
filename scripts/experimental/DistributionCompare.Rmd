@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r dataManipulation, echo=FALSE, fig.width=6, fig.height=4, echo=FALSE, message=FALSE, warning=FALSE, dev='svg'}
+```{r dataManipulation, echo=FALSE, fig.width=6, fig.height=4, echo=FALSE, message=FALSE, warning=FALSE, dev='pdf'}
 #load libraries
 library(ggplot2)
 library(reshape2)
