@@ -112,9 +112,13 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     std::vector<double> approx_fragment_S_prob = fillProbabilities(approx_fragment_S_dist, depth);
 
     //std::vector<double> decoy_prob = sampleDecoy(i+1);
-    //std::vector<double> sampled_exact_fragment_prob = sampleFromDistribution(exact_fragment_prob);
+    std::vector<double> sampled_exact_fragment_prob = sampleFromDistribution(exact_fragment_prob);
 
     std::vector<double> scores;
+
+    scores = calculateScores(exact_fragment_prob, sampled_exact_fragment_prob);
+
+    std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "sampled_distribution" << std::endl;
 
     scores = calculateScores(exact_fragment_prob, approx_precursor_prob);
 
