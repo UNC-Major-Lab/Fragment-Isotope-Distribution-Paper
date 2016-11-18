@@ -26,7 +26,7 @@ std::mt19937 gen(rd());
 std::uniform_int_distribution<> dis_AA(0, AMINO_ACIDS.length()-1);
 std::uniform_int_distribution<> dis_S(0, AMINO_ACIDS_SULFUR.length()-1);
 
-const int max_depth = 6;
+int max_depth;
 
 OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
     OpenMS::AASequence random_peptide;
@@ -60,7 +60,7 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
     return random_peptide;
 }
 
-void create_fragments(OpenMS::AASequence &p, std::ofstream outfiles[max_depth][max_depth], int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
+void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
     int num_fragments = p.size()-1;
 
     int tot_left_SSe = std::max(num_sulfurs + num_selenium,1);
@@ -73,7 +73,7 @@ void create_fragments(OpenMS::AASequence &p, std::ofstream outfiles[max_depth][m
         OpenMS::EmpiricalFormula b_ion = p.getPrefix(index).getFormula(OpenMS::Residue::ResidueType::BIon);
         OpenMS::EmpiricalFormula y_ion = p.getPrefix(index).getFormula(OpenMS::Residue::ResidueType::YIon);
 
-        for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope)
+        for (int precursor_isotope = 1; precursor_isotope < max_depth; ++precursor_isotope)
         {
             std::vector<OpenMS::UInt> isolated_isotopes;
             isolated_isotopes.push_back(precursor_isotope);
@@ -98,8 +98,9 @@ void create_fragments(OpenMS::AASequence &p, std::ofstream outfiles[max_depth][m
 void sample_fragment_isotopic_distributions(std::string base_path, float max_mass, int num_samples, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
 
     // create all output files and write header to each
-    std::ofstream outfiles[max_depth][max_depth];
+    std::ofstream** outfiles = new std::ofstream*[max_depth];
     for (int precursor_isotope = 1; precursor_isotope < max_depth; ++precursor_isotope) {
+        outfiles[precursor_isotope] = new std::ofstream[max_depth];
         for (int fragment_isotope = 0; fragment_isotope <= precursor_isotope; ++fragment_isotope) {
             std::string filename = "Precursor" + std::to_string(precursor_isotope) + "_" +
                                    "Fragment" + std::to_string(fragment_isotope) + ".tab";
@@ -130,15 +131,37 @@ void sample_fragment_isotopic_distributions(std::string base_path, float max_mas
         for (int fragment_isotope = 0; fragment_isotope <= precursor_isotope; ++fragment_isotope) {
             outfiles[precursor_isotope][fragment_isotope].close();
         }
+        delete[] outfiles[precursor_isotope];
     }
+    delete[] outfiles;
+}
+
+void usage()
+{
+    std::cout << "PeptideFragmentSampler out_path max_mass num_samples S CS Se CSe max_isotope" << std::endl;
+    std::cout << "out_path: The path to the directory that will store the training data, e.g. ~/data/" << std::endl;
+    std::cout << "max_mass: maximum mass allowed for sampled peptides, e.g. 8500" << std::endl;
+    std::cout << "num_samples: number of random peptides to generate for each peptide length, e.g 100" << std::endl;
+    std::cout << "S: number of sulfurs that should be in the fragment ion, e.g. 0" << std::endl;
+    std::cout << "CS: number of sulfurs that should be in the complementary fragment ion, e.g. 0" << std::endl;
+    std::cout << "Se: number of seleniums that should be in the fragment ion, e.g. 0" << std::endl;
+    std::cout << "CSe: number of seleniums that should be in the complementary fragment ion, e.g. 0" << std::endl;
+    std::cout << "max_isotope: The maximum isotope to generate training data for, e.g. 5" << std::endl;
 }
 
 int main(int argc, const char ** argv) {
+
+    if (argc != 9)
+    {
+        usage();
+    }
+
     // Increase the maximum number of open files for this process. Was necessary for me.
     struct rlimit rlp;
     rlp.rlim_cur = 600;
     setrlimit(RLIMIT_NOFILE, &rlp);
 
+    max_depth = atoi(argv[8])+1;
     sample_fragment_isotopic_distributions(argv[1], atof(argv[2]), atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), atoi(argv[6]), atoi(argv[7]));
 
     return 0;
