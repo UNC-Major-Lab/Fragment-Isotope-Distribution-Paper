@@ -14,6 +14,8 @@
 
 namespace SpectrumUtilities {
 
+    static const double ERROR_PPM = 20;     //acquisition mz error for peak matching
+
     static const OpenMS::ElementDB* ELEMENTS = OpenMS::ElementDB::getInstance();   //element database
 
     static void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const OpenMS::Precursor precursorInfo,
@@ -52,7 +54,7 @@ namespace SpectrumUtilities {
         for (int i = 0; i < theoDist.size(); ++i) {
 
             //calculate search tolerance
-            double tol =  OpenMS::Math::ppmToMass(20.0, theoDist[i].first);
+            double tol =  OpenMS::Math::ppmToMass(ERROR_PPM, theoDist[i].first);
 
             //find index of actual peak in spectrum
             OpenMS::Int isoPeakIndex = spec.findNearest(theoDist[i].first, tol);
@@ -306,6 +308,37 @@ namespace SpectrumUtilities {
             theo.second = theoPeakList[i].second;
             theoDist.push_back(theo);
         }
+    }
+
+    /**
+     * Check if a scaled isotope distribution is following a characteristic isotope distribution.
+     * @param dist scaled distribution where peak intensities sum to 1
+     * @return true if distribution follows a characterist rise/fall
+     */
+    static bool scaledDistributionValid(const std::vector<std::pair<double, double> > &dist)
+    {
+        //distribution values decreasing flag
+        bool valuesDecreasing = false;
+
+        //loop from beginning of distribution, checking for decreasing values
+        for (int i = 0; i < dist.size(); ++i) {
+            //if values are increasing
+            if (!valuesDecreasing) {
+                //check for next peak decreasing and difference is greater than 5%
+                if ( (dist[i+1].second < dist[i].second) && ((dist[i].second - dist[i+1].second) > 0.05) ) {
+                    //next peak is greater than 5% less than current peak, distribution is decreasing
+                    valuesDecreasing = true;
+                }
+            } else {    //values are decreasing
+                //check for next peak increasing and difference is greater than 5%
+                if ( (dist[i+1].second > dist[i].second) && ((dist[i+1].second - dist[i].second) > 0.05) ) {
+                    //distribution falling but next peak increases by more than 5%
+                    return false;
+                }
+            }
+        }
+        //distribution follows normal rise and fall.
+        return true;
     }
 }
 
