@@ -323,17 +323,17 @@ void scaleDistribution(std::vector<std::pair<double, double> > &obsDist)
 }
 
 /**
- * Check if a normalized isotope distribution is following a characteristic isotope distribution.
- * @param dist normalized distribution where peak intensities sum to 1
+ * Check if a scaled isotope distribution is following a characteristic isotope distribution.
+ * @param dist scaled distribution where peak intensities sum to 1
  * @return true if distribution follows a characterist rise/fall
  */
-bool normalizedDistributionValid(const std::vector<std::pair<double, double> > &dist)
+bool scaledDistributionValid(const std::vector<std::pair<double, double> > &dist)
 {
     //distribution values decreasing flag
     bool valuesDecreasing = false;
 
     //loop from beginning of distribution, checking for decreasing values
-    for (int i = 0; i > dist.size() - 1; --i) {
+    for (int i = 0; i < dist.size(); ++i) {
         //if values are increasing
         if (!valuesDecreasing) {
             //check for next peak decreasing and difference is greater than 5%
@@ -806,7 +806,7 @@ int main(int argc, char * argv[])
 
                         //write distribution results to file
                         distributionScoreFile << ionID << "\t";                           //ion ID
-                        distributionScoreFile << normalizedDistributionValid(observedDist) << "\t"; //valid distribution flag
+                        distributionScoreFile << scaledDistributionValid(observedDist) << "\t"; //valid distribution flag
                         distributionScoreFile << ionList[ionIndex].monoWeight << "\t";    //ion dist. mono weight
                         distributionScoreFile << ionList[ionIndex].charge << "\t";        //ion distribution charge
                         distributionScoreFile << exactPrecursorDist.size() << "\t";       //distribution search depth
