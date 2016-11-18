@@ -7,6 +7,7 @@ set(my_executables
         PeptideFragmentSampler
         CompareToTheoretical
         DistributionCompare
+        CompareToTargeted
         )
 
 ## list all classes here, which are required by your executables
@@ -15,6 +16,7 @@ set(my_sources
         PeptideFragmentSampler.cpp
         CompareToTheoretical.cpp
         DistributionCompare.cpp
+        CompareToTargeted.cpp
         Stats.h
         Ion.h
         Ion.cpp)
