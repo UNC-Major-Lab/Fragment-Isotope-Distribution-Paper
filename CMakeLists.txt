@@ -8,6 +8,7 @@ set(my_executables
         CompareToTheoretical
         DistributionCompare
         CompareToTargeted
+        GetSulfurDistribution
         )
 
 ## list all classes here, which are required by your executables
@@ -17,6 +18,7 @@ set(my_sources
         CompareToTheoretical.cpp
         DistributionCompare.cpp
         CompareToTargeted.cpp
+        GetSulfurDistribution.cpp
         Stats.h
         Ion.h
         Ion.cpp)

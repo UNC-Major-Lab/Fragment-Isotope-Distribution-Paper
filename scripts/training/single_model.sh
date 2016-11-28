@@ -1,6 +1,6 @@
 #!/bin/csh
 
-source config.csh
+source ../config.csh
 
 set file = $1
 set S = $2
@@ -23,5 +23,5 @@ set out_models = ${OUT_DIR}/spline/model/Precursor${precursor}_Fragment${fragmen
 
 set param = "FragmentIsotopeTensorProductSpline('"${max_mass}"','"${S}"','"${CS}"','"${Se}"','"${CSe}"','"${precursor}"','"${fragment}"','"${file}"','"${out_spline}"','"${out_res_hist}"','"${out_scatter}"','"${out_res3D}"','"${out_gof}"','"${out_models}"');quit force"
 
-cd ${SOURCE_DIR}/matlab/
+cd ${SOURCE_DIR}/scripts/training/
 matlab -nodisplay -nosplash -nodesktop -r $param

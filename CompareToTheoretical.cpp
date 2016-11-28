@@ -2,6 +2,7 @@
 #include <random>
 #include <numeric>
 #include <string>
+#include <set>
 
 #include <OpenMS/FORMAT/FASTAFile.h>
 #include <OpenMS/CHEMISTRY/AASequence.h>
@@ -19,7 +20,9 @@ std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<> dis(0, 1);
 
-bool isValidPeptide(AASequence pep) {
+std::set<AASequence> uniquePeptides;
+
+bool isValidPeptide(AASequence& pep) {
     String p = pep.toString();
     if (p.hasSubstring("U") || p.hasSubstring("B") || p.hasSubstring("Z") || p.hasSubstring("J") || p.hasSubstring("X"))
     {
@@ -179,8 +182,10 @@ void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& 
     digestor.digest(AASequence::fromString(protein.sequence), peptides);
     for (Size j = 0; j < peptides.size(); ++j)
     {
-        if (peptides[j].size() >= MIN_PEPTIDE_LENGTH && peptides[j].size() <= MAX_PEPTIDE_LENGTH && isValidPeptide(peptides[j]))
+        if (peptides[j].size() >= MIN_PEPTIDE_LENGTH && peptides[j].size() <= MAX_PEPTIDE_LENGTH
+            && isValidPeptide(peptides[j]) && uniquePeptides.find(peptides[j]) == uniquePeptides.end())
         {
+            uniquePeptides.insert(peptides[j]);
     		testTheoreticalPeptide(peptides[j]);
         }
     }

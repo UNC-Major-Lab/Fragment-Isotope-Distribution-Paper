@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <string>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -136,6 +137,39 @@ void sample_fragment_isotopic_distributions(std::string base_path, float max_mas
     delete[] outfiles;
 }
 
+void sample_average_fragment_isotopic_distribution(std::string distribution_path, std::string base_path, float max_mass)
+{
+    std::map<std::pair<int,int>, int> sulfurs2count;
+
+    std::ifstream sulfur_dist_in(distribution_path);
+    std::string input;
+    int S, CS, count, i;
+    while (sulfur_dist_in >> input)
+    {
+        i = (i++) % 3;
+        if (i == 0) S = atoi(input);
+        else if (i == 1) CS = atoi(input);
+        else {
+            count = atoi(input);
+            sulfurs2count[std::make_pair(S,CS)] = count;
+        }
+    }
+
+    int max_count = std::max_element(std::begin(sulfurs2count), std::end(sulfurs2count),
+                    [] (const std::pair<int,int> & p1, const std::pair<int,int> & p2) {
+                        return p1.second < p2.second;
+                    })->second;
+
+    for (auto itr : sulfurs2count)
+    {
+        double percentage = (double) itr.second / max_count;
+        if (percentage >= 0.001) {
+            int num_samples = std::floor(percentage * 1000);
+            sample_fragment_isotopic_distributions(base_path, max_mass, num_samples, itr.first.first, itr.first.second, 0, 0);
+        }
+    }
+}
+
 void usage()
 {
     std::cout << "PeptideFragmentSampler out_path max_mass num_samples S CS Se CSe max_isotope" << std::endl;
@@ -147,11 +181,18 @@ void usage()
     std::cout << "Se: number of seleniums that should be in the fragment ion, e.g. 0" << std::endl;
     std::cout << "CSe: number of seleniums that should be in the complementary fragment ion, e.g. 0" << std::endl;
     std::cout << "max_isotope: The maximum isotope to generate training data for, e.g. 5" << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "PeptideFragmentSampler sulfur_dist_path out_path max_mass max_isotope" << std::endl;
+    std::cout << "sulfur_dist_path: file path to the results of GetSulfurDistribution, e.g. ~/data/sulfur_distribution.tab" << std::endl;
+    std::cout << "out_path: The path to the directory that will store the training data, e.g. ~/data/" << std::endl;
+    std::cout << "max_mass: maximum mass allowed for sampled peptides, e.g. 8500" << std::endl;
+    std::cout << "max_isotope: The maximum isotope to generate training data for, e.g. 5" << std::endl;
 }
 
 int main(int argc, const char ** argv) {
 
-    if (argc != 9)
+    if (argc != 9 && argc != 4)
     {
         usage();
     }
@@ -161,8 +202,28 @@ int main(int argc, const char ** argv) {
     rlp.rlim_cur = 600;
     setrlimit(RLIMIT_NOFILE, &rlp);
 
-    max_depth = atoi(argv[8])+1;
-    sample_fragment_isotopic_distributions(argv[1], atof(argv[2]), atoi(argv[3]), atoi(argv[4]), atoi(argv[5]), atoi(argv[6]), atoi(argv[7]));
+    if (argc == 9) {
+        std::string out_path = argv[1];
+        float max_mass = atof(argv[2]);
+        int num_samples = atoi(argv[3]);
+        int S = atoi(argv[4]);
+        int CS = atoi(argv[5]);
+        int Se = atoi(argv[6]);
+        int CSe = atoi(argv[7]);
+
+        max_depth = atoi(argv[8]) + 1;
+
+        sample_fragment_isotopic_distributions(out_path, max_mass, num_samples, S, CS, Se, CSe);
+    }
+    else if (argc == 4)
+    {
+        std::string dist_path = argv[1];
+        std::string out_path = argv[2];
+        float max_mass = atof(argv[3]);
+        max_depth = atoi(argv[4]) + 1;
+
+        sample_average_fragment_isotopic_distribution(dist_path, out_path, max_mass);
+    }
 
     return 0;
 }
