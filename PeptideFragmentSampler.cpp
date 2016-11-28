@@ -6,6 +6,7 @@
 #include <fstream>
 #include <random>
 #include <string>
+#include <algorithm>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -143,22 +144,23 @@ void sample_average_fragment_isotopic_distribution(std::string distribution_path
 
     std::ifstream sulfur_dist_in(distribution_path);
     std::string input;
-    int S, CS, count, i;
+    int S, CS, count, i=0;
     while (sulfur_dist_in >> input)
     {
-        i = (i++) % 3;
         if (i == 0) S = atoi(input.c_str());
         else if (i == 1) CS = atoi(input.c_str());
         else {
             count = atoi(input.c_str());
             sulfurs2count[std::make_pair(S,CS)] = count;
         }
+        i = (i+1) % 3;
     }
 
-    int max_count = std::max_element(std::begin(sulfurs2count), std::end(sulfurs2count),
-                    [] (std::pair<const std::pair<int, int>, int> & p1, std::pair<const std::pair<int, int>, int> & p2) {
-                        return p1.second < p2.second;
-                    })->second;
+    int max_count = 0;
+    for (auto itr : sulfurs2count)
+    {
+        max_count = std::max(max_count, itr.second);
+    }
 
     for (auto itr : sulfurs2count)
     {
