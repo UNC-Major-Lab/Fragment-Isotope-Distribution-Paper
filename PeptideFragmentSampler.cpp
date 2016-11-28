@@ -192,7 +192,7 @@ void usage()
 
 int main(int argc, const char ** argv) {
 
-    if (argc != 9 && argc != 4)
+    if (argc != 9 && argc != 5)
     {
         usage();
     }
@@ -215,7 +215,7 @@ int main(int argc, const char ** argv) {
 
         sample_fragment_isotopic_distributions(out_path, max_mass, num_samples, S, CS, Se, CSe);
     }
-    else if (argc == 4)
+    else if (argc == 5)
     {
         std::string dist_path = argv[1];
         std::string out_path = argv[2];
