@@ -9,7 +9,7 @@
 #include <OpenMS/CHEMISTRY/ElementDB.h>
 #include <OpenMS/MATH/MISC/MathFunctions.h>
 
-#include "ion.h"
+#include "Ion.h"
 
 
 
