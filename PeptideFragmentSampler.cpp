@@ -97,7 +97,7 @@ void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_s
 }
 
 
-void sample_fragment_isotopic_distributions(std::string base_path, float max_mass, int num_samples, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
+void sample_fragment_isotopic_distributions(std::string base_path, float max_mass, int num_samples, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium, bool append) {
 
     // create all output files and write header to each
     std::ofstream** outfiles = new std::ofstream*[max_depth];
@@ -106,7 +106,9 @@ void sample_fragment_isotopic_distributions(std::string base_path, float max_mas
         for (int fragment_isotope = 0; fragment_isotope <= precursor_isotope; ++fragment_isotope) {
             std::string filename = "Precursor" + std::to_string(precursor_isotope) + "_" +
                                    "Fragment" + std::to_string(fragment_isotope) + ".tab";
-            outfiles[precursor_isotope][fragment_isotope].open(base_path + filename);
+
+            if (append) outfiles[precursor_isotope][fragment_isotope].open(base_path + filename, std::ofstream::out | std::ofstream::app);
+            else outfiles[precursor_isotope][fragment_isotope].open(base_path + filename);
 
             outfiles[precursor_isotope][fragment_isotope] << "probability" << "\tfrag.mass" << "\tprecursor.mass" << std::endl; //"\tfrag.a.mass" << "\tprecursor.a.mass" << std::endl;
         }
@@ -167,7 +169,7 @@ void sample_average_fragment_isotopic_distribution(std::string distribution_path
         double percentage = (double) itr.second / max_count;
         if (percentage >= 0.001) {
             int num_samples = std::floor(percentage * 1000);
-            sample_fragment_isotopic_distributions(base_path, max_mass, num_samples, itr.first.first, itr.first.second, 0, 0);
+            sample_fragment_isotopic_distributions(base_path, max_mass, num_samples, itr.first.first, itr.first.second, 0, 0, true);
         }
     }
 }
@@ -215,7 +217,7 @@ int main(int argc, const char ** argv) {
 
         max_depth = atoi(argv[8]) + 1;
 
-        sample_fragment_isotopic_distributions(out_path, max_mass, num_samples, S, CS, Se, CSe);
+        sample_fragment_isotopic_distributions(out_path, max_mass, num_samples, S, CS, Se, CSe, false);
     }
     else if (argc == 5)
     {
