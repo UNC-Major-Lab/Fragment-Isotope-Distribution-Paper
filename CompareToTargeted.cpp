@@ -6,7 +6,7 @@
 #include <string>
 
 #include <OpenMS/FORMAT/MzMLFile.h>
-#include <OpenMS/Math/MISC/MathFunctions.h>
+#include <OpenMS/MATH/MISC/MathFunctions.h>
 
 #include "Ion.h"
 #include "SpectrumUtilities.h"
