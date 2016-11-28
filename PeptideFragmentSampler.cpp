@@ -147,16 +147,16 @@ void sample_average_fragment_isotopic_distribution(std::string distribution_path
     while (sulfur_dist_in >> input)
     {
         i = (i++) % 3;
-        if (i == 0) S = atoi(input);
-        else if (i == 1) CS = atoi(input);
+        if (i == 0) S = atoi(input.c_str());
+        else if (i == 1) CS = atoi(input.c_str());
         else {
-            count = atoi(input);
+            count = atoi(input.c_str());
             sulfurs2count[std::make_pair(S,CS)] = count;
         }
     }
 
-    int max_count = std::max_element(std::begin(sulfurs2count), std::end(sulfurs2count),
-                    [] (const std::pair<int,int> & p1, const std::pair<int,int> & p2) {
+    int max_count = std::max_element(std::begin(sulfurs2count.), std::end(sulfurs2count),
+                    [] (std::pair<const std::pair<int, int>, int> & p1, std::pair<const std::pair<int, int>, int> & p2) {
                         return p1.second < p2.second;
                     })->second;
 
