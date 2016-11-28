@@ -155,7 +155,7 @@ void sample_average_fragment_isotopic_distribution(std::string distribution_path
         }
     }
 
-    int max_count = std::max_element(std::begin(sulfurs2count.), std::end(sulfurs2count),
+    int max_count = std::max_element(std::begin(sulfurs2count), std::end(sulfurs2count),
                     [] (std::pair<const std::pair<int, int>, int> & p1, std::pair<const std::pair<int, int>, int> & p2) {
                         return p1.second < p2.second;
                     })->second;
