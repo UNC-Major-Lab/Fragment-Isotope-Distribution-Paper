@@ -5,6 +5,8 @@
 #BSUB -n 1
 #BSUB -M 1
 
+module load gcc/4.8.1
+
 source ../config.csh
 
 ${BUILD_DIR}/PeptideFragmentSampler $FASTA > ${ROOT_OUT_DIR}"/sulfur_distribution.tab"

@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/sh
 
 bsub < LSF_get_sulfur_distribution.sh > out
 JOBID=`head -1 out | sed 's/.*<\\([0-9]*\\)>.*/\\1/'`
