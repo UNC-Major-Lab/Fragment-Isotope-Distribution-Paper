@@ -107,10 +107,20 @@ void sample_fragment_isotopic_distributions(std::string base_path, float max_mas
             std::string filename = "Precursor" + std::to_string(precursor_isotope) + "_" +
                                    "Fragment" + std::to_string(fragment_isotope) + ".tab";
 
-            if (append) outfiles[precursor_isotope][fragment_isotope].open(base_path + filename, std::ofstream::out | std::ofstream::app);
-            else outfiles[precursor_isotope][fragment_isotope].open(base_path + filename);
+            if (append)
+            {
+                outfiles[precursor_isotope][fragment_isotope].open(base_path + filename, std::ofstream::out | std::ofstream::app);
+            } else
+            {
+                outfiles[precursor_isotope][fragment_isotope].open(base_path + filename);
+            }
 
-            outfiles[precursor_isotope][fragment_isotope] << "probability" << "\tfrag.mass" << "\tprecursor.mass" << std::endl; //"\tfrag.a.mass" << "\tprecursor.a.mass" << std::endl;
+            // Only add the header if we're creating a new file
+            // This happens if we're not appending, or if we're appending and it's our first time in the loop
+            if (!append || (precursor_isotope == 1 && fragment_isotope == 0)) {
+                outfiles[precursor_isotope][fragment_isotope] << "probability" << "\tfrag.mass" << "\tprecursor.mass"
+                                                              << std::endl; //"\tfrag.a.mass" << "\tprecursor.a.mass" << std::endl;
+            }
         }
     }
 
