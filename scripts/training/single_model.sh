@@ -8,8 +8,7 @@ set CS = $3
 set Se = $4
 set CSe = $5
 set max_mass = $6
-
-set OUT_DIR = ${ROOT_OUT_DIR}"/S${S}_CS${CS}_Se${Se}_CSe${CSe}"
+set OUT_DIR = $7
 
 set precursor = `echo "$file" | sed -n "s/.*\/[a-zA-Z]*\([0-9]*\)_[a-zA-Z]*\([0-9]*\).*/\1/p"`
 set fragment = `echo "$file" | sed -n "s/.*\/[a-zA-Z]*\([0-9]*\)_[a-zA-Z]*\([0-9]*\).*/\2/p"`
