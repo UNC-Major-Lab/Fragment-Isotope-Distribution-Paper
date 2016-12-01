@@ -33,3 +33,5 @@ mkdir ${OUT_DIR}/spline/scatter/
 ${BUILD_DIR}/PeptideFragmentSampler ${ROOT_OUT_DIR}/sulfur_distribution.tab ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $MAX_ISOTOPE
 
 chmod 775 ${OUT_DIR}/data/*
+
+${SOURCE_DIR}/scripts/training/LSF_submit_average_models.sh $MAX_SAMPLED_MASS
