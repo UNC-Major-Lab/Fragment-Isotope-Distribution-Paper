@@ -1,6 +1,6 @@
 #!/bin/csh 
 
-source ../config.csh
+source ../config.sh
 
 set S = $1
 set CS = $2

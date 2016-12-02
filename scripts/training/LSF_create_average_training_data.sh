@@ -10,7 +10,7 @@ module load gcc/4.8.1
 module load r/3.2.2
 module load matlab
 
-source ../config.csh
+source ../config.sh
 
 set OUT_DIR = ${AVERAGINE_OUT_DIR}"/Average_Spline"
 

@@ -1,6 +1,6 @@
 #!/bin/csh
 
-source ../config.csh
+source ../config.sh
 
 set max_mass = $1
 

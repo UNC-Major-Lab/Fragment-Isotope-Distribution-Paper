@@ -9,7 +9,7 @@
 module load python/2.7.1 
 module load r/3.2.2
 
-source ../config.csh
+source ../config.sh
 
 set BIN_SIZE = 0.01
 set IN_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
