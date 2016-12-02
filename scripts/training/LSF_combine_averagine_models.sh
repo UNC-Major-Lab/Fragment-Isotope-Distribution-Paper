@@ -1,6 +1,6 @@
 #!/bin/csh
 #BSUB -L /bin/csh
-#BSUB -J LSF_combine_models.sh
+#BSUB -J LSF_combine_averagine_models.sh
 #BSUB -q day
 #BSUB -n 1
 #BSUB -M 1
