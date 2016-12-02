@@ -150,7 +150,7 @@ void sample_fragment_isotopic_distributions(std::string base_path, float max_mas
     delete[] outfiles;
 }
 
-void sample_average_fragment_isotopic_distribution(std::string distribution_path, std::string base_path, float max_mass)
+void sample_average_fragment_isotopic_distribution(std::string distribution_path, std::string base_path, float max_mass, float min_percentage)
 {
     std::map<std::pair<int,int>, int> sulfurs2count;
 
@@ -177,8 +177,8 @@ void sample_average_fragment_isotopic_distribution(std::string distribution_path
     for (auto itr : sulfurs2count)
     {
         double percentage = (double) itr.second / max_count;
-        if (percentage >= 0.001) {
-            int num_samples = std::floor(percentage * 1000);
+        if (percentage >= min_percentage) {
+            int num_samples = std::floor(percentage / min_percentage);
             sample_fragment_isotopic_distributions(base_path, max_mass, num_samples, itr.first.first, itr.first.second, 0, 0, true);
         }
     }
@@ -197,16 +197,17 @@ void usage()
     std::cout << "max_isotope: The maximum isotope to generate training data for, e.g. 5" << std::endl;
     std::cout << std::endl;
 
-    std::cout << "PeptideFragmentSampler sulfur_dist_path out_path max_mass max_isotope" << std::endl;
+    std::cout << "PeptideFragmentSampler sulfur_dist_path out_path max_mass min_percentage max_isotope" << std::endl;
     std::cout << "sulfur_dist_path: file path to the results of GetSulfurDistribution, e.g. ~/data/sulfur_distribution.tab" << std::endl;
     std::cout << "out_path: The path to the directory that will store the training data, e.g. ~/data/" << std::endl;
     std::cout << "max_mass: maximum mass allowed for sampled peptides, e.g. 8500" << std::endl;
+    std::cout << "min_percentage: the min abundance of a sulfur distribution necessary to be included in the training data (relative to most abundant case), e.g. .001" << std::endl;
     std::cout << "max_isotope: The maximum isotope to generate training data for, e.g. 5" << std::endl;
 }
 
 int main(int argc, const char ** argv) {
 
-    if (argc != 9 && argc != 5)
+    if (argc != 9 && argc != 6)
     {
         usage();
     }
@@ -229,14 +230,16 @@ int main(int argc, const char ** argv) {
 
         sample_fragment_isotopic_distributions(out_path, max_mass, num_samples, S, CS, Se, CSe, false);
     }
-    else if (argc == 5)
+    else if (argc == 6)
     {
         std::string dist_path = argv[1];
         std::string out_path = argv[2];
         float max_mass = atof(argv[3]);
-        max_depth = atoi(argv[4]) + 1;
+        float min_percentage = atof(argv[4]);
 
-        sample_average_fragment_isotopic_distribution(dist_path, out_path, max_mass);
+        max_depth = atoi(argv[5]) + 1;
+
+        sample_average_fragment_isotopic_distribution(dist_path, out_path, max_mass, min_percentage);
     }
 
     return 0;
