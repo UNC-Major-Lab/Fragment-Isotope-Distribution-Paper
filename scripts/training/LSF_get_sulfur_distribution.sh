@@ -9,5 +9,7 @@ module load gcc/4.8.1
 
 source ../config.sh
 
+mkdir -p ${AVERAGINE_OUT_DIR}"
+
 ${BUILD_DIR}/GetSulfurDistribution $FASTA > ${AVERAGINE_OUT_DIR}"/sulfur_distribution.tab"
 
