@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/csh
 
 if ($1 == 1) then
     bsub < LSF_get_sulfur_distribution.sh
