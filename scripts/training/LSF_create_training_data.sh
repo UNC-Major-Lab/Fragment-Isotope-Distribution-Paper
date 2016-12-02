@@ -46,7 +46,7 @@ else if ($LSB_JOBINDEX <= 16) then
     set S = `expr 7 - $index`
 endif
 
-set OUT_DIR = ${ROOT_OUT_DIR}"/S${S}_CS${CS}_Se${Se}_CSe${CSe}"
+set OUT_DIR = ${SULFUR_OUT_DIR}"/S${S}_CS${CS}_Se${Se}_CSe${CSe}"
 
 mkdir -p $OUT_DIR
 

@@ -12,7 +12,7 @@ module load matlab
 
 source ../config.csh
 
-set OUT_DIR = ${ROOT_OUT_DIR}"/Average_Spline"
+set OUT_DIR = ${AVERAGINE_OUT_DIR}"/Average_Spline"
 
 mkdir -p $OUT_DIR
 
@@ -30,7 +30,7 @@ mkdir ${OUT_DIR}/spline/hist/
 mkdir ${OUT_DIR}/spline/res3D/
 mkdir ${OUT_DIR}/spline/scatter/
 
-${BUILD_DIR}/PeptideFragmentSampler ${ROOT_OUT_DIR}/sulfur_distribution.tab ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $MAX_ISOTOPE
+${BUILD_DIR}/PeptideFragmentSampler ${AVERAGINE_OUT_DIR}/sulfur_distribution.tab ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $MAX_ISOTOPE
 
 chmod 775 ${OUT_DIR}/data/*
 

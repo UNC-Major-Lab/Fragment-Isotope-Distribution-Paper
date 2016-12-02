@@ -4,7 +4,7 @@ source ../config.csh
 
 set max_mass = $1
 
-set OUT_DIR = ${ROOT_OUT_DIR}"/Average_Spline"
+set OUT_DIR = ${AVERAGINE_OUT_DIR}"/Average_Spline"
 
 foreach file (${OUT_DIR}/data/*)
     if (-d $file) then

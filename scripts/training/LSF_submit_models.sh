@@ -8,7 +8,7 @@ set Se = $3
 set CSe = $4 
 set max_mass = $5
 
-set OUT_DIR = ${ROOT_OUT_DIR}"/S${S}_CS${CS}_Se${Se}_CSe${CSe}"
+set OUT_DIR = ${SULFUR_OUT_DIR}"/S${S}_CS${CS}_Se${Se}_CSe${CSe}"
 
 foreach file (${OUT_DIR}/data/*)
     if (-d $file) then
