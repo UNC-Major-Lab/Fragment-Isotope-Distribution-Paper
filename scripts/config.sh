@@ -1,7 +1,7 @@
 #!/bin/csh
 set SOURCE_DIR="~/Fragment-Isotope-Distribution-Paper/"
 set BUILD_DIR=${SOURCE_DIR}"/build/"
-set DATA_IDR=${SOURCE_DIR}"/data/"
+set DATA_DIR=${SOURCE_DIR}"/data/"
 
 set ROOT_OUT_DIR="/netscr/dennisg/MSFragmentDeisotoper/"
 set SULFUR_OUT_DIR=${ROOT_OUT_DIR}"/SulfurCorrected/"
