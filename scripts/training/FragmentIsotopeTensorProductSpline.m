@@ -271,7 +271,7 @@ end
 
 
 % Writes the base64BinaryArrayXML tag and its attributes
-function writeBase64BinaryArrayXML(outfile, tag, precision, endian, length, data)
+function writeBase64BinaryArrayXML(fileID, tag, precision, endian, length, data)
 	% Open the tag
 	fprintf(fileID, strcat(['\t<', tag, '>\n']));
 
