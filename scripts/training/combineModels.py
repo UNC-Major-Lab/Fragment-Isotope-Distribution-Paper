@@ -3,11 +3,10 @@ import sys
 import os
 import re
 
-schema_infile = open(sys.argv[1])
-root_dir = sys.argv[2]
+root_dir = sys.argv[1]
 
-for line in schema_infile:
-    print line.rstrip()
+print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+print "<models>\n"
 
 for d in os.listdir(root_dir):
     if not os.path.isfile(d) and os.path.exists(root_dir+d+"/spline/model/"):
@@ -17,4 +16,5 @@ for d in os.listdir(root_dir):
                 infile = open(fp)
                 for line in infile:
                     print line.rstrip()
-print "</models>\n</class>"
+
+print "</models>"
