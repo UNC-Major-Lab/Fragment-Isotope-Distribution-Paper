@@ -196,7 +196,7 @@ function writeModelXML(outfile_path, sp_pp, S, CS, Se, CSe, precursor_isotope, f
 	fprintf(fileID, strcat(['\t\t<CS>', CS, '</CS>\n']));
 	fprintf(fileID, strcat(['\t\t<Se>', Se, '</Se>\n']));
 	fprintf(fileID, strcat(['\t\t<CSe>', CSe, '</CSe>\n']));
-	fprintf(fileID, strcat(['\t\t<PrecursorIndex>', precursor, '</PrecursorIndex>\n']));
+	fprintf(fileID, strcat(['\t\t<PrecursorIndex>', precursor_isotope, '</PrecursorIndex>\n']));
 	fprintf(fileID, strcat(['\t\t<FragmentIndex>', fragment_isotope, '</FragmentIndex>\n']));
 	fprintf(fileID, strcat(['\t\t<OrderX>', num2str(sp_pp.order(1)), '</OrderX>\n']));
 	fprintf(fileID, strcat(['\t\t<OrderY>', num2str(sp_pp.order(1)), '</OrderY>\n']));
