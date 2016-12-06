@@ -182,33 +182,31 @@ function [RMSD meanD Rsq residuals] = goodnessOfFitStatistics(M, sp_pp)
 	Rsq = 1 - (SSres/SStot);	
 end
 
-
-
 % Takes a tensor-product spline model in pp form and writes a partial XML file to disk.
 % This will write the information for a single <model> tag.
 function writeModelXML(outfile_path, sp_pp, S, CS, Se, CSe, precursor_isotope, fragment_isotope)
 	% Open our output file for writing
 	fileID = fopen(outfile_path,'w');
 	
-	% Open the <model> tag and write its attributes
-	fprintf(fileID, strcat(['\t<model S=''',S,''' CS=''',CS,''' Se=''',Se,''' CSe=''',CSe,''' PrecursorIndex=''',precursor_isotope,''' FragmentIndex=''',fragment_isotope,''' OrderX=''',num2str(sp_pp.order(1)),''' OrderY=''',num2str(sp_pp.order(1)),'''>\n']));
+	% Open the <model> tag
+	fprintf(fileID, '\t<model>\n');
+
+	% Write model attributes
+	fprintf(fileID, strcat(['\t\t<S>', S, '</S>\n']));
+	fprintf(fileID, strcat(['\t\t<CS>', CS, '</CS>\n']));
+	fprintf(fileID, strcat(['\t\t<Se>', Se, '</Se>\n']));
+	fprintf(fileID, strcat(['\t\t<CSe>', CSe, '</CSe>\n']));
+	fprintf(fileID, strcat(['\t\t<PrecursorIndex>', precursor, '</PrecursorIndex>\n']));
+	fprintf(fileID, strcat(['\t\t<FragmentIndex>', fragment_isotope, '</FragmentIndex>\n']));
+	fprintf(fileID, strcat(['\t\t<OrderX>', num2str(sp_pp.order(1)), '</OrderX>\n']));
+	fprintf(fileID, strcat(['\t\t<OrderY>', num2str(sp_pp.order(1)), '</OrderY>\n']));
 
 
-	% Open the <breaksFragmentMassArrayBinary> tag and write its attributes
-	fprintf(fileID, strcat(['\t\t<breaksFragmentMassArrayBinary precision=''32'' endian=''little'' length=''',num2str(length(sp_pp.breaks{1})),'''>'])); 
-	% Write the actual break values
-	fprintf(fileID, convertAndEncode(sp_pp.breaks{1}));
-	% Close the <breaksFragmentMassArrayBinary> tag
-	fprintf(fileID, '</breaksFragmentMassArrayBinary>\n');
+	% Write the <fragmentMassBreaks> tag and its attributes
+	writeBase64BinaryArrayXML(fileID, 'fragmentMassBreaks', '32', 'little', num2str(length(sp_pp.breaks{1})), convertAndEncode(sp_pp.breaks{1}));
 
-
-	% Open the <breaksPrecursorMassArrayBinary> tag and write its attributes
-	fprintf(fileID, strcat(['\t\t<breaksPrecursorMassArrayBinary precision=''32'' endian=''little'' length=''',num2str(length(sp_pp.breaks{2})),'''>'])); 
-	% Write the actual break values
-	fprintf(fileID, convertAndEncode(sp_pp.breaks{2}));
-	% Close the <breaksPrecursorMassArrayBinary> tag
-	fprintf(fileID, '</breaksPrecursorMassArrayBinary>\n');
-
+	% Write the <precursorMassBreaks> tag and its attributes
+	writeBase64BinaryArrayXML(fileID, 'precursorMassBreaks', '32', 'little', num2str(length(sp_pp.breaks{2})), convertAndEncode(sp_pp.breaks{2}));
 
 	% The format that the coefficients are stored in the tensor product spline is super confusing to me.
 	% Reshape them to make them easier to iterate through.
@@ -260,14 +258,9 @@ function writeModelXML(outfile_path, sp_pp, S, CS, Se, CSe, precursor_isotope, f
 	        end
 	    end
 	end
-	
-	% Open the <coefficientsArrayBinary> tag and write its attributes
-	fprintf(fileID, strcat(['\t\t<coefficientsArrayBinary precision=''32'' endian=''little'' length=''',num2str(ii), '''>']));
-	% Write the actual coefficient values, but only include the coefficients we actually need.
-	% Remember that we initialized the array to a larger size than necessary.
-	fprintf(fileID, convertAndEncode(coefs_out(1:ii)));
-	% Close the <coefficientsArrayBinary> tag
-	fprintf(fileID, '</coefficientsArrayBinary>\n');
+
+	% Write the <coefficients> tag and its attributes
+	writeBase64BinaryArrayXML(fileID, 'coefficients', '32', 'little', num2str(ii), convertAndEncode(coefs_out(1:ii)));
 
 	% Close the <model> tag
 	fprintf(fileID, '\t</model>\n'); 
@@ -277,7 +270,22 @@ function writeModelXML(outfile_path, sp_pp, S, CS, Se, CSe, precursor_isotope, f
 end
 
 
+% Writes the base64BinaryArrayXML tag and its attributes
+function writeBase64BinaryArrayXML(outfile, tag, precision, endian, length, data)
+% Open the tag
+fprintf(fileID, strcat['\t<',tag,'>\n']);
 
+% Write the attributes
+fprintf(fileID, strcat(['\t\t<precision>', precision, '</precision>\n']));
+fprintf(fileID, strcat(['\t\t<endian>', endian, '</endian>\n']));
+fprintf(fileID, strcat(['\t\t<length>', length, '</length>\n']));
+fprintf(fileID, '\t\t<binaryArray>');
+fprintf(fileID, data);
+fprintf(fileID, '</binaryArray>\n');
+
+% Close the tag
+fprintf(fileID, strcat['\t</',tag,'>\n']);
+end
 
 
 

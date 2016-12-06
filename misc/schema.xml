@@ -1,14 +1,13 @@
-<?xml version="1.0"?>
-<class>
+<?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-	<xs:annotation>
-  		<xs:documentation xlm:lang="en">
-			XML Schema for tensor-product splines that approximate the isotopic distributions of MS/MS fragments.
-		</xs:documentation>
-	</xs:annotation>
-
-	<xs:element name="models" type="modelsType"/>
+	<xs:element name="models" type="modelsType">
+		<xs:annotation>
+			<xs:documentation>
+				XML Schema for tensor-product splines that approximate the isotopic distributions of MS/MS fragments.
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
 
 	<xs:complexType name="modelsType">
 		<xs:sequence minOccurs="1">
@@ -17,36 +16,27 @@
 	</xs:complexType>
 
 	<xs:complexType name="individualModelType">
-		<xs:attribute name="S" type="xs:nonNegativeInteger" use="required"/>
-		<xs:attribute name="CS" type="xs:nonNegativeInteger" use="required"/>
-		<xs:attribute name="Se" type="xs:nonNegativeInteger" use="required"/>
-		<xs:attribute name="CSe" type="xs:nonNegativeInteger" use="required"/>
-		<xs:attribute name="PrecursorIndex" type="xs:nonNegativeInteger" use="required"/>
-		<xs:attribute name="FragmentIndex" type="xs:nonNegativeInteger" use="required"/>
-		<xs:attribute name="OrderX" type="xs:positiveInteger" use="required"/>
-		<xs:attribute name="OrderY" type="xs:positiveInteger" use="required"/>
-		
 		<xs:sequence>
-			<xs:element name="breaksFragmentMassArrayBinary" type="xs:base64Binary" use="required">
-				<xs:attribute name="precision" type="xs:nonNegativeInteger" use="required"/>
-				<xs:attribute name="endian" type="xs:string" use="required"/>
-				<xs:attribute name="length" type="xs:positiveInteger" use="required"/>
-			</xs:element>
-		
-			<xs:element name="breaksPrecursorMassArrayBinary" type="xs:base64Binary" use="required">
-				<xs:attribute name="precision" type="xs:nonNegativeInteger" use="required"/>
-				<xs:attribute name="endian" type="xs:string" use="required"/>
-				<xs:attribute name="length" type="xs:positiveInteger" use="required"/>
-			</xs:element>
-		
-			<xs:element name="coefficientsArrayBinary" type="xs:base64Binary" use="required">
-				<xs:attribute name="precision" type="xs:nonNegativeInteger" use="required"/>
-				<xs:attribute name="endian" type="xs:string" use="required"/>
-				<xs:attribute name="length" type="xs:positiveInteger" use="required"/>
-			</xs:element>
+			<xs:element name="S" type="xs:nonNegativeInteger" maxOccurs="1" minOccurs="0"/>
+			<xs:element name="CS" type="xs:nonNegativeInteger" maxOccurs="1" minOccurs="0"/>
+			<xs:element name="Se" type="xs:nonNegativeInteger" maxOccurs="1" minOccurs="0"/>
+			<xs:element name="CSe" type="xs:nonNegativeInteger" maxOccurs="1" minOccurs="0"/>
+			<xs:element name="PrecursorIndex" type="xs:nonNegativeInteger" maxOccurs="1"/>
+			<xs:element name="FragmentIndex" type="xs:nonNegativeInteger" maxOccurs="1"/>
+			<xs:element name="OrderX" type="xs:positiveInteger" maxOccurs="1"/>
+			<xs:element name="OrderY" type="xs:positiveInteger" maxOccurs="1"/>
+
+			<xs:element name="fragmentMassBreaks" type="base64BinaryArrayType" maxOccurs="1"/>
+			<xs:element name="precursorMassBreaks" type="base64BinaryArrayType" maxOccurs="1"/>
+			<xs:element name="coefficients" type="base64BinaryArrayType" maxOccurs="1"/>
 		</xs:sequence>
 	</xs:complexType>
 
-</xs:schema>
+	<xs:complexType name="base64BinaryArrayType">
+		<xs:element name="precision" type="xs:nonNegativeInteger"/>
+		<xs:element name="endian" type="xs:string"/>
+		<xs:element name="length" type="xs:positiveInteger"/>
+		<xs:element name="binaryArray" type="xs:base64Binary"/>
+	</xs:complexType>
 
-<models>
+</xs:schema>
