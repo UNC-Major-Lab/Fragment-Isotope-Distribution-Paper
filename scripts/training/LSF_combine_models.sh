@@ -9,5 +9,5 @@ module load python/2.7.1
 
 source ../config.sh
 
-python ${SOURCE_DIR}/scripts/training/combineModels.py ${SOURCE_DIR}/misc/schema.xml $SULFUR_OUT_DIR > ${SULFUR_OUT_DIR}"/models.xml"
-python ${SOURCE_DIR}/scripts/training/combineModels.py ${SOURCE_DIR}/misc/schema.xml $AVERAGINE_OUT_DIR > ${AVERAGINE_OUT_DIR}"/models.xml"
+python ${SOURCE_DIR}/scripts/training/combineModels.py $SULFUR_OUT_DIR > ${SULFUR_OUT_DIR}"/models.xml"
+python ${SOURCE_DIR}/scripts/training/combineModels.py $AVERAGINE_OUT_DIR > ${AVERAGINE_OUT_DIR}"/models.xml"
