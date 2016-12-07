@@ -273,13 +273,13 @@ end
 % Writes the base64BinaryArrayXML tag and its attributes
 function writeBase64BinaryArrayXML(fileID, tag, precision, endian, length, data)
 	% Open the tag
-	fprintf(fileID, strcat(['\t<', tag, '>\n']));
+	fprintf(fileID, strcat(['\t\t<', tag, '>\n']));
 
 	% Write the attributes
-	fprintf(fileID, strcat(['\t\t<precision>', precision, '</precision>\n']));
-	fprintf(fileID, strcat(['\t\t<endian>', endian, '</endian>\n']));
-	fprintf(fileID, strcat(['\t\t<length>', length, '</length>\n']));
-	fprintf(fileID, '\t\t<binaryArray>');
+	fprintf(fileID, strcat(['\t\t\t<precision>', precision, '</precision>\n']));
+	fprintf(fileID, strcat(['\t\t\t<endian>', endian, '</endian>\n']));
+	fprintf(fileID, strcat(['\t\t\t<length>', length, '</length>\n']));
+	fprintf(fileID, '\t\t\t<binaryArray>');
 	fprintf(fileID, data);
 	fprintf(fileID, '</binaryArray>\n');
 
