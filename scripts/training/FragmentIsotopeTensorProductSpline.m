@@ -284,7 +284,7 @@ function writeBase64BinaryArrayXML(fileID, tag, precision, endian, length, data)
 	fprintf(fileID, '</binaryArray>\n');
 
 	% Close the tag
-	fprintf(fileID, strcat(['\t</',tag,'>\n']));
+	fprintf(fileID, strcat(['\t\t</',tag,'>\n']));
 end
 
 
