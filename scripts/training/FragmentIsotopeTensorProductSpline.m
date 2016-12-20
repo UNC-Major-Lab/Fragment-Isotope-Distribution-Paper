@@ -192,7 +192,7 @@ function writeModelXML(outfile_path, sp_pp, S, CS, Se, CSe, precursor_isotope, f
 	fprintf(fileID, '\t<model');
 	% Write composition attributes if this was a sulfur specific model
   if S~='NA'
-		fprintf(fileID, strcat([' S=''',S,''' CS=''',CS,''' Se=''',Se,''' CSe=''',CSe,'''']);
+		fprintf(fileID, strcat([' S=''', S, ''' CS=''', CS, ''' Se=''', Se, ''' CSe=''', CSe, '''']));
 	end
 	% Write remaining attributes
 	fprintf(fileID, strcat([' PrecursorIsotope=''',precursor_isotope,''' FragmentIsotope=''',fragment_isotope,''' FragmentOrder=''',num2str(sp_pp.order(1)),''' PrecursorOrder=''',num2str(sp_pp.order(1)),'''>\n']));
