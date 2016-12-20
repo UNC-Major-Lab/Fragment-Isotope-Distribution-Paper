@@ -188,8 +188,14 @@ function writeModelXML(outfile_path, sp_pp, S, CS, Se, CSe, precursor_isotope, f
 	% Open our output file for writing
 	fileID = fopen(outfile_path,'w');
 
-	% Open the <model> tag and write its attributes
-	fprintf(fileID, strcat(['\t<model S=''',S,''' CS=''',CS,''' Se=''',Se,''' CSe=''',CSe,''' PrecursorIsotope=''',precursor_isotope,''' FragmentIsotope=''',fragment_isotope,''' FragmentOrder=''',num2str(sp_pp.order(1)),''' PrecursorOrder=''',num2str(sp_pp.order(1)),'''>\n']));
+	% Open the <model> tag
+	fprintf(fileID, '\t<model');
+	% Write composition attributes if this was a sulfur specific model
+  if S~='NA'
+		fprintf(fileID, strcat([' S=''',S,''' CS=''',CS,''' Se=''',Se,''' CSe=''',CSe,''']);
+	end
+	% Write remaining attributes
+	fprintf(fileID, strcat([' PrecursorIsotope=''',precursor_isotope,''' FragmentIsotope=''',fragment_isotope,''' FragmentOrder=''',num2str(sp_pp.order(1)),''' PrecursorOrder=''',num2str(sp_pp.order(1)),'''>\n']));
 
 	% Write the <fragmentMassBreaks> tag and its attributes
 	writeBase64BinaryArrayXML(fileID, 'fragmentMassBreaks', '32', 'little', num2str(length(sp_pp.breaks{1})), convertAndEncode(sp_pp.breaks{1}));
