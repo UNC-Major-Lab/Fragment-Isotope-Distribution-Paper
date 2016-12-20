@@ -187,20 +187,9 @@ end
 function writeModelXML(outfile_path, sp_pp, S, CS, Se, CSe, precursor_isotope, fragment_isotope)
 	% Open our output file for writing
 	fileID = fopen(outfile_path,'w');
-	
-	% Open the <model> tag
-	fprintf(fileID, '\t<model>\n');
 
-	% Write model attributes
-	fprintf(fileID, strcat(['\t\t<S>', S, '</S>\n']));
-	fprintf(fileID, strcat(['\t\t<CS>', CS, '</CS>\n']));
-	fprintf(fileID, strcat(['\t\t<Se>', Se, '</Se>\n']));
-	fprintf(fileID, strcat(['\t\t<CSe>', CSe, '</CSe>\n']));
-	fprintf(fileID, strcat(['\t\t<PrecursorIsotope>', precursor_isotope, '</PrecursorIsotope>\n']));
-	fprintf(fileID, strcat(['\t\t<FragmentIsotope>', fragment_isotope, '</FragmentIsotope>\n']));
-	fprintf(fileID, strcat(['\t\t<OrderX>', num2str(sp_pp.order(1)), '</OrderX>\n']));
-	fprintf(fileID, strcat(['\t\t<OrderY>', num2str(sp_pp.order(1)), '</OrderY>\n']));
-
+	% Open the <model> tag and write its attributes
+	fprintf(fileID, strcat(['\t<model S=''',S,''' CS=''',CS,''' Se=''',Se,''' CSe=''',CSe,''' PrecursorIsotope=''',precursor_isotope,''' FragmentIsotope=''',fragment_isotope,''' FragmentOrder=''',num2str(sp_pp.order(1)),''' PrecursorOrder=''',num2str(sp_pp.order(1)),'''>\n']));
 
 	% Write the <fragmentMassBreaks> tag and its attributes
 	writeBase64BinaryArrayXML(fileID, 'fragmentMassBreaks', '32', 'little', num2str(length(sp_pp.breaks{1})), convertAndEncode(sp_pp.breaks{1}));
@@ -272,19 +261,13 @@ end
 
 % Writes the base64BinaryArrayXML tag and its attributes
 function writeBase64BinaryArrayXML(fileID, tag, precision, endian, length, data)
-	% Open the tag
-	fprintf(fileID, strcat(['\t\t<', tag, '>\n']));
 
-	% Write the attributes
-	fprintf(fileID, strcat(['\t\t\t<precision>', precision, '</precision>\n']));
-	fprintf(fileID, strcat(['\t\t\t<endian>', endian, '</endian>\n']));
-	fprintf(fileID, strcat(['\t\t\t<length>', length, '</length>\n']));
-	fprintf(fileID, '\t\t\t<binaryArray>');
+	% Open the tag and write its attributes
+	fprintf(fileID, strcat(['\t\t<', tag, ' precision=''', precision, ''' endian=''', endian, ''' length=''', length, '''>']));
+	% Write the actual values
 	fprintf(fileID, data);
-	fprintf(fileID, '</binaryArray>\n');
-
 	% Close the tag
-	fprintf(fileID, strcat(['\t\t</',tag,'>\n']));
+	fprintf(fileID, strcat(['</', tag, '>\n']));
 end
 
 
