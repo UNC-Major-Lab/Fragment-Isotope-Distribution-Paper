@@ -117,7 +117,7 @@ void sample_fragment_isotopic_distributions(std::string base_path, float max_mas
 
             // Only add the header if we're creating a new file
             // This happens if we're not appending, or if we're appending and it's our first time in the loop
-            if (!append || (precursor_isotope == 1 && fragment_isotope == 0)) {
+            if (!append) {
                 outfiles[precursor_isotope][fragment_isotope] << "probability" << "\tfrag.mass" << "\tprecursor.mass"
                                                               << std::endl; //"\tfrag.a.mass" << "\tprecursor.a.mass" << std::endl;
             }
@@ -174,12 +174,14 @@ void sample_average_fragment_isotopic_distribution(std::string distribution_path
         max_count = std::max(max_count, itr.second);
     }
 
+    bool append = false;
     for (auto itr : sulfurs2count)
     {
         double percentage = (double) itr.second / max_count;
         if (percentage >= min_percentage) {
             int num_samples = std::floor(percentage / min_percentage);
-            sample_fragment_isotopic_distributions(base_path, max_mass, num_samples, itr.first.first, itr.first.second, 0, 0, true);
+            sample_fragment_isotopic_distributions(base_path, max_mass, num_samples, itr.first.first, itr.first.second, 0, 0, append);
+            append = false;
         }
     }
 }
