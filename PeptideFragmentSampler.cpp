@@ -62,6 +62,21 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
     return random_peptide;
 }
 
+OpenMS::IsotopeDistribution getFragmentDistribution(OpenMS::EmpiricalFormula &precursor_ef, OpenMS::EmpiricalFormula &fragment_ef, std::vector<OpenMS::UInt> &isolated_isotopes)
+{
+    // A fragment's isotopes can only be as high as the largest isolated precursor isotope.
+    OpenMS::UInt max_depth = 30;
+
+    // Treat *this as the fragment molecule
+    OpenMS::EmpiricalFormula complementary_fragment = precursor_ef-fragment_ef;
+
+    OpenMS::IsotopeDistribution fragment_isotope_dist = fragment_ef.getIsotopeDistribution(max_depth);
+    OpenMS::IsotopeDistribution comp_fragment_isotope_dist = complementary_fragment.getIsotopeDistribution(max_depth);
+
+    OpenMS::IsotopeDistribution result;
+    result.calcFragmentIsotopeDist(fragment_isotope_dist, comp_fragment_isotope_dist, isolated_isotopes);
+}
+
 void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
     int num_fragments = p.size()-1;
 
@@ -80,8 +95,10 @@ void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_s
             std::vector<OpenMS::UInt> isolated_isotopes;
             isolated_isotopes.push_back(precursor_isotope);
 
-            OpenMS::IsotopeDistribution b_id = b_ion.getConditionalFragmentIsotopeDist(precursor_ef, isolated_isotopes);
-            OpenMS::IsotopeDistribution y_id = y_ion.getConditionalFragmentIsotopeDist(precursor_ef, isolated_isotopes);
+            //OpenMS::IsotopeDistribution b_id = b_ion.getConditionalFragmentIsotopeDist(precursor_ef, isolated_isotopes);
+            //OpenMS::IsotopeDistribution y_id = y_ion.getConditionalFragmentIsotopeDist(precursor_ef, isolated_isotopes);
+            OpenMS::IsotopeDistribution b_id = getFragmentDistribution(precursor_ef, b_ion, isolated_isotopes);
+            OpenMS::IsotopeDistribution y_id = getFragmentDistribution(precursor_ef, y_ion, isolated_isotopes);
 
             for (int fragment_isotope = 0; fragment_isotope <= precursor_isotope && fragment_isotope < b_id.size(); ++fragment_isotope)
             {
