@@ -75,6 +75,8 @@ OpenMS::IsotopeDistribution getFragmentDistribution(OpenMS::EmpiricalFormula &pr
 
     OpenMS::IsotopeDistribution result;
     result.calcFragmentIsotopeDist(fragment_isotope_dist, comp_fragment_isotope_dist, isolated_isotopes);
+
+    return result;
 }
 
 void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
@@ -90,7 +92,7 @@ void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_s
         OpenMS::EmpiricalFormula b_ion = p.getPrefix(index).getFormula(OpenMS::Residue::ResidueType::BIon);
         OpenMS::EmpiricalFormula y_ion = p.getPrefix(index).getFormula(OpenMS::Residue::ResidueType::YIon);
 
-        for (int precursor_isotope = 1; precursor_isotope < max_depth; ++precursor_isotope)
+        for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope)
         {
             std::vector<OpenMS::UInt> isolated_isotopes;
             isolated_isotopes.push_back(precursor_isotope);
@@ -118,7 +120,7 @@ void sample_fragment_isotopic_distributions(std::string base_path, float max_mas
 
     // create all output files and write header to each
     std::ofstream** outfiles = new std::ofstream*[max_depth];
-    for (int precursor_isotope = 1; precursor_isotope < max_depth; ++precursor_isotope) {
+    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope) {
         outfiles[precursor_isotope] = new std::ofstream[max_depth];
         for (int fragment_isotope = 0; fragment_isotope <= precursor_isotope; ++fragment_isotope) {
             std::string filename = "Precursor" + std::to_string(precursor_isotope) + "_" +
@@ -158,7 +160,7 @@ void sample_fragment_isotopic_distributions(std::string base_path, float max_mas
     }
 
     // close all output files
-    for (int precursor_isotope = 1; precursor_isotope < max_depth; ++precursor_isotope) {
+    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope) {
         for (int fragment_isotope = 0; fragment_isotope <= precursor_isotope; ++fragment_isotope) {
             outfiles[precursor_isotope][fragment_isotope].close();
         }
