@@ -65,7 +65,7 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
 OpenMS::IsotopeDistribution getFragmentDistribution(OpenMS::EmpiricalFormula &precursor_ef, OpenMS::EmpiricalFormula &fragment_ef, std::vector<OpenMS::UInt> &isolated_isotopes)
 {
     // A fragment's isotopes can only be as high as the largest isolated precursor isotope.
-    OpenMS::UInt max_depth = 30;
+    OpenMS::UInt max_depth = *std::max_element(isolated_isotopes.begin(), isolated_isotopes.end())+1;
 
     // Treat *this as the fragment molecule
     OpenMS::EmpiricalFormula complementary_fragment = precursor_ef-fragment_ef;
