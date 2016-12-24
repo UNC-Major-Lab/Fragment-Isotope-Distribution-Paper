@@ -11,6 +11,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#include <OpenMS/CHEMISTRY/Element.h>
 #include <OpenMS/CHEMISTRY/AASequence.h>
 #include <OpenMS/CHEMISTRY/ResidueDB.h>
 #include <OpenMS/CHEMISTRY/ElementDB.h>
@@ -62,7 +63,7 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
     return random_peptide;
 }
 
-OpenMS::IsotopeDistribution getIsotopeDistribution(OpenMS::EmpiricalFormula &formula, OpenMS::UInt max_depth)
+/*OpenMS::IsotopeDistribution getIsotopeDistribution(OpenMS::EmpiricalFormula &formula, OpenMS::UInt max_depth)
 {
     OpenMS::IsotopeDistribution result(max_depth);
     for (auto it = formula.begin(); it != formula.end(); ++it)
@@ -89,7 +90,7 @@ OpenMS::IsotopeDistribution getFragmentDistribution(OpenMS::EmpiricalFormula &pr
     result.calcFragmentIsotopeDist(fragment_isotope_dist, comp_fragment_isotope_dist, isolated_isotopes);
 
     return result;
-}
+}*/
 
 void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_sulfurs, int num_c_sulfurs, int num_selenium, int num_c_selenium) {
     int num_fragments = p.size()-1;
@@ -98,6 +99,7 @@ void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_s
     int tot_right_SSe = std::max(num_c_sulfurs + num_c_selenium,1);
 
     OpenMS::EmpiricalFormula precursor_ef = p.getFormula();
+    OpenMS::IsotopeDistribution precursor_id = precursor_ef.getIsotopeDistribution(30);
 
     for (int index = tot_left_SSe; index < num_fragments-tot_right_SSe; ++index)
     {
@@ -109,17 +111,17 @@ void create_fragments(OpenMS::AASequence &p, std::ofstream** outfiles, int num_s
             std::vector<OpenMS::UInt> isolated_isotopes;
             isolated_isotopes.push_back(precursor_isotope);
 
-            //OpenMS::IsotopeDistribution b_id = b_ion.getConditionalFragmentIsotopeDist(precursor_ef, isolated_isotopes);
-            //OpenMS::IsotopeDistribution y_id = y_ion.getConditionalFragmentIsotopeDist(precursor_ef, isolated_isotopes);
-            OpenMS::IsotopeDistribution b_id = getFragmentDistribution(precursor_ef, b_ion, isolated_isotopes);
-            OpenMS::IsotopeDistribution y_id = getFragmentDistribution(precursor_ef, y_ion, isolated_isotopes);
+            OpenMS::IsotopeDistribution b_id = b_ion.getConditionalFragmentIsotopeDist(precursor_ef, isolated_isotopes);
+            OpenMS::IsotopeDistribution y_id = y_ion.getConditionalFragmentIsotopeDist(precursor_ef, isolated_isotopes);
+            //OpenMS::IsotopeDistribution b_id = getFragmentDistribution(precursor_ef, b_ion, isolated_isotopes);
+            //OpenMS::IsotopeDistribution y_id = getFragmentDistribution(precursor_ef, y_ion, isolated_isotopes);
 
             for (int fragment_isotope = 0; fragment_isotope <= precursor_isotope && fragment_isotope < b_id.size(); ++fragment_isotope)
             {
-                outfiles[precursor_isotope][fragment_isotope] << b_id.getContainer()[fragment_isotope].second
+                outfiles[precursor_isotope][fragment_isotope] << b_id.getContainer()[fragment_isotope].second * precursor_id.getContainer()[precursor_isotope].second
                                                               << "\t" << b_ion.getMonoWeight()
                                                               << "\t" << p.getMonoWeight() << std::endl;
-                outfiles[precursor_isotope][fragment_isotope] << y_id.getContainer()[fragment_isotope].second
+                outfiles[precursor_isotope][fragment_isotope] << y_id.getContainer()[fragment_isotope].second * precursor_id.getContainer()[precursor_isotope].second
                                                               << "\t" << y_ion.getMonoWeight()
                                                               << "\t" << p.getMonoWeight() << std::endl;
             }
