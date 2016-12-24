@@ -62,6 +62,18 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
     return random_peptide;
 }
 
+OpenMS::IsotopeDistribution getIsotopeDistribution(OpenMS::EmpiricalFormula &formula, OpenMS::UInt max_depth) const
+{
+    OpenMS::IsotopeDistribution result(max_depth);
+    for (auto it = formula.begin(); it != formula.end(); ++it)
+    {
+        OpenMS::IsotopeDistribution tmp = it->first->getIsotopeDistribution();
+        tmp.setMaxIsotope(max_depth);
+        result += tmp * it->second;
+    }
+    return result;
+}
+
 OpenMS::IsotopeDistribution getFragmentDistribution(OpenMS::EmpiricalFormula &precursor_ef, OpenMS::EmpiricalFormula &fragment_ef, std::vector<OpenMS::UInt> &isolated_isotopes)
 {
     // A fragment's isotopes can only be as high as the largest isolated precursor isotope.
@@ -70,8 +82,8 @@ OpenMS::IsotopeDistribution getFragmentDistribution(OpenMS::EmpiricalFormula &pr
     // Treat *this as the fragment molecule
     OpenMS::EmpiricalFormula complementary_fragment = precursor_ef-fragment_ef;
 
-    OpenMS::IsotopeDistribution fragment_isotope_dist = fragment_ef.getIsotopeDistribution(max_depth);
-    OpenMS::IsotopeDistribution comp_fragment_isotope_dist = complementary_fragment.getIsotopeDistribution(max_depth);
+    OpenMS::IsotopeDistribution fragment_isotope_dist = getIsotopeDistribution(fragment_ef, max_depth);
+    OpenMS::IsotopeDistribution comp_fragment_isotope_dist = getIsotopeDistribution(complementary_fragment, max_depth);
 
     OpenMS::IsotopeDistribution result;
     result.calcFragmentIsotopeDist(fragment_isotope_dist, comp_fragment_isotope_dist, isolated_isotopes);
