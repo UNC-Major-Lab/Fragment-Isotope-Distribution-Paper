@@ -62,7 +62,7 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
     return random_peptide;
 }
 
-OpenMS::IsotopeDistribution getIsotopeDistribution(OpenMS::EmpiricalFormula &formula, OpenMS::UInt max_depth) const
+OpenMS::IsotopeDistribution getIsotopeDistribution(OpenMS::EmpiricalFormula &formula, OpenMS::UInt max_depth)
 {
     OpenMS::IsotopeDistribution result(max_depth);
     for (auto it = formula.begin(); it != formula.end(); ++it)
