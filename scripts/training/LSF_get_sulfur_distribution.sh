@@ -1,7 +1,7 @@
 #!/bin/csh
 #BSUB -L /bin/csh
 #BSUB -J LSF_get_sulfur_distribution.sh
-#BSUB -q hour
+#BSUB -q week
 #BSUB -n 1
 #BSUB -M 1
 
