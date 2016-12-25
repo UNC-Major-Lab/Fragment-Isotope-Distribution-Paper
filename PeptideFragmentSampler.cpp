@@ -214,7 +214,7 @@ void sample_average_fragment_isotopic_distribution(std::string distribution_path
         if (percentage >= min_percentage) {
             int num_samples = std::floor(percentage / min_percentage);
             sample_fragment_isotopic_distributions(base_path, max_mass, num_samples, itr.first.first, itr.first.second, 0, 0, append);
-            append = false;
+            append = true;
         }
     }
 }
