@@ -22,7 +22,7 @@ std::uniform_real_distribution<> dis(0, 1);
 
 std::set<AASequence> uniquePeptides;
 
-std::oftream out_residual;
+std::ofstream out_residual;
 
 bool isValidPeptide(AASequence& pep) {
     String p = pep.toString();
