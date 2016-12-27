@@ -8,12 +8,13 @@ from math import isnan
 
 root_dir = sys.argv[1]
 bin_size = float(sys.argv[2])
+prefix = sys.argv[3]
 
 comp2iso2bin2count = dict()
 
 for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
-    if os.path.isfile(fp) and ".out" in f:
+    if os.path.isfile(fp) and ".out" in f and prefix in f:
         infile = open(fp)
         for line in infile:
             [pcc, man, chi, iso, comp] = line.strip().split("\t")
