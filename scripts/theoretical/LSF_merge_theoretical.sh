@@ -1,7 +1,7 @@
 #!/bin/csh
 #BSUB -L /bin/csh
 #BSUB -J LSF_merge_theoretical.sh
-#BSUB -q day
+#BSUB -q week
 #BSUB -o /netscr/dennisg/log/LSF_merge_theoretical.log.%J
 #BSUB -n 1
 #BSUB -M 1

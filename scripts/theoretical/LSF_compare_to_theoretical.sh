@@ -1,7 +1,7 @@
 #!/bin/csh
 #BSUB -L /bin/csh
 #BSUB -J LSF_compare_to_theoretical.sh[1-300]
-#BSUB -q hour
+#BSUB -q week
 #BSUB -o /netscr/dennisg/log/LSF_compare_to_theoretical.log.%J
 #BSUB -n 1
 #BSUB -M 1
