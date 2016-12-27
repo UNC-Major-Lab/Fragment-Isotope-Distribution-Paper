@@ -15,5 +15,5 @@ set BIN_SIZE = 0.01
 set IN_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
 
 python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalComparisons.py $IN_DIR $BIN_SIZE "scores_" > ${IN_DIR}"/scores.txt"
-python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalComparisons.py $IN_DIR $BIN_SIZE "residuals_" > ${IN_DIR}"/residuals.txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalResiduals.py $IN_DIR $BIN_SIZE "residuals_" > ${IN_DIR}"/residuals.txt"
 
