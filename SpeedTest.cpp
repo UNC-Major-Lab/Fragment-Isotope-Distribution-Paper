@@ -12,7 +12,7 @@ void testFFTApproximationGivenIsotopes(float min_mass, float max_mass, std::vect
         for (float fragment_mass = min_mass; fragment_mass < precursor_mass; fragment_mass+=100)
         {
             IsotopeDistribution id;
-            id.estimateForFragmentFromPeptideWeightFast(precursor_mass, fragment_mass, precursor_isotopes);
+            id.estimateForFragmentFromPeptideWeight(precursor_mass, fragment_mass, precursor_isotopes);
         }
     }
 }

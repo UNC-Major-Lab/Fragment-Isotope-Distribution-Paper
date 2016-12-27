@@ -4,26 +4,27 @@ cmake_minimum_required(VERSION 2.8.3)
 
 ## list all your executables here (a corresponding .cpp file should exist, e.g. Main.cpp)
 set(my_executables
-        PeptideFragmentSampler
+        #PeptideFragmentSampler
         CompareToTheoretical
-        DistributionCompare
-        CompareToTargeted
-        GetSulfurDistribution
-        SpeedTest
+        #DistributionCompare
+        #CompareToTargeted
+        #GetSulfurDistribution
+        #SpeedTest
         )
 
 ## list all classes here, which are required by your executables
 ## (all these classes will be linked into a library)
 set(my_sources
-        PeptideFragmentSampler.cpp
+        #PeptideFragmentSampler.cpp
         CompareToTheoretical.cpp
-        DistributionCompare.cpp
-        CompareToTargeted.cpp
-        GetSulfurDistribution.cpp
-        SpeedTest.cpp
-        Stats.h
-        Ion.h
-        Ion.cpp)
+        #DistributionCompare.cpp
+        #CompareToTargeted.cpp
+        #GetSulfurDistribution.cpp
+        #SpeedTest.cpp
+        #Stats.h
+        #Ion.h
+        #Ion.cpp
+        )
 
 ## find OpenMS configuration and register target "OpenMS" (our library)
 find_package(OpenMS)
