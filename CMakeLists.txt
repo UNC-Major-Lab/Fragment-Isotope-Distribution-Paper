@@ -9,6 +9,7 @@ set(my_executables
         DistributionCompare
         CompareToTargeted
         GetSulfurDistribution
+        SpeedTest
         )
 
 ## list all classes here, which are required by your executables
@@ -19,6 +20,7 @@ set(my_sources
         DistributionCompare.cpp
         CompareToTargeted.cpp
         GetSulfurDistribution.cpp
+        SpeedTest.cpp
         Stats.h
         Ion.h
         Ion.cpp)
