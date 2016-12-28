@@ -20,7 +20,7 @@ min_job = max_job - num_jobs
 for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
     if os.path.isfile(fp) and ".out" in f and prefix in f:
-        job = f.split("_")[-1].split(".")[0]
+        job = int(f.split("_")[-1].split(".")[0])
         if job <= min_job or job > max_job: continue
 
         infile = open(fp)
