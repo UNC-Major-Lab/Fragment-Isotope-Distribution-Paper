@@ -134,11 +134,13 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
 
     scores = calculateScores(exact_fragment_prob, approx_precursor_prob);
 
-    std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_precursor" << std::endl;
+    //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_precursor" << std::endl;
+    std::cout << scores[1] << "\t" << label << "\t" << "approx_precursor" << std::endl;
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_prob);
 
-    std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_fragment" << std::endl;
+    //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_fragment" << std::endl;
+    std::cout << scores[1] << "\t" << label << "\t" << "approx_fragment" << std::endl;
 
     //scores = calculateScores(exact_fragment_prob, approx_fragment_S_prob);
 
@@ -149,7 +151,7 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_prob);
     for (int i = 0; i < scores.size(); ++i)
     {
-        out_residual << scores[i] << std::endl;
+        out_residual << scores[i] << "\t" << label << "\t" << "approx_fragment" << std::endl;
     }
 }
 

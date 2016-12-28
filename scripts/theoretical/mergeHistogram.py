@@ -25,13 +25,13 @@ for f in os.listdir(root_dir):
 
         infile = open(fp)
         for line in infile:
-            [score, iso, comp] = line.strip().split("\t")
+            [comp, bin, iso, count] = line.strip().split("\t")
+            count = int(count)
             if not comp2iso2bin2count.has_key(comp):
                 comp2iso2bin2count[comp] = dict()
             if not comp2iso2bin2count[comp].has_key(iso):
                 comp2iso2bin2count[comp][iso] = defaultdict(int)
-            bin = round(float(score)/bin_size)*bin_size
-            comp2iso2bin2count[comp][iso][bin]+=1
+            comp2iso2bin2count[comp][iso][bin]+=count
 
 for comp in comp2iso2bin2count:
     for iso in comp2iso2bin2count[comp]:
