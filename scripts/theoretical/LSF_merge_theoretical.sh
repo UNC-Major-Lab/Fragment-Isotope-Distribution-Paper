@@ -1,6 +1,6 @@
 #!/bin/csh
 #BSUB -L /bin/csh
-#BSUB -J LSF_merge_theoretical.sh
+#BSUB -J LSF_merge_theoretical.sh[1-10]
 #BSUB -q week
 #BSUB -o /netscr/dennisg/log/LSF_merge_theoretical.log.%J
 #BSUB -n 1
@@ -14,6 +14,6 @@ source ../config.sh
 set BIN_SIZE = 0.01
 set IN_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
 
-python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalComparisons.py $IN_DIR $BIN_SIZE "scores_" > ${IN_DIR}"/scores.txt"
-python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalResiduals.py $IN_DIR $BIN_SIZE "residuals_" > ${IN_DIR}"/residuals.txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalComparisons.py $IN_DIR $BIN_SIZE "scores_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_scores_"${LSB_JOBINDEX}".txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalResiduals.py $IN_DIR $BIN_SIZE "residuals_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_residuals_"${LSB_JOBINDEX}".txt"
 
