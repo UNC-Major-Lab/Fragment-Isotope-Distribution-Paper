@@ -10,7 +10,7 @@ data <- read.table(infile,header=F,sep="\t")
 
 p <- ggplot(data=data, aes(x=V2, y=V4, group=V3, fill=factor(V3)))
 
-pdf(filename=outfile, width=600, height=400, units="px")
+pdf(outfile, width=6, height=6)
 
 p 
 + geom_bar(stat='identity', width=.01) 
