@@ -167,11 +167,11 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
     double frag_mass = fragment.getAverageWeight();
 
     std::vector<UInt> isolated_precursor_isotopes(1,0);
-    for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
+    /*for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
         isolated_precursor_isotopes.push_back(i);
         std::string label = "0-"+std::to_string(i);
         testTheoreticalIsolation(precursor, fragment, isolated_precursor_isotopes, pep_mass, frag_mass, num_s_prec, num_s_frag, i+1, label);
-    }
+    }*/
 
     for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
         isolated_precursor_isotopes.clear();
