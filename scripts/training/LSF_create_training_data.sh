@@ -11,7 +11,7 @@ module load matlab
 
 source ../config.sh
 
-set S = ${LSB_JOBINDEX}-1
+set S = `expr $LSB_JOBINDEX - 1`
 
 set OUT_DIR = ${SULFUR_OUT_DIR}"/S${S}"
 
