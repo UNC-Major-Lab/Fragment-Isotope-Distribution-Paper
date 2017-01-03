@@ -1,10 +1,9 @@
 #!/bin/csh
 #BSUB -L /bin/csh
-#BSUB -J LSF_create_training_data.sh[1-16]
+#BSUB -J LSF_create_training_data.sh[1-11]
 #BSUB -q week
 #BSUB -o /netscr/dennisg/Isotopes.log.%J
 #BSUB -n 1
-#BSUB -M 20
 
 module load gcc/4.8.1
 module load r/3.2.2
@@ -12,7 +11,7 @@ module load matlab
 
 source ../config.sh
 
-set S = $LSB_JOBINDEX
+set S = ${LSB_JOBINDEX}-1
 
 set OUT_DIR = ${SULFUR_OUT_DIR}"/S${S}"
 
