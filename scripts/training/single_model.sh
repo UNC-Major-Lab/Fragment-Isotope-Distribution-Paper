@@ -18,4 +18,4 @@ set out_models = ${OUT_DIR}/spline/model/Precursor${precursor}.xml
 set param = "IsotopeSpline('"${max_mass}"','"${S}"','"${precursor}"','"${file}"','"${out_res_hist}"','"${out_scatter}"','"${out_res}"','"${out_gof}"','"${out_models}"');quit force"
 
 cd ${SOURCE_DIR}/scripts/training/
-#matlab -nodisplay -nosplash -nodesktop -r $param
+matlab -nodisplay -nosplash -nodesktop -r $param
