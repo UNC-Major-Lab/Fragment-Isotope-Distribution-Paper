@@ -30,7 +30,7 @@ mkdir ${OUT_DIR}/spline/hist/
 mkdir ${OUT_DIR}/spline/res/
 mkdir ${OUT_DIR}/spline/scatter/
 
-${BUILD_DIR}/GenerateTrainingData ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMPLES $S $MAX_ISOTOPE
+${BUILD_DIR}/GenerateTrainingData 0 ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMPLES $S $MAX_ISOTOPE
 
 chmod 775 ${OUT_DIR}/data/*
 

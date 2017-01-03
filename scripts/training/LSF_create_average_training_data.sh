@@ -29,7 +29,7 @@ mkdir ${OUT_DIR}/spline/hist/
 mkdir ${OUT_DIR}/spline/res/
 mkdir ${OUT_DIR}/spline/scatter/
 
-${BUILD_DIR}/GenerateTrainingData ${AVERAGINE_OUT_DIR}/sulfur_distribution.tab ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $MIN_PERCENTAGE_AVERAGINE $MAX_ISOTOPE
+${BUILD_DIR}/GenerateTrainingData 1 ${AVERAGINE_OUT_DIR}/sulfur_distribution.tab ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $MIN_PERCENTAGE_AVERAGINE $MAX_ISOTOPE
 
 chmod 775 ${OUT_DIR}/data/*
 
