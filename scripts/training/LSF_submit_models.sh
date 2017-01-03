@@ -5,7 +5,7 @@ source ../config.sh
 set S = $1
 set max_mass = $2
 
-set OUT_DIR = ${SULFUR_OUT_DIR}"/S${S}}"
+set OUT_DIR = ${SULFUR_OUT_DIR}"/S${S}"
 
 foreach file (${OUT_DIR}/data/*)
     if (-d $file) then
