@@ -8,8 +8,11 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	M = dlmread(infile,'\t',1,0);
 	
 	order = 4;
-	% Create spline using least squares approximation
+	% Create spline using least squares approximation in the B-spline format (better for creation)
 	cs = spap2(order, order, M(:,2), M(:,1));
+	% Convert from B-spline to piecewise polynomial (pp) format. (better for evaluation)
+	cs_pp = fn2fm(cs,'pp');
+	cs_pp.breaks
 	
 	% Create a figure of the scatter plot and spline
 	xlabel('precursor mass');
