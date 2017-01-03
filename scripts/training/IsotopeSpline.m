@@ -7,11 +7,19 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	% M(:,2) = precursor masses = X-axis
 	M = dlmread(infile,'\t',1,0);
 	
-	% Create a figure of the scatter plot
+	order = 4;
+	% Create spline using least squares approximation
+	cs = spap2(order, order, M(:,2), M(:,1));
+	
+	% Create a figure of the scatter plot and spline
 	xlabel('precursor mass');
 	ylabel('probability');
 	title(sprintf(strcat('Precursor isotope: ',precursor_isotope, '\n Sulfurs in peptide: ', S)))
 	scatter(M(:,2),M(:,1))
+	hold on;
+	fnplt(cs, 2, 'g');
+	hold off;
+	
 	[pathstr,name,ext] = fileparts(outfile_scatter);
 	print(outfile_scatter,strcat('-d', ext(2:end)));
 
