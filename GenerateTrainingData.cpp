@@ -23,8 +23,8 @@ std::uniform_int_distribution<> dis_S(0, AMINO_ACIDS_SULFUR.length()-1);
 
 int max_depth;
 
-void write_distribution(OpenMS::AASequence &p, std::ofstream* outfiles) {
-
+void write_distribution(OpenMS::AASequence &p, std::ofstream* outfiles)
+{
     OpenMS::EmpiricalFormula precursor_ef = p.getFormula();
     OpenMS::IsotopeDistribution precursor_id = precursor_ef.getIsotopeDistribution(30);
 
@@ -35,27 +35,31 @@ void write_distribution(OpenMS::AASequence &p, std::ofstream* outfiles) {
     }
 }
 
-OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_sulfurs) {
+OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_sulfurs)
+{
     OpenMS::AASequence random_peptide;
 
     // for insertion of sulfur containing amino acids
-    for (int i = 0; i < num_sulfurs; ++i) {
+    for (int i = 0; i < num_sulfurs; ++i)
+    {
         random_peptide += residueDB->getResidue(AMINO_ACIDS_SULFUR[dis_S(gen)]);
     }
 
     // random amino acid insertion (non Sulfur and Selenium amino acids)
-    for (int aa_index = 0; aa_index < peptide_length; ++aa_index) {
+    for (int aa_index = 0; aa_index < peptide_length; ++aa_index)
+    {
         random_peptide += residueDB->getResidue(AMINO_ACIDS[dis_AA(gen)]);
     }
 
     return random_peptide;
 }
 
-void sample_isotopic_distributions(std::string base_path, float max_mass, int num_samples, int num_sulfurs, bool append) {
-
+void sample_isotopic_distributions(std::string base_path, float max_mass, int num_samples, int num_sulfurs, bool append)
+{
     // create all output files and write header to each
     std::ofstream* outfiles = new std::ofstream[max_depth];
-    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope) {
+    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope)
+    {
         std::string filename = "Precursor" + std::to_string(precursor_isotope) + ".tab";
 
         if (append)
@@ -76,20 +80,22 @@ void sample_isotopic_distributions(std::string base_path, float max_mass, int nu
 
     int max_length = max_mass/100;
 
-    for (int peptide_length = 0; peptide_length <= max_length; ++peptide_length) {
-
-        for (int sample = 0; sample < num_samples; ++sample) {
-
+    for (int peptide_length = 0; peptide_length <= max_length; ++peptide_length)
+    {
+        for (int sample = 0; sample < num_samples; ++sample)
+        {
             OpenMS::AASequence random_sequence = create_random_peptide_sequence(peptide_length, num_sulfurs);
 
-            if (random_sequence.size() > 0 && random_sequence.getMonoWeight() <= max_mass) {
+            if (random_sequence.size() > 0 && random_sequence.getMonoWeight() <= max_mass)
+            {
                 write_distribution(random_sequence, outfiles);
             }
         }
     }
 
     // close all output files
-    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope) {
+    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope)
+    {
         outfiles[precursor_isotope].close();
     }
     delete[] outfiles;
@@ -104,8 +110,12 @@ void sample_average_isotopic_distribution(std::string distribution_path, std::st
     int S, CS, count, i=0;
     while (sulfur_dist_in >> input)
     {
-        if (i == 0) S = atoi(input.c_str());
-        else {
+        if (i == 0)
+        {
+            S = atoi(input.c_str());
+        }
+        else
+        {
             count = atoi(input.c_str());
             sulfurs2count[S] = count;
         }
@@ -122,7 +132,8 @@ void sample_average_isotopic_distribution(std::string distribution_path, std::st
     for (auto itr : sulfurs2count)
     {
         double percentage = (double) itr.second / max_count;
-        if (percentage >= min_percentage) {
+        if (percentage >= min_percentage)
+        {
             int num_samples = std::floor(percentage / min_percentage);
             sample_isotopic_distributions(base_path, max_mass, num_samples, itr.first, append);
             append = true;
@@ -150,7 +161,8 @@ void usage()
 }
 
 
-int main(int argc, const char ** argv) {
+int main(int argc, const char ** argv)
+{
     if (argc != 7)
     {
         usage();
