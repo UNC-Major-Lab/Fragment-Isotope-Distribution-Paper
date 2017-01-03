@@ -4,22 +4,22 @@ cmake_minimum_required(VERSION 2.8.3)
 
 ## list all your executables here (a corresponding .cpp file should exist, e.g. Main.cpp)
 set(my_executables
-        #PeptideFragmentSampler
+        GenerateTrainingData
         CompareToTheoretical
         #DistributionCompare
         #CompareToTargeted
-        #GetSulfurDistribution
+        GetSulfurDistribution
         #SpeedTest
         )
 
 ## list all classes here, which are required by your executables
 ## (all these classes will be linked into a library)
 set(my_sources
-        #PeptideFragmentSampler.cpp
+        GenerateTrainingData.cpp
         CompareToTheoretical.cpp
         #DistributionCompare.cpp
         #CompareToTargeted.cpp
-        #GetSulfurDistribution.cpp
+        GetSulfurDistribution.cpp
         #SpeedTest.cpp
         #Stats.h
         #Ion.h
@@ -31,6 +31,9 @@ find_package(OpenMS)
 ## if the above fails you can try calling cmake with -D OpenMS_DIR=/path/to/OpenMS/
 ## or modify the find_package() call accordingly
 ##find_package(OpenMS PATHS "/Users/dennisg/OpenMS/OpenMS/")
+
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-extensions")
 
 # check whether the OpenMS package was found
 if (OpenMS_FOUND)

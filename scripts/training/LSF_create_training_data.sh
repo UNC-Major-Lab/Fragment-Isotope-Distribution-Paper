@@ -12,41 +12,9 @@ module load matlab
 
 source ../config.sh
 
-echo $LSB_JOBINDEX
+set S = $LSB_JOBINDEX
 
-set index = $LSB_JOBINDEX
-set CS = 0
-set S = 0
-set CSe = 0
-set Se = 0
-
-if ($LSB_JOBINDEX <= 1) then
-
-else if ($LSB_JOBINDEX <= 2) then
-    set S = 1
-else if ($LSB_JOBINDEX <= 4) then
-    set index = `expr $LSB_JOBINDEX - 2`
-    set CS = `expr $index - 1`
-    set S = `expr 3 - $index`
-else if ($LSB_JOBINDEX <= 6) then
-    set index = `expr $LSB_JOBINDEX - 4`
-    set CS = `expr $index - 1`
-    set S = `expr 4 - $index`
-else if ($LSB_JOBINDEX <= 9) then
-    set index = `expr $LSB_JOBINDEX - 6`
-    set CS = `expr $index - 1`
-    set S = `expr 5 - $index`
-else if ($LSB_JOBINDEX <= 12) then
-    set index = `expr $LSB_JOBINDEX - 9`
-    set CS = `expr $index - 1`
-    set S = `expr 6 - $index`
-else if ($LSB_JOBINDEX <= 16) then
-    set index = `expr $LSB_JOBINDEX - 12`
-    set CS = `expr $index - 1`
-    set S = `expr 7 - $index`
-endif
-
-set OUT_DIR = ${SULFUR_OUT_DIR}"/S${S}_CS${CS}_Se${Se}_CSe${CSe}"
+set OUT_DIR = ${SULFUR_OUT_DIR}"/S${S}"
 
 mkdir -p $OUT_DIR
 
@@ -57,15 +25,14 @@ mkdir ${OUT_DIR}/data/
 rm -r ${OUT_DIR}/spline/
 
 mkdir ${OUT_DIR}/spline/
-mkdir ${OUT_DIR}/spline/3D/
 mkdir ${OUT_DIR}/spline/model/
 mkdir ${OUT_DIR}/spline/gof/
 mkdir ${OUT_DIR}/spline/hist/
-mkdir ${OUT_DIR}/spline/res3D/
+mkdir ${OUT_DIR}/spline/res/
 mkdir ${OUT_DIR}/spline/scatter/
 
-${BUILD_DIR}/PeptideFragmentSampler ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMPLES $S $CS $Se $CSe $MAX_ISOTOPE
+${BUILD_DIR}/GenerateTrainingData ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMPLES $S $MAX_ISOTOPE
 
 chmod 775 ${OUT_DIR}/data/*
 
-${SOURCE_DIR}/scripts/training/LSF_submit_models.sh $S $CS $Se $CSe $MAX_SAMPLED_MASS
+${SOURCE_DIR}/scripts/training/LSF_submit_models.sh $S $MAX_SAMPLED_MASS
