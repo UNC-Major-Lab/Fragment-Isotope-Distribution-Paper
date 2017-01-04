@@ -10,7 +10,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	
 	order = 4;
 	
-	breakSteps = 250;	% The amount of daltons in between each spline break.
+	breakSteps = 1000;	% The amount of daltons in between each spline break.
 						% We're using the same value for both X and Y.
 	min_mass = 50;		% The lower bound of our spline breaks (in daltons)
 	
