@@ -41,7 +41,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	% Write the GOF statistics with model description to a file
 	fileID = fopen(outfile_gof,'w');
 	fprintf(fileID, '%s', strcat([S, ' ', precursor_isotope, ' ']));
-	fprintf(fileID, '%3.5f %3.5f %3.5f\n', [RMSD meanD Rsq]);
+	fprintf(fileID, ' %3.5f %3.5f %3.5f\n', [RMSD meanD Rsq]);
 	fclose(fileID);
 	
 	% Create histogram of the residuals. Ideally this will be normally distributed and centered at 0.
@@ -63,7 +63,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	[pathstr,name,ext] = fileparts(outfile_res);
 	print(outfile_res,strcat('-d', ext(2:end)));
 	
-	%writeModelXML(outfile_model, sp_pp, S, precursor_isotope);	
+	writeModelXML(outfile_model, sp_pp, S, precursor_isotope);	
 	
 	exit;
 end
@@ -114,7 +114,7 @@ function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	% Iterate through the coefficients and store them in the 1-D array.
 	ii = 0;
 	for i = 1:sp_pp.pieces
-        for j = 1:sp_pp.order
+        for j = sp_pp.order:1
 			ii = ii+1;
             coefs_out(ii) = sp_pp.coefs(i, j);          
         end
