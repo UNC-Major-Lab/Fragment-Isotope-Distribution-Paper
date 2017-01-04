@@ -107,7 +107,7 @@ function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	fprintf(fileID, strcat([' PrecursorIsotope=''',precursor_isotope,''' Order=''',num2str(sp_pp.order(1)),'''>\n']));
 
 	% Write the <massBreaks> tag and its attributes
-	writeBase64BinaryArrayXML(fileID, 'massBreaks', '32', 'little', num2str(sp_pp.pieces + 1), convertAndEncode(sp_pp.breaks));
+	writeBase64BinaryArrayXML(fileID, 'knots', '32', 'little', num2str(sp_pp.pieces + 1), convertAndEncode(sp_pp.breaks));
 
 	% We initialize the 1-D array that will stores the coefficients to its maximum possible size.
 	% The maximum size is the number of patches * the number of coefficients per patch.
