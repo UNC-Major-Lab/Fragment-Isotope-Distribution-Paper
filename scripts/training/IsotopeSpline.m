@@ -14,8 +14,10 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 						% We're using the same value for both X and Y.
 	min_mass = 50;		% The lower bound of our spline breaks (in daltons)
 	
-	min_knot = double(idivide(min(M(:,2))-min_mass,int32(breakSteps),'floor')*breakSteps+min_mass); % minimum observed fragment mass rounded
-	max_knot = double(idivide(max(M(:,2)),int32(breakSteps),'ceil')*breakSteps+min_mass); % maximum observed fragment mass rounded
+	%min_knot = double(idivide(min(M(:,2))-min_mass,int32(breakSteps),'floor')*breakSteps+min_mass); % minimum observed fragment mass rounded
+	%max_knot = double(idivide(max(M(:,2)),int32(breakSteps),'ceil')*breakSteps+min_mass); % maximum observed fragment mass rounded
+	min_knot = min(M(:,2));
+	max_knot = max(M(:,2));
 	% Create the knots in the proper format
 	knots = augknt([min_knot, min_knot:breakSteps:max_knot, max_knot], order);
 	% Create spline using least squares approximation in the B-spline format (better for creation)
