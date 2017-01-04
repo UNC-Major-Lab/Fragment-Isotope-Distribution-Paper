@@ -104,7 +104,7 @@ function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 		fprintf(fileID, strcat([' S=''', S, '''']));
 	end
 	% Write remaining attributes
-	fprintf(fileID, strcat([' PrecursorIsotope=''',precursor_isotope,''' Order=''',num2str(sp_pp.order(1)),'''>\n']));
+	fprintf(fileID, strcat([' isotope=''',precursor_isotope,''' order=''',num2str(sp_pp.order(1)),'''>\n']));
 
 	% Write the <massBreaks> tag and its attributes
 	writeBase64BinaryArrayXML(fileID, 'knots', '64', 'little', num2str(sp_pp.pieces + 1), convertAndEncode(sp_pp.breaks));
