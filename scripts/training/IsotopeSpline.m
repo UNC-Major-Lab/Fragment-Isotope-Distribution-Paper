@@ -77,7 +77,7 @@ function [RMSD meanD Rsq residuals] = goodnessOfFitStatistics(M, sp_pp)
 	% Calculate residual for each data point.
 	residuals = zeros(1,length(M(:,1)));
 	for i = 1:length(M(:,1))
-		residuals(i) = M(i,1) - fnval( sp_pp, M(i,2) ); % M(i,1) is our observed value, and fnval() calculates are predicted value
+		residuals(i) = M(i,1) - fnval( sp_pp, M(i,2) ); % M(i,1) is our observed value, and fnval() calculates the predicted value
 	end
 
 	% Calculate the GOF statisitics
@@ -114,10 +114,10 @@ function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	% Iterate through the coefficients and store them in the 1-D array.
 	ii = 0;
 	for i = 1:sp_pp.pieces
-        for j = sp_pp.order:1
+		for j = sp_pp.order:-1:1
 			ii = ii+1;
-            coefs_out(ii) = sp_pp.coefs(i, j);          
-        end
+			coefs_out(ii) = sp_pp.coefs(i, j);          
+		end
 	end
 
 	% Write the <coefficients> tag and its attributes
