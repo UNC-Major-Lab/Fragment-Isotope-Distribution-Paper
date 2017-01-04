@@ -19,7 +19,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	% Create the knots in the proper format
 	knots = augknt([min_knot, min_knot:breakSteps:max_knot, max_knot], order);
 	% Create spline using least squares approximation in the B-spline format (better for creation)
-	sp = spap2(order, M(:,2), M(:,1));
+	sp = spap2(knots, order, M(:,2), M(:,1));
 	% Convert from B-spline to piecewise polynomial (pp) format. (better for evaluation)
 	sp_pp = fn2fm(sp,'pp');
 	sp_pp.breaks
