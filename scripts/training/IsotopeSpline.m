@@ -7,7 +7,17 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	% M(:,2) = precursor masses = X-axis
 	M = dlmread(infile,'\t',1,0);
 	
+	
 	order = 4;
+	
+	breakSteps = 250;	% The amount of daltons in between each spline break.
+						% We're using the same value for both X and Y.
+	min_mass = 50;		% The lower bound of our spline breaks (in daltons)
+	
+	min_knot = double(idivide(min(M(:,2))-min_mass,int32(breakSteps),'floor')*breakSteps+min_mass); % minimum observed fragment mass rounded
+	max_knot = double(idivide(max(M(:,2)),int32(breakSteps),'ceil')*breakSteps+min_mass); % maximum observed fragment mass rounded
+	% Create the knots in the proper format
+	knots = augknt([min_knot, min_knot:breakSteps:max_knot, max_knot], order);
 	% Create spline using least squares approximation in the B-spline format (better for creation)
 	sp = spap2(order, M(:,2), M(:,1));
 	% Convert from B-spline to piecewise polynomial (pp) format. (better for evaluation)
@@ -96,57 +106,19 @@ function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	fprintf(fileID, strcat([' PrecursorIsotope=''',precursor_isotope,''' Order=''',num2str(sp_pp.order(1)),'''>\n']));
 
 	% Write the <massBreaks> tag and its attributes
-	writeBase64BinaryArrayXML(fileID, 'massBreaks', '32', 'little', num2str(length(sp_pp.breaks)), convertAndEncode(sp_pp.breaks));
+	writeBase64BinaryArrayXML(fileID, 'massBreaks', '32', 'little', num2str(sp_pp.pieces + 1), convertAndEncode(sp_pp.breaks));
 
-	% The format that the coefficients are stored in the tensor product spline is super confusing to me.
-	% Reshape them to make them easier to iterate through.
-	coefs = reshape(sp_pp.coefs, [1, sp_pp.pieces(1), sp_pp.order(1), sp_pp.pieces(2), sp_pp.order(2)]);
-	
-	% We want to store the coefficients in a 1-D array before encoding them into Base64
-	% We're going to store all the coefficients for a single patch, 
-	% followed by the coefficients for next patch, and then the next patch, etc.
-	% The coefficients c(1:16) for a particular patch, (assuming the order of the splines is 4 in both x and y)
-	% are written in an order such that the equation to evaluate the value for a patch is: 
-	% value = c(1)*x^3*y^3 + c(2)*x^3*y^2 + c(3)*x^3*y + c(4)*x^3
-	% 		+ c(5)*x^2*y^3 + c(6)*x^2*y^2 + c(7)*x^2*y + c(8)*x^2
-	% 		+ c(9)*x*y^3   + c(10)*x*y^2  + c(11)*x*y  + c(12)*x 
-	% 		+ c(13)*y^3    + c(14)*y^2    + c(15)*y    + c(16)
-	%      
-	% Where x = fragment mass - patch's corresponding fragment mass break
-	%           
-	%      e.g. if a patch is valid for fragment masses = 550-800
-	%           and your fragment mass is 650, then x = 650-550 = 100
-	%
-	%   and y = precursor mass - patch's corresponding precursor mass break
-	%
-	%      e.g. if a patch is valid for precursor masses = 550-800
-	%           and your precursor mass is 650, then y = 650-550 = 100
-	%
-	%
-	%
-	% The tensor product spline, sp_pp, contains a full rectangular grid of patches.
-	% Our data, however, only covers a triangle because the fragment mass must be smaller than the precursor mass.
-	% This means there are many patches (~50%) that are invalid for our model and we won't write them to disk.
-	% 
 	% We initialize the 1-D array that will stores the coefficients to its maximum possible size.
 	% The maximum size is the number of patches * the number of coefficients per patch.
-	coefs_out = zeros(1, sp_pp.pieces(1) * sp_pp.pieces(2) * sp_pp.order(1) * sp_pp.order(2));
+	coefs_out = zeros(1, sp_pp.pieces * sp_pp.order );
 
 	% Iterate through the coefficients and store them in the 1-D array.
 	ii = 0;
-	for i = 1:sp_pp.pieces(2)
-	    for j = 1:sp_pp.pieces(1)
-			% The patch's fragment mass must be <= precursor mass,
-			% otherwise the patch is invalid and we don't write it to disk.
-	        if sp_pp.breaks{1}(j) <= sp_pp.breaks{2}(i)
-	            for c1 = 1:sp_pp.order(1)
-	                for c2 = 1:sp_pp.order(2)
-						ii = ii+1;
-	                    coefs_out(ii) = coefs(1, j, c1, i, c2);          
-	                end
-	            end
-	        end
-	    end
+	for i = 1:sp_pp.pieces
+        for j = 1:sp_pp.order
+			ii = ii+1;
+            coefs_out(ii) = sp_pp.coefs(i, j);          
+        end
 	end
 
 	% Write the <coefficients> tag and its attributes
