@@ -61,7 +61,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	ylabel('residual');
 	title(sprintf(strcat('Precursor isotope: ',precursor_isotope,' Sulfurs in fragment: ', S)))
 	[pathstr,name,ext] = fileparts(outfile_res);
-	print(outfile_res3D,strcat('-d', ext(2:end)));
+	print(outfile_res,strcat('-d', ext(2:end)));
 	
 	%writeModelXML(outfile_model, sp_pp, S, precursor_isotope);	
 	
