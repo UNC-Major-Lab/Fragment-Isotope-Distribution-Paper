@@ -116,7 +116,7 @@ function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	% Iterate through the coefficients and store them in the 1-D array.
 	ii = 0;
 	for i = 1:sp_pp.pieces
-		for j = 1:sp_pp.order
+		for j = sp_pp.order:-1:1
 			ii = ii+1;
 			coefs_out(ii) = sp_pp.coefs(i, j);          
 		end
