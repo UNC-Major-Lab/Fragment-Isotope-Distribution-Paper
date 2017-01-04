@@ -107,7 +107,7 @@ function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	fprintf(fileID, strcat([' PrecursorIsotope=''',precursor_isotope,''' Order=''',num2str(sp_pp.order(1)),'''>\n']));
 
 	% Write the <massBreaks> tag and its attributes
-	writeBase64BinaryArrayXML(fileID, 'knots', '32', 'little', num2str(sp_pp.pieces + 1), convertAndEncode(sp_pp.breaks));
+	writeBase64BinaryArrayXML(fileID, 'knots', '64', 'little', num2str(sp_pp.pieces + 1), convertAndEncode(sp_pp.breaks));
 
 	% We initialize the 1-D array that will stores the coefficients to its maximum possible size.
 	% The maximum size is the number of patches * the number of coefficients per patch.
@@ -123,7 +123,7 @@ function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	end
 
 	% Write the <coefficients> tag and its attributes
-	writeBase64BinaryArrayXML(fileID, 'coefficients', '32', 'little', num2str(ii), convertAndEncode(coefs_out(1:ii)));
+	writeBase64BinaryArrayXML(fileID, 'coefficients', '64', 'little', num2str(ii), convertAndEncode(coefs_out(1:ii)));
 
 	% Close the <model> tag
 	fprintf(fileID, '\t</model>\n'); 
@@ -148,10 +148,6 @@ end
 
 function output = convertAndEncode(input)
 	[str,maxsize,endian] = computer;
-
-	% After testing, double precision was clearly unnecessary.
-	% Convert to single precision to half the memory and disk space requirement.
-	input = single(input); 
 	
 	% Executive decision to store the data as little-endian
 	if endian == 'R'
