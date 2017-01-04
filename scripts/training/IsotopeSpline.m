@@ -22,7 +22,6 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	sp = spap2(knots, order, M(:,2), M(:,1));
 	% Convert from B-spline to piecewise polynomial (pp) format. (better for evaluation)
 	sp_pp = fn2fm(sp,'pp');
-	sp_pp.breaks
 	
 	% Create a figure of the scatter plot and spline
 	xlabel('precursor mass');
@@ -30,7 +29,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	title(sprintf(strcat('Precursor isotope: ',precursor_isotope, '\n Sulfurs in peptide: ', S)))
 	scatter(M(:,2),M(:,1))
 	hold on;
-	fnplt(cs, 2, 'g');
+	fnplt(sp, 2, 'g');
 	hold off;
 	
 	[pathstr,name,ext] = fileparts(outfile_scatter);
