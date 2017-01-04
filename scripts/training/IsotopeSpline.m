@@ -1,7 +1,7 @@
 % Describe what it does
 % Describe the input
 % Describe the output
-function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_res_hist, outfile_scatter, outfile_res3D, outfile_gof, outfile_model)
+function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_res_hist, outfile_scatter, outfile_res, outfile_gof, outfile_model)
 	% For orientation:
 	% M(:,1) = probabilities = Y-axis
 	% M(:,2) = precursor masses = X-axis
@@ -9,10 +9,10 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	
 	order = 4;
 	% Create spline using least squares approximation in the B-spline format (better for creation)
-	cs = spap2(order, order, M(:,2), M(:,1));
+	sp = spap2(order, M(:,2), M(:,1));
 	% Convert from B-spline to piecewise polynomial (pp) format. (better for evaluation)
-	cs_pp = fn2fm(cs,'pp');
-	cs_pp.breaks
+	sp_pp = fn2fm(sp,'pp');
+	sp_pp.breaks
 	
 	% Create a figure of the scatter plot and spline
 	xlabel('precursor mass');
@@ -25,7 +25,37 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	
 	[pathstr,name,ext] = fileparts(outfile_scatter);
 	print(outfile_scatter,strcat('-d', ext(2:end)));
+	
+	% Calculate GOF statistics
+	[RMSD meanD Rsq residuals] = goodnessOfFitStatistics(M, sp_pp);
 
+	% Write the GOF statistics with model description to a file
+	fileID = fopen(outfile_gof,'w');
+	fprintf(fileID, '%s', strcat([S, ' ', precursor_isotope, ' ']));
+	fprintf(fileID, '%3.5f %3.5f %3.5f\n', [RMSD meanD Rsq]);
+	fclose(fileID);
+	
+	% Create histogram of the residuals. Ideally this will be normally distributed and centered at 0.
+	figure();
+	hist(residuals, 50);
+	xlabel('residual');
+	title(sprintf(strcat('Precursor isotope: ',precursor_isotope, '\n Sulfurs in fragment: ', S)))
+	[pathstr,name,ext] = fileparts(outfile_res_hist);
+	print(outfile_res_hist,strcat('-d', ext(2:end)));
+	
+	% Create a scatterplot of residuals. This will show us any hot spots of high error.
+	% The PDF takes up a lot of space but looks better.
+	% If this isn't for publication, then output as a non-vector graphics format
+	figure();
+	scatter(M(:,2), residuals, 1, residuals)
+	xlabel('precursor mass');
+	ylabel('residual');
+	title(sprintf(strcat('Precursor isotope: ',precursor_isotope,' Sulfurs in fragment: ', S)))
+	[pathstr,name,ext] = fileparts(outfile_res);
+	print(outfile_res3D,strcat('-d', ext(2:end)));
+	
+	%writeModelXML(outfile_model, sp_pp, S, precursor_isotope);	
+	
 	exit;
 end
 
@@ -38,7 +68,7 @@ function [RMSD meanD Rsq residuals] = goodnessOfFitStatistics(M, sp_pp)
 	% Calculate residual for each data point.
 	residuals = zeros(1,length(M(:,1)));
 	for i = 1:length(M(:,1))
-		residuals(i) = M(i,1) - fnval( sp_pp, {M(i,2),M(i,3)} ); % M(i,1) is our observed value, and fnval() calculates are predicted value
+		residuals(i) = M(i,1) - fnval( sp_pp, M(i,2) ); % M(i,1) is our observed value, and fnval() calculates are predicted value
 	end
 
 	% Calculate the GOF statisitics
@@ -52,24 +82,21 @@ end
 
 % Takes a tensor-product spline model in pp form and writes a partial XML file to disk.
 % This will write the information for a single <model> tag.
-function writeModelXML(outfile_path, sp_pp, S, CS, Se, CSe, precursor_isotope, fragment_isotope)
+function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	% Open our output file for writing
 	fileID = fopen(outfile_path,'w');
 
 	% Open the <model> tag
 	fprintf(fileID, '\t<model');
 	% Write composition attributes if this was a sulfur specific model
-  if S~='NA'
-		fprintf(fileID, strcat([' S=''', S, ''' CS=''', CS, ''' Se=''', Se, ''' CSe=''', CSe, '''']));
+  	if S~='NA'
+		fprintf(fileID, strcat([' S=''', S, '''']));
 	end
 	% Write remaining attributes
-	fprintf(fileID, strcat([' PrecursorIsotope=''',precursor_isotope,''' FragmentIsotope=''',fragment_isotope,''' FragmentOrder=''',num2str(sp_pp.order(1)),''' PrecursorOrder=''',num2str(sp_pp.order(1)),'''>\n']));
+	fprintf(fileID, strcat([' PrecursorIsotope=''',precursor_isotope,''' Order=''',num2str(sp_pp.order(1)),'''>\n']));
 
-	% Write the <fragmentMassBreaks> tag and its attributes
-	writeBase64BinaryArrayXML(fileID, 'fragmentMassBreaks', '32', 'little', num2str(length(sp_pp.breaks{1})), convertAndEncode(sp_pp.breaks{1}));
-
-	% Write the <precursorMassBreaks> tag and its attributes
-	writeBase64BinaryArrayXML(fileID, 'precursorMassBreaks', '32', 'little', num2str(length(sp_pp.breaks{2})), convertAndEncode(sp_pp.breaks{2}));
+	% Write the <massBreaks> tag and its attributes
+	writeBase64BinaryArrayXML(fileID, 'massBreaks', '32', 'little', num2str(length(sp_pp.breaks)), convertAndEncode(sp_pp.breaks));
 
 	% The format that the coefficients are stored in the tensor product spline is super confusing to me.
 	% Reshape them to make them easier to iterate through.
