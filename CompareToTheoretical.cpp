@@ -180,23 +180,63 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
     }
 }
 
-void testTheoreticalPeptide(AASequence& pep)
+void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
+{
+    UInt depth = 20;
+    IsotopeDistribution exact, averagine(depth), spline(depth);
+
+    double average_weight = p.getAverageWeight();
+    exact = p.getIsotopeDistribution(depth);
+    averagine.estimateFromPeptideWeight(average_weight);
+    spline.estimateFromPeptideWeightFast(average_weight);
+
+    std::vector<double> exact_prob =  fillProbabilities(exact, depth);
+    std::vector<double> averagine_prob =  fillProbabilities(averagine, depth);
+    std::vector<double> spline_prob =  fillProbabilities(spline, depth);
+
+    std::vector<double> scores;
+    scores = calculateScores(exact_prob, averagine_prob);
+    std::cout << scores[1] << "\t" << average_weight << "\t" << "exact vs averagine" << std::endl;
+    scores = calculateScores(exact_prob, spline_prob);
+    std::cout << scores[1] << "\t" << average_weight << "\t" << "exact vs spline" << std::endl;
+    scores = calculateScores(averagine_prob, spline_prob);
+    std::cout << scores[1] << "\t" << average_weight << "\t" << "averagine vs spline" << std::endl;
+
+   /*
+    scores = calculateResiduals(exact_prob, averagine_prob);
+    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs averagine" << std::endl;
+    scores = calculateResiduals(exact_prob, spline_prob);
+    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs spline" << std::endl;
+    scores = calculateResiduals(averagine_prob, spline_prob);
+    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "averagine vs spline" << std::endl;
+    */
+}
+
+void testTheoreticalPeptide(AASequence& pep, bool doFragments)
 {
     EmpiricalFormula precursor = pep.getFormula();
     EmpiricalFormula fragment;
-    for (Size i = 1; i < pep.size(); i++)
+
+    if (doFragments)
     {
-        AASequence frag = pep.getPrefix(i);
+        for (Size i = 1; i < pep.size(); i++)
+        {
+            AASequence frag = pep.getPrefix(i);
 
-        fragment = frag.getFormula(Residue::ResidueType::BIon);
-        testTheoreticalIon(pep, frag, precursor, fragment);
+            fragment = frag.getFormula(Residue::ResidueType::BIon);
+            testTheoreticalIon(pep, frag, precursor, fragment);
 
-        fragment = pep.getPrefix(i).getFormula(Residue::ResidueType::YIon);
-        testTheoreticalIon(pep, frag, precursor, fragment);
+            fragment = pep.getPrefix(i).getFormula(Residue::ResidueType::YIon);
+            testTheoreticalIon(pep, frag, precursor, fragment);
+        }
+    }
+    else
+    {
+        testTheoreticalPeptideDistribution(precursor);
     }
 }
 
-void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& digestor)
+void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& digestor, bool doFragments)
 {
     static Size MIN_PEPTIDE_LENGTH = 5;
     static Size MAX_PEPTIDE_LENGTH = 80;
@@ -209,12 +249,12 @@ void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& 
             && isValidPeptide(peptides[j]) && uniquePeptides.find(peptides[j]) == uniquePeptides.end())
         {
             uniquePeptides.insert(peptides[j]);
-    		testTheoreticalPeptide(peptides[j]);
+    		testTheoreticalPeptide(peptides[j], doFragments);
         }
     }
 }
 
-void testTheoreticalPeptides(std::string fasta_path, int job_id, int num_jobs)
+void testTheoreticalPeptides(std::string fasta_path, int job_id, int num_jobs, bool doFragments)
 {
     std::vector<FASTAFile::FASTAEntry> proteins;
     FASTAFile().load(fasta_path, proteins);
@@ -223,15 +263,15 @@ void testTheoreticalPeptides(std::string fasta_path, int job_id, int num_jobs)
 
     for (Size i = job_id; i < proteins.size(); i+=num_jobs)
     {
-        testTheoreticalProtein(proteins[i], digestor);
+        testTheoreticalProtein(proteins[i], digestor, doFragments);
     }
 }
 
 int main(int argc, char * argv[])
 {
-    out_residual.open(argv[4]);
+    out_residual.open(argv[5]);
 
-    testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]));
+    testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]), atoi(argv[4]));
 
     out_residual.close();
 
