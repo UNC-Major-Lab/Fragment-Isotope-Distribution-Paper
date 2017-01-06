@@ -40,7 +40,7 @@ private:
 
     UInt MIN_PEPTIDE_LENGTH;
     UInt MAX_PEPTIDE_LENGTH;
-    float MAX_MASS:
+    float MAX_MASS;
 };
 
 
