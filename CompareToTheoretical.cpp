@@ -196,11 +196,11 @@ void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
 
     std::vector<double> scores;
     scores = calculateScores(exact_prob, averagine_prob);
-    std::cout << scores[2] << "\t" << average_weight << "\t" << "exact vs averagine" << std::endl;
+    std::cout << scores[1] << "\t" << average_weight << "\t" << "exact vs averagine" << std::endl;
     scores = calculateScores(exact_prob, spline_prob);
-    std::cout << scores[2] << "\t" << average_weight << "\t" << "exact vs spline" << std::endl;
+    std::cout << scores[1] << "\t" << average_weight << "\t" << "exact vs spline" << std::endl;
     scores = calculateScores(averagine_prob, spline_prob);
-    std::cout << scores[2] << "\t" << average_weight << "\t" << "averagine vs spline" << std::endl;
+    std::cout << scores[1] << "\t" << average_weight << "\t" << "averagine vs spline" << std::endl;
 
    /*
     scores = calculateResiduals(exact_prob, averagine_prob);
