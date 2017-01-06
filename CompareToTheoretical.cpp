@@ -187,7 +187,8 @@ void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
 
     double average_weight = p.getAverageWeight();
     exact = p.getIsotopeDistribution(depth);
-    averagine.estimateFromPeptideWeight(average_weight);
+    //averagine.estimateFromPeptideWeight(average_weight);
+    averagine.estimateFromWeightAndComp(average_weight, 4.86151, 7.68282, 1.3005, 1.56299, 0.047074, 0);
     spline.estimateFromPeptideWeightFast(average_weight);
 
     std::vector<double> exact_prob =  fillProbabilities(exact, depth);

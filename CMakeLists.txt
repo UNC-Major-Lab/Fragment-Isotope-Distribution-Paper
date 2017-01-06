@@ -8,7 +8,7 @@ set(my_executables
         CompareToTheoretical
         #DistributionCompare
         #CompareToTargeted
-        GetSulfurDistribution
+        CreateAveragineModel
         #SpeedTest
         )
 
@@ -19,7 +19,7 @@ set(my_sources
         CompareToTheoretical.cpp
         #DistributionCompare.cpp
         #CompareToTargeted.cpp
-        GetSulfurDistribution.cpp
+        CreateAveragineModel.cpp
         #SpeedTest.cpp
         #Stats.h
         #Ion.h
