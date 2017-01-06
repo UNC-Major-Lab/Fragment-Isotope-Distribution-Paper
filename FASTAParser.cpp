@@ -19,7 +19,7 @@ void FASTAParser::digestProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigesti
     digestor.digest(AASequence::fromString(protein.sequence), peptides);
     for (Size j = 0; j < peptides.size(); ++j)
     {
-        if (peptides[j].size() >= MIN_PEPTIDE_LENGTH && peptides[j].size() <= MAX_PEPTIDE_LENGTH
+        if (peptides[j].size() >= MIN_PEPTIDE_LENGTH && peptides[j].size() <= MAX_PEPTIDE_LENGTH && peptides[j].getAverageWeight() <= MAX_MASS
             && isValidPeptide(peptides[j]) && unique_peptides.find(peptides[j]) == unique_peptides.end())
         {
             unique_peptides.insert(peptides[j]);

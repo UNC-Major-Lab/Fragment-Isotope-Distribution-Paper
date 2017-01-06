@@ -116,11 +116,11 @@ void sample_isotopic_distributions(std::string base_path, float max_mass, int nu
 
 
 
-void sample_average_isotopic_distribution(std::string distribution_path, std::string base_path)
+void sample_average_isotopic_distribution(std::string distribution_path, float max_mass, std::string base_path)
 {
     std::ofstream* outfiles = openOutputFiles(base_path, false);
 
-    FASTAParser parser(distribution_path, 5, 100);
+    FASTAParser parser(distribution_path, max_mass, 5, 100);
     for (auto itr = parser.begin(); itr != parser.end(); ++itr)
     {
         write_distribution(*itr, outfiles);
@@ -178,7 +178,7 @@ int main(int argc, const char ** argv)
 
         max_depth = atoi(argv[6]) + 1;
 
-        sample_average_isotopic_distribution(dist_path, out_path);
+        sample_average_isotopic_distribution(dist_path, max_mass, out_path);
     }
 
     return 0;

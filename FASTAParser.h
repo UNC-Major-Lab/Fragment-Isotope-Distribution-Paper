@@ -18,8 +18,8 @@ class FASTAParser {
 
 public:
 
-    FASTAParser(std::string fasta_path, UInt min_peptide_length, UInt max_peptide_length) :
-            fasta_path(fasta_path), MIN_PEPTIDE_LENGTH(min_peptide_length), MAX_PEPTIDE_LENGTH(max_peptide_length)
+    FASTAParser(std::string fasta_path, float max_mass, UInt min_peptide_length, UInt max_peptide_length) :
+            fasta_path(fasta_path), MAX_MASS(max_mass), MIN_PEPTIDE_LENGTH(min_peptide_length), MAX_PEPTIDE_LENGTH(max_peptide_length)
     {
         digestFASTA();
     }
@@ -40,6 +40,7 @@ private:
 
     UInt MIN_PEPTIDE_LENGTH;
     UInt MAX_PEPTIDE_LENGTH;
+    float MAX_MASS:
 };
 
 
