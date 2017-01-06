@@ -24,10 +24,12 @@ set(my_sources
         #Stats.h
         #Ion.h
         #Ion.cpp
+        FASTAParser.cpp
+        FASTAParser.h
         )
 
 ## find OpenMS configuration and register target "OpenMS" (our library)
-find_package(OpenMS)
+find_package(OpenMS PATHS "/Users/dennisg/OpenMS/dev-OpenMS/")
 ## if the above fails you can try calling cmake with -D OpenMS_DIR=/path/to/OpenMS/
 ## or modify the find_package() call accordingly
 ##find_package(OpenMS PATHS "/Users/dennisg/OpenMS/OpenMS/")

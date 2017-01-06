@@ -11,6 +11,8 @@
 #include <OpenMS/CHEMISTRY/ResidueDB.h>
 #include <OpenMS/CHEMISTRY/ElementDB.h>
 
+#include "FASTAParser.h"
+
 static const OpenMS::ResidueDB* residueDB = OpenMS::ResidueDB::getInstance();
 
 static std::string AMINO_ACIDS = "ADEFGHIKLNPQRSTVWY";
@@ -23,7 +25,43 @@ std::uniform_int_distribution<> dis_S(0, AMINO_ACIDS_SULFUR.length()-1);
 
 int max_depth;
 
-void write_distribution(OpenMS::AASequence &p, std::ofstream* outfiles)
+std::ofstream* openOutputFiles(std::string base_path, bool append)
+{
+    // create all output files and write header to each
+    std::ofstream* outfiles = new std::ofstream[max_depth];
+    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope)
+    {
+        std::string filename = "Precursor" + std::to_string(precursor_isotope) + ".tab";
+
+        if (append)
+        {
+            outfiles[precursor_isotope].open(base_path + filename, std::ofstream::out | std::ofstream::app);
+        }
+        else
+        {
+            outfiles[precursor_isotope].open(base_path + filename);
+        }
+
+        // Only add the header if we're creating a new file
+        // This happens if we're not appending, or if we're appending and it's our first time in the loop
+        if (!append) {
+            outfiles[precursor_isotope] << "probability" << "\tprecursor.mass" << std::endl;
+        }
+    }
+    return outfiles;
+}
+
+void closeOutputFiles(std::ofstream* outfiles)
+{
+    // close all output files
+    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope)
+    {
+        outfiles[precursor_isotope].close();
+    }
+    delete[] outfiles;
+}
+
+void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles)
 {
     OpenMS::EmpiricalFormula precursor_ef = p.getFormula();
     OpenMS::IsotopeDistribution precursor_id = precursor_ef.getIsotopeDistribution(30);
@@ -56,27 +94,7 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
 
 void sample_isotopic_distributions(std::string base_path, float max_mass, int num_samples, int num_sulfurs, bool append)
 {
-    // create all output files and write header to each
-    std::ofstream* outfiles = new std::ofstream[max_depth];
-    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope)
-    {
-        std::string filename = "Precursor" + std::to_string(precursor_isotope) + ".tab";
-
-        if (append)
-        {
-            outfiles[precursor_isotope].open(base_path + filename, std::ofstream::out | std::ofstream::app);
-        }
-        else
-        {
-            outfiles[precursor_isotope].open(base_path + filename);
-        }
-
-        // Only add the header if we're creating a new file
-        // This happens if we're not appending, or if we're appending and it's our first time in the loop
-        if (!append) {
-            outfiles[precursor_isotope] << "probability" << "\tprecursor.mass" << std::endl;
-        }
-    }
+    std::ofstream* outfiles = openOutputFiles(base_path, append);
 
     int max_length = max_mass/100;
 
@@ -93,52 +111,22 @@ void sample_isotopic_distributions(std::string base_path, float max_mass, int nu
         }
     }
 
-    // close all output files
-    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope)
-    {
-        outfiles[precursor_isotope].close();
-    }
-    delete[] outfiles;
+    closeOutputFiles(outfiles);
 }
 
-void sample_average_isotopic_distribution(std::string distribution_path, std::string base_path, float max_mass, float min_percentage)
+
+
+void sample_average_isotopic_distribution(std::string distribution_path, std::string base_path)
 {
-    std::map<int, int> sulfurs2count;
+    std::ofstream* outfiles = openOutputFiles(base_path, false);
 
-    std::ifstream sulfur_dist_in(distribution_path);
-    std::string input;
-    int S, CS, count, i=0;
-    while (sulfur_dist_in >> input)
+    FASTAParser parser(distribution_path, 5, 100);
+    for (auto itr = parser.begin(); itr != parser.end(); ++itr)
     {
-        if (i == 0)
-        {
-            S = atoi(input.c_str());
-        }
-        else
-        {
-            count = atoi(input.c_str());
-            sulfurs2count[S] = count;
-        }
-        i = (i+1) % 2;
+        write_distribution(*itr, outfiles);
     }
 
-    int max_count = 0;
-    for (auto itr : sulfurs2count)
-    {
-        max_count = std::max(max_count, itr.second);
-    }
-
-    bool append = false;
-    for (auto itr : sulfurs2count)
-    {
-        double percentage = (double) itr.second / max_count;
-        if (percentage >= min_percentage)
-        {
-            int num_samples = std::floor(percentage / min_percentage);
-            sample_isotopic_distributions(base_path, max_mass, num_samples, itr.first, append);
-            append = true;
-        }
-    }
+    closeOutputFiles(outfiles);
 }
 
 
@@ -190,7 +178,7 @@ int main(int argc, const char ** argv)
 
         max_depth = atoi(argv[6]) + 1;
 
-        sample_average_isotopic_distribution(dist_path, out_path, max_mass, min_percentage);
+        sample_average_isotopic_distribution(dist_path, out_path);
     }
 
     return 0;
