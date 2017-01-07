@@ -182,7 +182,7 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
 
 void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
 {
-    UInt depth = 21;
+    UInt depth = 19;
     IsotopeDistribution exact, averagine(depth), spline(depth);
 
     double average_weight = p.getAverageWeight();
