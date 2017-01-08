@@ -103,7 +103,7 @@ std::vector<double> calculateResiduals(std::vector<double>& l, std::vector<doubl
     return result;
 }
 
-void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fragment, std::vector<UInt>& isolated_precursor_isotopes,
+void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fragment, std::set<UInt>& isolated_precursor_isotopes,
                               double pep_mass, double frag_mass, int num_s_prec, int num_s_frag, UInt depth, std::string label)
 {
     IsotopeDistribution exact_fragment_dist = fragment.getConditionalFragmentIsotopeDist(precursor, isolated_precursor_isotopes);
@@ -166,16 +166,16 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
     double pep_mass = precursor.getAverageWeight();
     double frag_mass = fragment.getAverageWeight();
 
-    std::vector<UInt> isolated_precursor_isotopes(1,0);
+    std::set<UInt> isolated_precursor_isotopes;
     /*for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
-        isolated_precursor_isotopes.push_back(i);
+        isolated_precursor_isotopes.insert(i);
         std::string label = "0-"+std::to_string(i);
         testTheoreticalIsolation(precursor, fragment, isolated_precursor_isotopes, pep_mass, frag_mass, num_s_prec, num_s_frag, i+1, label);
     }*/
 
     for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
         isolated_precursor_isotopes.clear();
-        isolated_precursor_isotopes.push_back(i);
+        isolated_precursor_isotopes.insert(i);
         testTheoreticalIsolation(precursor, fragment, isolated_precursor_isotopes, pep_mass, frag_mass, num_s_prec, num_s_frag, i+1, std::to_string(i));
     }
 }

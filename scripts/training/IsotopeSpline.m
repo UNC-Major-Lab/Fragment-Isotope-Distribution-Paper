@@ -18,10 +18,13 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	%max_knot = double(idivide(max(M(:,2)),int32(breakSteps),'ceil')*breakSteps+min_mass); % maximum observed fragment mass rounded
 	min_knot = min(M(:,2));
 	max_knot = max(M(:,2));
-	% Create the knots in the proper format
+	% Create uniformly spaced knots in the proper format
 	knots = augknt([min_knot, min_knot:breakSteps:max_knot, max_knot], order);
 	% Create spline using least squares approximation in the B-spline format (better for creation)
 	sp = spap2(knots, order, M(:,2), M(:,1));
+	% Optimize knot selection
+	sp = spap2(newknt(sp), order, M(:,2), M(:,1));	
+	sp.breaks
 	% Convert from B-spline to piecewise polynomial (pp) format. (better for evaluation)
 	sp_pp = fn2fm(sp,'pp');
 	
