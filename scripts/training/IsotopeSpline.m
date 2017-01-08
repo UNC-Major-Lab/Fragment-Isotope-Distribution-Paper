@@ -24,9 +24,9 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	sp = spap2(knots, order, M(:,2), M(:,1));
 	% Optimize knot selection
 	sp = spap2(newknt(sp), order, M(:,2), M(:,1));	
-	sp.breaks
 	% Convert from B-spline to piecewise polynomial (pp) format. (better for evaluation)
 	sp_pp = fn2fm(sp,'pp');
+	sp_pp.breaks
 	
 	% Create a figure of the scatter plot and spline
 	xlabel('precursor mass');
