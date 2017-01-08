@@ -191,6 +191,9 @@ void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
     averagine.estimateFromWeightAndComp(average_weight, 4.86151, 7.68282, 1.3005, 1.56299, 0.047074, 0);
     spline.estimateFromPeptideWeightFast(average_weight);
 
+    averagine.renormalize();
+    spline.renormalize();
+
     std::vector<double> exact_prob =  fillProbabilities(exact, depth);
     std::vector<double> averagine_prob =  fillProbabilities(averagine, depth);
     std::vector<double> spline_prob =  fillProbabilities(spline, depth);
