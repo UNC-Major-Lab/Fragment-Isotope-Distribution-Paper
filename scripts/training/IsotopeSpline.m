@@ -25,7 +25,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	% Convert from B-spline to piecewise polynomial (pp) format. (better for evaluation)
 	sp_pp = fn2fm(sp,'pp');
 	sp_pp.breaks
-	testNonNegative(sp_pp, min_knot, max_knot)
+	num_neg = testNonNegative(sp_pp, min_knot, max_knot)
 	
 	% Create a figure of the scatter plot and spline
 	xlabel('precursor mass');
@@ -45,7 +45,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	% Write the GOF statistics with model description to a file
 	fileID = fopen(outfile_gof,'w');
 	fprintf(fileID, '%s', strcat([S, ' ', precursor_isotope, ' ']));
-	fprintf(fileID, ' %3.5f %3.5f %3.5f\n', [RMSD meanD Rsq]);
+	fprintf(fileID, ' %3.5f %3.5f %3.5f %3.5f\n', [RMSD meanD Rsq num_neg]);
 	fclose(fileID);
 	
 	% Create histogram of the residuals. Ideally this will be normally distributed and centered at 0.
