@@ -14,8 +14,6 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 						% We're using the same value for both X and Y.
 	min_mass = 50;		% The lower bound of our spline breaks (in daltons)
 	
-	%min_knot = double(idivide(min(M(:,2))-min_mass,int32(breakSteps),'floor')*breakSteps+min_mass); % minimum observed fragment mass rounded
-	%max_knot = double(idivide(max(M(:,2)),int32(breakSteps),'ceil')*breakSteps+min_mass); % maximum observed fragment mass rounded
 	min_knot = min(M(:,2));
 	max_knot = max(M(:,2));
 	% Create uniformly spaced knots in the proper format
@@ -27,6 +25,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	% Convert from B-spline to piecewise polynomial (pp) format. (better for evaluation)
 	sp_pp = fn2fm(sp,'pp');
 	sp_pp.breaks
+	testNonNegative(sp_pp, min_knot, max_knot)
 	
 	% Create a figure of the scatter plot and spline
 	xlabel('precursor mass');
@@ -188,4 +187,15 @@ function output = base64encode(input)
 	end
 
 	output = char(org.apache.commons.codec.binary.Base64.encodeBase64Chunked(input))';
+end
+
+
+function output = testNonNegative(sp_pp, min_mass, max_mass)
+	output = 0; 
+	for i = min_mass:max_mass
+		y = fnval( sp_pp, i );
+		if y < 0
+			output = output+1;
+		end
+	end
 end
