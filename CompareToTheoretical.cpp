@@ -138,12 +138,12 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     scores = calculateScores(exact_fragment_prob, approx_precursor_prob);
 
     //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_precursor" << std::endl;
-    std::cout << scores[1] << "\t" << label << "\t" << "approx_precursor" << std::endl;
+    out_scores << scores[1] << "\t" << label << "\t" << "approx_precursor" << std::endl;
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_prob);
 
     //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_fragment" << std::endl;
-    std::cout << scores[1] << "\t" << label << "\t" << "approx_fragment" << std::endl;
+    out_scores << scores[1] << "\t" << label << "\t" << "approx_fragment" << std::endl;
 
     //scores = calculateScores(exact_fragment_prob, approx_fragment_S_prob);
 
@@ -208,11 +208,11 @@ void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
 
     std::vector<double> scores;
     /*scores = calculateScores(exact_prob, averagine_prob);
-    std::cout << scores[2] << "\t" << average_weight << "\t" << "exact vs averagine" << std::endl;
+    out_scores << scores[2] << "\t" << average_weight << "\t" << "exact vs averagine" << std::endl;
     scores = calculateScores(exact_prob, spline_prob);
-    std::cout << scores[2] << "\t" << average_weight << "\t" << "exact vs spline" << std::endl;
+    out_scores << scores[2] << "\t" << average_weight << "\t" << "exact vs spline" << std::endl;
     scores = calculateScores(averagine_prob, spline_prob);
-    std::cout << scores[2] << "\t" << average_weight << "\t" << "averagine vs spline" << std::endl;
+    out_scores << scores[2] << "\t" << average_weight << "\t" << "averagine vs spline" << std::endl;
     */
 
 
