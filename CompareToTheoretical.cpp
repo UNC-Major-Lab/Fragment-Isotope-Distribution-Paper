@@ -26,6 +26,7 @@ std::uniform_real_distribution<> dis(0, 1);
 std::set<AASequence> uniquePeptides;
 
 std::ofstream out_residual;
+std::ofstream out_scores;
 
 bool isValidPeptide(AASequence& pep) {
     String p = pep.toString();
@@ -283,22 +284,23 @@ void testTheoreticalPeptides(std::string fasta_path, int job_id, int num_jobs, b
 
 void usage()
 {
-    std::cout << "CompareToTheoretical fasta_path job_id num_jobs" << std::endl;
+    std::cout << "CompareToTheoretical fasta_path job_id num_jobs do_frag residual_file score_file" << std::endl;
 }
 
 int main(int argc, char * argv[])
 {
-    if (argc != 5)
+    if (argc != 7)
     {
         usage();
     }
 
-    out_residual.open(argv[4]);
+    out_residual.open(argv[5]);
+    out_scores.open(argv[6]);
 
-    testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]), false);
-    testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]), true);
+    testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]), atoi(argv[4]));
 
     out_residual.close();
+    out_scores.close();
 
     return 0;
 }
