@@ -17,7 +17,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	min_knot = min(M(:,2));
 	max_knot = max(M(:,2));
 	% Create uniformly spaced knots in the proper format
-	knots = augknt([min_knot, min_knot:breakSteps:max_knot, max_knot], order);
+	knots = augknt([min_knot, min_knot:breakSteps:max_knot, max_knot], order, 2);
 	% Create spline using least squares approximation in the B-spline format (better for creation)
 	sp = spap2(knots, order, M(:,2), M(:,1));
 	% Optimize knot selection
@@ -45,7 +45,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	% Write the GOF statistics with model description to a file
 	fileID = fopen(outfile_gof,'w');
 	fprintf(fileID, '%s', strcat([S, ' ', precursor_isotope, ' ']));
-	fprintf(fileID, ' %3.5f %3.5f %3.5f %3.5f\n', [RMSD meanD Rsq num_neg]);
+	fprintf(fileID, ' %3.5f %3.5f %3.5f %d\n', [RMSD meanD Rsq num_neg]);
 	fclose(fileID);
 	
 	% Create histogram of the residuals. Ideally this will be normally distributed and centered at 0.
