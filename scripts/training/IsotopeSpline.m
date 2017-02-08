@@ -17,7 +17,7 @@ function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_r
 	min_knot = min(M(:,2));
 	max_knot = max(M(:,2));
 	% Create uniformly spaced knots in the proper format
-	knots = augknt([min_knot, min_knot:breakSteps:max_knot, max_knot], order, 2);
+	knots = augknt([min_knot, min_knot:breakSteps:max_knot, max_knot], order, 1);
 	% Create spline using least squares approximation in the B-spline format (better for creation)
 	sp = spap2(knots, order, M(:,2), M(:,1));
 	% Optimize knot selection
