@@ -33,4 +33,4 @@ for f in os.listdir(root_dir):
 
 for comp in comp2bin2count:
     for bin in comp2bin2count[comp]:
-        print "\t".join([comp, str(bin), str(bin2count[bin])])
+        print "\t".join([comp, str(bin), str(comp2bin2count[comp][bin])])
