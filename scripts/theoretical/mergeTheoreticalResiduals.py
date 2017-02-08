@@ -12,7 +12,7 @@ prefix = sys.argv[3]
 job_id = int(sys.argv[4])
 num_jobs = int(sys.argv[5])
 
-bin2count = defaultdict(int)
+comp2bin2count = defaultdict(dict)
 
 max_job = num_jobs * job_id
 min_job = max_job - num_jobs
@@ -25,9 +25,12 @@ for f in os.listdir(root_dir):
 
         infile = open(fp)
         for line in infile:
-            residual = line.strip()
+            [residual, comp] = line.strip()
             bin = round(float(residual)/bin_size)*bin_size
-            bin2count[bin]+=1
+            if not comp2bin2count[comp].has_key(bin):
+                comp2bin2count[comp][bin]=0
+            comp2bin2count[comp][bin]+=1
 
-for bin in bin2count:
-    print "\t".join([str(bin), str(bin2count[bin])])
+for comp in comp2bin2count:
+    for bin in comp2bin2count[comp]:
+        print "\t".join([comp, str(bin), str(bin2count[bin])])
