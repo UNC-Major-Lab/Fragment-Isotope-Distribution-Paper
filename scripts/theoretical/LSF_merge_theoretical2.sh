@@ -14,8 +14,11 @@ source ../config.sh
 set BIN_SIZE = 0.01
 set IN_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
 
-python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR $BIN_SIZE "merged_scores_" 1 10 > ${IN_DIR}"/scores.txt"
-python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR $BIN_SIZE "merged_residuals_" 1 10 > ${IN_DIR}"/residuals.txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR $BIN_SIZE "merged_precursor_scores_" 1 10 > ${IN_DIR}"/precursor_scores.txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR $BIN_SIZE "merged_precursor_residuals_" 1 10 > ${IN_DIR}"/precursor_residuals.txt"
 
-Rscript plotComparisons.R ${IN_DIR}"/residuals.txt" ${IN_DIR}"/residuals.pdf"
+python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR $BIN_SIZE "merged_fragment_scores_" 1 10 > ${IN_DIR}"/fragment_scores.txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR $BIN_SIZE "merged_fragment_residuals_" 1 10 > ${IN_DIR}"/fragment_residuals.txt"
+
+Rscript plotComparisons.R ${IN_DIR}"/precursor_residuals.txt" ${IN_DIR}"/residuals.pdf"
 
