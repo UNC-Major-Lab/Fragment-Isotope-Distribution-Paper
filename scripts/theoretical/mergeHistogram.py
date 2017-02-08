@@ -12,7 +12,7 @@ prefix = sys.argv[3]
 job_id = int(sys.argv[4])
 num_jobs = int(sys.argv[5])
 
-comp2iso2bin2count = dict()
+comp2bin2count = defaultdict(dict)
 
 max_job = num_jobs * job_id
 min_job = max_job - num_jobs
@@ -25,15 +25,12 @@ for f in os.listdir(root_dir):
 
         infile = open(fp)
         for line in infile:
-            [comp, bin, iso, count] = line.strip().split("\t")
+            [comp, bin, count] = line.strip().split("\t")
             count = int(count)
-            if not comp2iso2bin2count.has_key(comp):
-                comp2iso2bin2count[comp] = dict()
-            if not comp2iso2bin2count[comp].has_key(iso):
-                comp2iso2bin2count[comp][iso] = defaultdict(int)
-            comp2iso2bin2count[comp][iso][bin]+=count
+            if not comp2bin2count[comp].has_key(bin):
+                comp2bin2count[comp][bin] = 0
+            comp2bin2count[comp][bin]+=count
 
-for comp in comp2iso2bin2count:
-    for iso in comp2iso2bin2count[comp]:
-        for bin in comp2iso2bin2count[comp][iso]:
-            print "\t".join([comp, str(bin), iso, str(comp2iso2bin2count[comp][iso][bin])])
+for comp in comp2bin2count:
+    for bin in comp2bin2count[comp]:
+        print "\t".join([comp, str(bin), str(comp2bin2count[comp][bin])])
