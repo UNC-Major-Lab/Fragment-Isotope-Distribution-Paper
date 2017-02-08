@@ -17,6 +17,8 @@
 
 using namespace OpenMS;
 
+static const OpenMS::ElementDB* elementDB = OpenMS::ElementDB::getInstance();
+
 std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<> dis(0, 1);
@@ -182,34 +184,42 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
 
 void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
 {
-    UInt depth = 19;
-    IsotopeDistribution exact, averagine(depth), spline(depth);
+    UInt depth = 11;
+    IsotopeDistribution exact, averagine(depth), spline(depth), averagineS(depth);
+
+    int num_S = p.getNumberOf(elementDB->getElement("Sulfur"));
 
     double average_weight = p.getAverageWeight();
     exact = p.getIsotopeDistribution(depth);
-    //averagine.estimateFromPeptideWeight(average_weight);
-    averagine.estimateFromWeightAndComp(average_weight, 4.86151, 7.68282, 1.3005, 1.56299, 0.047074, 0);
-    spline.estimateFromPeptideWeightFast(average_weight);
+    averagine.estimateFromPeptideWeight(average_weight);
+    averagineS.estimateFromPeptideWeightAndS(average_weight, num_S);
+    //averagine.estimateFromWeightAndComp(average_weight, 4.86151, 7.68282, 1.3005, 1.56299, 0.047074, 0);
+    //spline.estimateFromPeptideWeightFast(average_weight);
 
     averagine.renormalize();
-    spline.renormalize();
+    averagineS.renormalize();
+    //spline.renormalize();
 
     std::vector<double> exact_prob =  fillProbabilities(exact, depth);
-    std::vector<double> averagine_prob =  fillProbabilities(averagine, depth);
-    std::vector<double> spline_prob =  fillProbabilities(spline, depth);
+    std::vector<double> averagine_prob = fillProbabilities(averagine, depth);
+    std::vector<double> averagineS_prob = fillProbabilities(averagineS, depth);
+    //std::vector<double> spline_prob =  fillProbabilities(spline, depth);
 
     std::vector<double> scores;
-    scores = calculateScores(exact_prob, averagine_prob);
+    /*scores = calculateScores(exact_prob, averagine_prob);
     std::cout << scores[2] << "\t" << average_weight << "\t" << "exact vs averagine" << std::endl;
     scores = calculateScores(exact_prob, spline_prob);
     std::cout << scores[2] << "\t" << average_weight << "\t" << "exact vs spline" << std::endl;
     scores = calculateScores(averagine_prob, spline_prob);
     std::cout << scores[2] << "\t" << average_weight << "\t" << "averagine vs spline" << std::endl;
+    */
 
-   /*
+
     scores = calculateResiduals(exact_prob, averagine_prob);
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs averagine" << std::endl;
-    scores = calculateResiduals(exact_prob, spline_prob);
+    scores = calculateResiduals(exact_prob, averagineS_prob);
+    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs sulfur-specific averagine" << std::endl;
+    /*scores = calculateResiduals(exact_prob, spline_prob);
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs spline" << std::endl;
     scores = calculateResiduals(averagine_prob, spline_prob);
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "averagine vs spline" << std::endl;
@@ -271,11 +281,22 @@ void testTheoreticalPeptides(std::string fasta_path, int job_id, int num_jobs, b
     }
 }
 
+void usage()
+{
+    std::cout << "CompareToTheoretical fasta_path job_id num_jobs" << std::endl;
+}
+
 int main(int argc, char * argv[])
 {
-    out_residual.open(argv[5]);
+    if (argc != 5)
+    {
+        usage();
+    }
 
-    testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]), atoi(argv[4]));
+    out_residual.open(argv[4]);
+
+    testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]), false);
+    testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]), true);
 
     out_residual.close();
 
