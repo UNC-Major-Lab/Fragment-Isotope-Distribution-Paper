@@ -11,12 +11,13 @@ module load r/3.2.2
 
 source ../config.sh
 
-set BIN_SIZE = 0.0025
+set BIN_SIZE_RESIDUAL = 0.0025
+set BIN_SIZE_CHISQUARE = 1
 set IN_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
 
-#python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalComparisons.py $IN_DIR $BIN_SIZE "scores_precursor_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_precursor_scores_"${LSB_JOBINDEX}".out"
-python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalResiduals.py $IN_DIR $BIN_SIZE "residuals_precursor_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_precursor_residuals_"${LSB_JOBINDEX}".out"
+python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalComparisons.py $IN_DIR BIN_SIZE_CHISQUARE "scores_precursor_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_precursor_scores_"${LSB_JOBINDEX}".out"
+python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalResiduals.py $IN_DIR $BIN_SIZE_RESIDUAL "residuals_precursor_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_precursor_residuals_"${LSB_JOBINDEX}".out"
 
-#python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalComparisons.py $IN_DIR $BIN_SIZE "scores_fragment_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_fragment_scores_"${LSB_JOBINDEX}".out"
-#python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalResiduals.py $IN_DIR $BIN_SIZE "residuals_fragment_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_fragment_residuals_"${LSB_JOBINDEX}".out"
+#python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalComparisons.py $IN_DIR BIN_SIZE_CHISQUARE "scores_fragment_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_fragment_scores_"${LSB_JOBINDEX}".out"
+#python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalResiduals.py $IN_DIR BIN_SIZE_RESIDUAL "residuals_fragment_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_fragment_residuals_"${LSB_JOBINDEX}".out"
 
