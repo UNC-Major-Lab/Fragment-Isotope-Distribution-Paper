@@ -5,7 +5,7 @@ args = commandArgs(trailingOnly=TRUE)
 
 infile = args[1]
 outfile = args[2]
-binWidth = args[3]
+binWidth = as.numeric(args[3])
 
 data <- read.table(infile,header=F,sep="\t")
 
