@@ -10,7 +10,7 @@ fragments <- args[4]
 
 data <- read.table(infile,header=F,sep="\t")
 
-if (fragments == "T") {
+if (fragments == "F") {
 
     p <- ggplot(data=data, aes(x=V2, y=V3, group=V1, fill=factor(V1)))
 
