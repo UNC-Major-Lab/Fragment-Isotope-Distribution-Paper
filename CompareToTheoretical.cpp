@@ -119,16 +119,16 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     approx_fragment_dist.estimateForFragmentFromPeptideWeight(pep_mass, frag_mass, isolated_precursor_isotopes);
     approx_fragment_dist.renormalize();
 
-    /*IsotopeDistribution approx_fragment_S_dist(depth);
+    IsotopeDistribution approx_fragment_S_dist(depth);
     approx_fragment_S_dist.estimateForFragmentFromPeptideWeightAndS(pep_mass, num_s_prec, frag_mass, num_s_frag, isolated_precursor_isotopes);
-    approx_fragment_S_dist.renormalize();*/
+    approx_fragment_S_dist.renormalize();
 
 
 
     std::vector<double> exact_fragment_prob =  fillProbabilities(exact_fragment_dist, depth);
     std::vector<double> approx_precursor_prob = fillProbabilities(approx_precursor_dist, depth);
     std::vector<double> approx_fragment_prob = fillProbabilities(approx_fragment_dist, depth);
-    //std::vector<double> approx_fragment_S_prob = fillProbabilities(approx_fragment_S_dist, depth);
+    std::vector<double> approx_fragment_S_prob = fillProbabilities(approx_fragment_S_dist, depth);
 
     //std::vector<double> decoy_prob = sampleDecoy(i+1);
     //std::vector<double> sampled_exact_fragment_prob = sampleFromDistribution(exact_fragment_prob);
@@ -136,26 +136,24 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     std::vector<double> scores;
 
     scores = calculateScores(exact_fragment_prob, approx_precursor_prob);
-
-    //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_precursor" << std::endl;
-    out_scores << scores[1] << "\t" << label << "\t" << "approx_precursor" << std::endl;
+    out_scores << scores[2] << "\t" << label << "\t" << "p" << std::endl;
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_prob);
+    out_scores << scores[2] << "\t" << label << "\t" << "f" << std::endl;
 
-    //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_fragment" << std::endl;
-    out_scores << scores[1] << "\t" << label << "\t" << "approx_fragment" << std::endl;
-
-    //scores = calculateScores(exact_fragment_prob, approx_fragment_S_prob);
-
-    //std::cout << scores[0] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "approx_fragment_S" << std::endl;
+    scores = calculateScores(exact_fragment_prob, approx_fragment_S_prob);
+    out_scores << scores[2] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "fs" << std::endl;
 
 
     //Residuals
+    scores = calculateResiduals(exact_fragment_prob, approx_precursor_prob);
+    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "p" << std::endl;
+
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_prob);
-    for (int i = 0; i < scores.size(); ++i)
-    {
-        out_residual << scores[i] << "\t" << label << "\t" << "approx_fragment" << std::endl;
-    }
+    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "f" << std::endl;
+
+    scores = calculateResiduals(exact_fragment_prob, approx_fragment_S_prob);
+    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "fs" << std::endl;
 }
 
 void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& precursor, EmpiricalFormula& fragment)
@@ -170,11 +168,11 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
     double frag_mass = fragment.getAverageWeight();
 
     std::set<UInt> isolated_precursor_isotopes;
-    /*for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
+    for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
         isolated_precursor_isotopes.insert(i);
         std::string label = "0-"+std::to_string(i);
         testTheoreticalIsolation(precursor, fragment, isolated_precursor_isotopes, pep_mass, frag_mass, num_s_prec, num_s_frag, i+1, label);
-    }*/
+    }
 
     for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
         isolated_precursor_isotopes.clear();
