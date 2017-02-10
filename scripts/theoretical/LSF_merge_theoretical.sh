@@ -19,5 +19,5 @@ python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalResiduals.py $IN_DIR $B
 python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalResiduals.py $IN_DIR $BIN_SIZE_RESIDUAL "residuals_precursor_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_precursor_residuals_"${LSB_JOBINDEX}".out"
 
 python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalComparisons.py $IN_DIR $BIN_SIZE_CHISQUARE "scores_fragment_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_fragment_scores_"${LSB_JOBINDEX}".out"
-python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalResiduals.py $IN_DIR $BIN_SIZE_RESIDUAL "residuals_fragment_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_fragment_residuals_"${LSB_JOBINDEX}".out"
+python ${SOURCE_DIR}/scripts/theoretical/mergeTheoreticalComparisons.py $IN_DIR $BIN_SIZE_RESIDUAL "residuals_fragment_" $LSB_JOBINDEX 10 > ${IN_DIR}"/merged_fragment_residuals_"${LSB_JOBINDEX}".out"
 
