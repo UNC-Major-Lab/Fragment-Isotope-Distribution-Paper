@@ -142,7 +142,7 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     out_scores << scores[2] << "\t" << label << "\t" << "f" << std::endl;
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_S_prob);
-    out_scores << scores[2] << "\t" << scores[1] << "\t" << scores[2] << "\t" << label << "\t" << "fs" << std::endl;
+    out_scores << scores[2] << "\t" << label << "\t" << "fs" << std::endl;
 
 
     //Residuals
