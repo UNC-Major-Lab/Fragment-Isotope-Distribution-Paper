@@ -21,5 +21,8 @@ python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR $BIN_SIZE_RES
 python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR $BIN_SIZE_CHISQUARE "merged_fragment_scores_" 1 10 T > ${IN_DIR}"/fragment_scores.txt"
 python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR $BIN_SIZE_RESIDUAL "merged_fragment_residuals_" 1 10 T > ${IN_DIR}"/fragment_residuals.txt"
 
-Rscript plotComparisons.R ${IN_DIR}"/precursor_residuals.txt" ${IN_DIR}"/precursor_residuals.pdf" ${BIN_SIZE_RESIDUAL}
-Rscript plotComparisons.R ${IN_DIR}"/precursor_scores.txt" ${IN_DIR}"/precursor_chisquared.pdf" ${BIN_SIZE_CHISQUARE}
+Rscript plotComparisons.R ${IN_DIR}"/precursor_residuals.txt" ${IN_DIR}"/precursor_residuals.pdf" ${BIN_SIZE_RESIDUAL} F
+Rscript plotComparisons.R ${IN_DIR}"/precursor_scores.txt" ${IN_DIR}"/precursor_chisquared.pdf" ${BIN_SIZE_CHISQUARE} F
+
+Rscript plotComparisons.R ${IN_DIR}"/fragment_residuals.txt" ${IN_DIR}"/fragment_residuals.pdf" ${BIN_SIZE_RESIDUAL} T
+Rscript plotComparisons.R ${IN_DIR}"/fragment_scores.txt" ${IN_DIR}"/fragment_chisquared.pdf" ${BIN_SIZE_CHISQUARE} T
