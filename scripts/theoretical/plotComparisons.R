@@ -24,7 +24,7 @@ if (fragments == "F") {
 
     p <- ggplot(data=data, aes(x=V2, y=V4, group=V1, fill=factor(V1)))
 
-    pdf(outfile, width=9, height=20)
+    pdf(outfile, width=12, height=18)
 
     print(p + geom_bar(stat='identity', width=binWidth) + facet_wrap(V3 ~ V1, scale="free") + xlab("residual") + ylab("frequency") + ggtitle("Histogram of residuals (averagine - expected)"))
 

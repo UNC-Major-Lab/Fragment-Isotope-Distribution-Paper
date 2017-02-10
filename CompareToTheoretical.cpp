@@ -135,8 +135,8 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
 
     std::vector<double> scores;
 
-    scores = calculateScores(exact_fragment_prob, approx_precursor_prob);
-    out_scores << scores[2] << "\t" << label << "\t" << "p" << std::endl;
+    //scores = calculateScores(exact_fragment_prob, approx_precursor_prob);
+    //out_scores << scores[2] << "\t" << label << "\t" << "p" << std::endl;
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_prob);
     out_scores << scores[2] << "\t" << label << "\t" << "f" << std::endl;
@@ -146,8 +146,8 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
 
 
     //Residuals
-    scores = calculateResiduals(exact_fragment_prob, approx_precursor_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "p" << std::endl;
+    //scores = calculateResiduals(exact_fragment_prob, approx_precursor_prob);
+    //for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "p" << std::endl;
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_prob);
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "f" << std::endl;
