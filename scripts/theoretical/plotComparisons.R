@@ -16,7 +16,7 @@ if (fragments == "F") {
 
     pdf(outfile, width=9, height=6)
 
-    p + geom_bar(stat='identity', width=binWidth) + facet_wrap(~ V1) + xlab("residual") + ylab("frequency") + ggtitle("Histogram of residuals (averagine - expected)")
+    print(p + geom_bar(stat='identity', width=binWidth) + facet_wrap(~ V1) + xlab("residual") + ylab("frequency") + ggtitle("Histogram of residuals (averagine - expected)"))
 
     dev.off()
 
@@ -26,7 +26,7 @@ if (fragments == "F") {
 
     pdf(outfile, width=9, height=6)
 
-    p + geom_bar(stat='identity', width=binWidth) + facet_wrap(V3 ~ V1) + xlab("residual") + ylab("frequency") + ggtitle("Histogram of residuals (averagine - expected)")
+    print(p + geom_bar(stat='identity', width=binWidth) + facet_wrap(V3 ~ V1) + xlab("residual") + ylab("frequency") + ggtitle("Histogram of residuals (averagine - expected)"))
 
     dev.off()
 
