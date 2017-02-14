@@ -14,7 +14,7 @@ library(reshape2)
 library(plyr)
 
 #load data from file
-distData <- read.table("distributionScores.out", header=T, sep="\t")
+distData <- read.table("/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/HT/distributionScores.out", header=T, sep="\t")
 #only distributions flagged as valid
 distData <- distData[which(distData$distributionValid == 1), ]
 

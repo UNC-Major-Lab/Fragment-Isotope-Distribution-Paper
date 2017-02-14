@@ -19,7 +19,7 @@ namespace SpectrumUtilities {
 
     static const OpenMS::ElementDB* ELEMENTS = OpenMS::ElementDB::getInstance();   //element database
 
-    static void whichPrecursorIsotopes(std::vector<OpenMS::UInt> &precursorIsotopes, const OpenMS::Precursor precursorInfo,
+    static void whichPrecursorIsotopes(std::set<OpenMS::UInt> &precursorIsotopes, const OpenMS::Precursor precursorInfo,
                                        const Ion precursorIon, const double offset) {
         //isolation window lower cutoff
         double lowerCutoff = precursorInfo.getMZ() - precursorInfo.getIsolationWindowLowerOffset() + offset;
@@ -34,7 +34,7 @@ namespace SpectrumUtilities {
 
         //loop through each isotope of precursor ion
         for (OpenMS::UInt m = smallestIsotope; m <= largestIsotope; ++m) {
-            precursorIsotopes.push_back(m);
+            precursorIsotopes.insert(m);
         }
     }
 
@@ -112,7 +112,7 @@ namespace SpectrumUtilities {
      * @param precursorCharge the charge of the precursor peptide that was fragmented.
      */
     static void exactConditionalFragmentIsotopeDist(std::vector<std::pair<double, double> > &condDist,
-                                             const std::vector<OpenMS::UInt> &precursorIsotopes,
+                                             const std::set<OpenMS::UInt> &precursorIsotopes,
                                              const Ion &ion,
                                              const OpenMS::AASequence &precursorSequence,
                                              const OpenMS::Int &precursorCharge)
@@ -143,7 +143,7 @@ namespace SpectrumUtilities {
     }
 
     static void approxPrecursorFromWeightIsotopeDist(std::vector<std::pair<double, double> > &approxDist,
-                                              const std::vector<OpenMS::UInt> &precursorIsotopes,
+                                              const std::set<OpenMS::UInt> &precursorIsotopes,
                                               const Ion &fragmentIon)
     {
         OpenMS::UInt minIsotope = 7;
@@ -151,7 +151,7 @@ namespace SpectrumUtilities {
         approxDist.clear();
 
         //construct distribution of depth at the maximum precursor isotope isolated
-        OpenMS::IsotopeDistribution fragmentDist(std::max(minIsotope,precursorIsotopes.back()));
+        OpenMS::IsotopeDistribution fragmentDist(std::min(minIsotope, *std::max_element(precursorIsotopes.begin(), precursorIsotopes.end()) + 1));
 
         //estimate from fragment average weight
         fragmentDist.estimateFromPeptideWeight(fragmentIon.formula.getAverageWeight());
@@ -179,7 +179,7 @@ namespace SpectrumUtilities {
     }
 
     static void approxFragmentFromWeightIsotopeDist(std::vector<std::pair<double, double> > &approxDist,
-                                             const std::vector<OpenMS::UInt> &precursorIsotopes,
+                                             const std::set<OpenMS::UInt> &precursorIsotopes,
                                              const Ion &fragmentIon,
                                              const OpenMS::AASequence &precursorSequence,
                                              const OpenMS::Int &precursorCharge)
@@ -193,7 +193,7 @@ namespace SpectrumUtilities {
         double fragmentAvgWeight = fragmentIon.formula.getAverageWeight();
 
         //construct distribution
-        OpenMS::IsotopeDistribution fragmentDist(precursorIsotopes.back() + 1);
+        OpenMS::IsotopeDistribution fragmentDist(*std::max_element(precursorIsotopes.begin(), precursorIsotopes.end()) + 1);
 
         //estimate approx distribution from peptide weight
         fragmentDist.estimateForFragmentFromPeptideWeight(precursorAvgWeight, fragmentAvgWeight, precursorIsotopes);
@@ -221,7 +221,7 @@ namespace SpectrumUtilities {
     }
 
     static void approxFragmentFromWeightAndSIsotopeDist(std::vector<std::pair<double, double> > &approxDist,
-                                                 const std::vector<OpenMS::UInt> &precursorIsotopes,
+                                                 const std::set<OpenMS::UInt> &precursorIsotopes,
                                                  const Ion &fragmentIon,
                                                  const OpenMS::AASequence &precursorSequence,
                                                  const OpenMS::Int &precursorCharge)
@@ -240,7 +240,7 @@ namespace SpectrumUtilities {
         int fragmentSulfurs = fragmentIon.formula.getNumberOf(ELEMENTS->getElement("Sulfur"));
 
         //construct distribution
-        OpenMS::IsotopeDistribution fragmentDist(precursorIsotopes.back() + 1);
+        OpenMS::IsotopeDistribution fragmentDist(*std::max_element(precursorIsotopes.begin(), precursorIsotopes.end()) + 1);
 
         //estimate approx distribution from peptide weight
         fragmentDist.estimateForFragmentFromPeptideWeightAndS(precursorAvgWeight, precursorSulfurs,

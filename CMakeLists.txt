@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8.3)
 set(my_executables
         GenerateTrainingData
         CompareToTheoretical
-        #DistributionCompare
+        DistributionCompare
         #CompareToTargeted
         CreateAveragineModel
         #SpeedTest
@@ -17,13 +17,13 @@ set(my_executables
 set(my_sources
         GenerateTrainingData.cpp
         CompareToTheoretical.cpp
-        #DistributionCompare.cpp
+        DistributionCompare.cpp
         #CompareToTargeted.cpp
         CreateAveragineModel.cpp
         #SpeedTest.cpp
-        #Stats.h
-        #Ion.h
-        #Ion.cpp
+        Stats.h
+        Ion.h
+        Ion.cpp
         FASTAParser.cpp
         FASTAParser.h
         )

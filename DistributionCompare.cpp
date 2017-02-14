@@ -253,7 +253,7 @@ int main(int argc, char * argv[])
                     ++ionID;
 
                     //compute search peak matching tolerance
-                    double tol = SpectrumUtilities::ERROR_PPM * ionList[ionIndex].monoMz;
+                    double tol = OpenMS::Math::ppmToMass(SpectrumUtilities::ERROR_PPM, ionList[ionIndex].monoMz);
 
                     //find nearest peak to ion mz within tolerance
                     OpenMS::Int peakIndex = currentSpectrum.findNearest(ionList[ionIndex].monoMz, tol);
@@ -307,7 +307,7 @@ int main(int argc, char * argv[])
                         //vector for observed isotope distribution <mz, intensity>
                         std::vector<std::pair<double, double> > observedDist;
                         //vector for precursor isotopes captured in isolation window
-                        std::vector<OpenMS::UInt> precursorIsotopes;
+                        std::set<OpenMS::UInt> precursorIsotopes;
 
                         //fill precursor isotopes vector
                         SpectrumUtilities::whichPrecursorIsotopes(precursorIsotopes,
@@ -317,7 +317,7 @@ int main(int argc, char * argv[])
 
                         //fill exact theoretical precursor isotope distribution vector
                         SpectrumUtilities::exactPrecursorIsotopeDist(exactPrecursorDist,
-                                                  precursorIsotopes.back() + 1,
+                                                  *std::max_element(precursorIsotopes.begin(), precursorIsotopes.end()) + 1,
                                                   ionList[ionIndex]);
                         //fill exact conditional isotope distribution vector
                         SpectrumUtilities::exactConditionalFragmentIsotopeDist(exactConditionalFragmentDist,
@@ -406,8 +406,8 @@ int main(int argc, char * argv[])
                         distributionScoreFile << completeAtDepth << "\t";                 //complete dist. up to depth
 
                         distributionScoreFile << precursorIsotopes.size() << "\t";
-                        for (int j = 0; j < precursorIsotopes.size(); ++j) {
-                            distributionScoreFile << precursorIsotopes[j] << "|";
+                        for (auto j : precursorIsotopes) {
+                            distributionScoreFile << j << "|";
                         }
                         distributionScoreFile << "\t";
 

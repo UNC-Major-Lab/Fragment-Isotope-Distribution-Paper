@@ -16,7 +16,13 @@ if (fragments == "F") {
 
     pdf(outfile, width=9, height=6)
 
-    print(p + geom_bar(stat='identity', width=binWidth) + facet_wrap(~ V1, scale="free") + xlab("residual") + ylab("frequency") + ggtitle("Histogram of residuals"))
+    print(p
+        + geom_bar(stat='identity', width=binWidth)
+        + facet_wrap(~ V1, scale="free")
+        + scale_x_continuous(expand=c(0,0))
+        + xlab("residual")
+        + ylab("frequency")
+        + ggtitle("Histogram of residuals"))
 
     dev.off()
 
@@ -26,7 +32,13 @@ if (fragments == "F") {
 
     pdf(outfile, width=12, height=18)
 
-    print(p + geom_bar(stat='identity', width=binWidth) + facet_wrap(V3 ~ V1, scale="free") + xlab("residual") + ylab("frequency") + ggtitle("Histogram of chi-squared statistic"))
+    print(p
+        + geom_bar(stat='identity', width=binWidth)
+        + facet_wrap(V3 ~ V1, scale="free")
+        + scale_x_continuous(expand=c(0,0))
+        + xlab("residual")
+        + ylab("frequency")
+        + ggtitle("Histogram of chi-squared statistic"))
 
     dev.off()
 
