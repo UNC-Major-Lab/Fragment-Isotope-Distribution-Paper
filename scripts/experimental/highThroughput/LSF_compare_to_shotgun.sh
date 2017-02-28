@@ -4,7 +4,7 @@
 #BSUB -q week
 #BSUB -o /netscr/dennisg/log/LSF_compare_to_shotgun.log.%J
 #BSUB -n 1
-#BSUB -M 4
+#BSUB -M 8
 
 module load gcc/4.8.1
 module load r/3.2.2
