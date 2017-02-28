@@ -183,16 +183,17 @@ int main(int argc, char * argv[])
             }
             out << isotope_range << "\t" << ionIndex << "\t" << ion_name << "\t" << ionList[ionIndex].monoMz + 3.3 << "\t" << 0 << std::endl;
 
-            normalizeDist(observedDist);
-            normalizeDist(exactConditionalFragmentDist);
-            normalizeDist(approxFragmentFromWeightDist);
-            normalizeDist(approxFragmentFromWeightAndSulfurDist);
+            SpectrumUtilities::scaleDistribution(observedDist);
 
             //compute chi-squared with observed to Conditional
             double exactCondFragmentX2 = Stats::computeX2(observedDist, exactConditionalFragmentDist);
             double approxFragmentFromWeightX2 = Stats::computeX2(observedDist, approxFragmentFromWeightDist);
             double approxFragmentFromWeightAndSulfurX2 = Stats::computeX2(observedDist,
                                                                           approxFragmentFromWeightAndSulfurDist);
+            normalizeDist(observedDist);
+            normalizeDist(exactConditionalFragmentDist);
+            normalizeDist(approxFragmentFromWeightDist);
+            normalizeDist(approxFragmentFromWeightAndSulfurDist);
 
             outputDist(calc_out, exactConditionalFragmentDist, ion_name, ionIndex, isotope_range, "Exact Fragment");
             outputDist(calc_out, approxFragmentFromWeightDist, ion_name, ionIndex, isotope_range, "Approx Fragment");
