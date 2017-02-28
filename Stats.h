@@ -40,30 +40,6 @@ public:
         return sum;
     }
 
-    static double computeCC(const std::vector<std::pair<double, double> > &obsDist,
-                     const std::vector<std::pair<double, double> > &theoDist)
-    {
-        //vector to hold observed proportions
-        std::vector<double> obsProp;
-        //vector to hold theoretical proportions
-        std::vector<double> theoProp;
-
-        //check they are both the same size
-        if (obsDist.size() != theoDist.size()) {
-            return 0;
-        }
-
-        //fill proportions vectors from distribution parameters
-        for (int i = 0; i < obsDist.size(); ++i) {
-            obsProp.push_back(obsDist[i].second);
-            theoProp.push_back(theoDist[i].second);
-        }
-
-        //compute pearsons correlation coefficient
-        return OpenMS::Math::pearsonCorrelationCoefficient(obsProp.begin(), obsProp.end(),
-                                                           theoProp.begin(), theoProp.end());
-    }
-
     static double computeX2(const std::vector<std::pair<double, double> > &obsDist,
                      const std::vector<std::pair<double, double> > &theoDist)
     {
