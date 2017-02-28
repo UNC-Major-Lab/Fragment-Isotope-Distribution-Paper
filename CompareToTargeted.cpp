@@ -37,9 +37,9 @@ void outputDist(std::ofstream &out, std::vector<std::pair<double, double> > &dis
     }
 }
 
-void outputScores(std::ofstream &out, std::string ion_name, int ionIndex, std::string isotope_range, std::string name, double score, double x)
+void outputScores(std::ofstream &out, std::string ion_name, int ionIndex, std::string isotope_range, std::string name, double score, double x, double y)
 {
-    out << isotope_range << "\t" << ionIndex << "\t" << ion_name << "\t" << name << "\t" << score << "\t" << x << std::endl;
+    out << isotope_range << "\t" << ionIndex << "\t" << ion_name << "\t" << name << "\t" << score << "\t" << x << "\t" << y << std::endl;
 }
 
 
@@ -68,7 +68,7 @@ int main(int argc, char * argv[])
 
     out << "isotope.range" << "\t" << "ion.index" << "\t" << "ion.name" << "\t" << "mz" << "\t" << "int" << std::endl;
     calc_out << "isotope.range" << "\t" << "ion.index" << "\t" << "ion.name" << "\t" << "mz" << "\t" << "int" << "\t" << "method" << std::endl;
-    scores_out << "isotope.range" << "\t" << "ion.index" << "\t" << "ion.name" << "\t" << "method" << "\t" << "label" << "\t" << "x" << std::endl;
+    scores_out << "isotope.range" << "\t" << "ion.index" << "\t" << "ion.name" << "\t" << "method" << "\t" << "label" << "\t" << "x" << "\t" << "y" << std::endl;
 
 
     const Ion precursorIon = Ion(OpenMS::AASequence::fromString("[-18.010565]ELYENKPRRPYIL"), OpenMS::Residue::Full, 3);
@@ -198,9 +198,9 @@ int main(int argc, char * argv[])
             outputDist(calc_out, approxFragmentFromWeightDist, ion_name, ionIndex, isotope_range, "Approx Fragment");
             outputDist(calc_out, approxFragmentFromWeightAndSulfurDist, ion_name, ionIndex, isotope_range, "Approx Fragment S");
 
-            outputScores(calc_out, ion_name, ionIndex, isotope_range, "Exact Fragment", exactCondFragmentX2, observedDist.front().first);
-            outputScores(calc_out, ion_name, ionIndex, isotope_range, "Approx Fragment", approxFragmentFromWeightX2, observedDist.front().first);
-            outputScores(calc_out, ion_name, ionIndex, isotope_range, "Approx Fragment S", approxFragmentFromWeightAndSulfurX2, observedDist.front().first);
+            outputScores(calc_out, ion_name, ionIndex, isotope_range, "Exact Fragment", exactCondFragmentX2, observedDist.front().first, 1.0);
+            outputScores(calc_out, ion_name, ionIndex, isotope_range, "Approx Fragment", approxFragmentFromWeightX2, observedDist.front().first, 0.8);
+            outputScores(calc_out, ion_name, ionIndex, isotope_range, "Approx Fragment S", approxFragmentFromWeightAndSulfurX2, observedDist.front().first, 0.6);
         }
 
     }
