@@ -6,9 +6,10 @@ cmake_minimum_required(VERSION 2.8.3)
 set(my_executables
         GenerateTrainingData
         CompareToTheoretical
-        DistributionCompare
-        #CompareToTargeted
+        CompareToShotgun
+        CompareToTargeted
         CreateAveragineModel
+        GetSulfurDistribution
         #SpeedTest
         )
 
@@ -17,9 +18,10 @@ set(my_executables
 set(my_sources
         GenerateTrainingData.cpp
         CompareToTheoretical.cpp
-        DistributionCompare.cpp
-        #CompareToTargeted.cpp
+        CompareToShotgun.cpp
+        CompareToTargeted.cpp
         CreateAveragineModel.cpp
+        GetSulfurDistribution.cpp
         #SpeedTest.cpp
         Stats.h
         Ion.h

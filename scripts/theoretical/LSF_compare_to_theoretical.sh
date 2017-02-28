@@ -15,6 +15,6 @@ set OUT_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical"
 
 mkdir -p $OUT_DIR
 
-${BUILD_DIR}/CompareToTheoretical $FASTA $LSB_JOBINDEX 100 0 ${ROOT_OUT_DIR}"/compare_to_theoretical/residuals_precursor_"${LSB_JOBINDEX}".out" ${ROOT_OUT_DIR}"/compare_to_theoretical/scores_precursor_"${LSB_JOBINDEX}".out"
-${BUILD_DIR}/CompareToTheoretical $FASTA $LSB_JOBINDEX 100 1 ${ROOT_OUT_DIR}"/compare_to_theoretical/residuals_fragment_"${LSB_JOBINDEX}".out" ${ROOT_OUT_DIR}"/compare_to_theoretical/scores_fragment_"${LSB_JOBINDEX}".out"
+${BUILD_DIR}/CompareToTheoretical $FASTA $LSB_JOBINDEX 100 0 ${OUT_DIR}"/residuals_precursor_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/scores_precursor_"${LSB_JOBINDEX}".out"
+${BUILD_DIR}/CompareToTheoretical $FASTA $LSB_JOBINDEX 100 1 ${OUT_DIR}"/residuals_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/scores_fragment_"${LSB_JOBINDEX}".out"
 

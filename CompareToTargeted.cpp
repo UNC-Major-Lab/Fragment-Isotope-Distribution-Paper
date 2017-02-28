@@ -81,7 +81,7 @@ int main(int argc, char * argv[])
         currentSpectrumCentroid.sortByPosition();
 
         const OpenMS::Precursor precursorInfo = currentSpectrumCentroid.getPrecursors()[0];
-        std::vector<OpenMS::UInt> precursorIsotopes;
+        std::set<OpenMS::UInt> precursorIsotopes;
 
         //fill precursor isotopes vector
         SpectrumUtilities::whichPrecursorIsotopes(precursorIsotopes,
@@ -89,13 +89,15 @@ int main(int argc, char * argv[])
                                precursorIon,
                                0);
 
+        OpenMS::UInt minIsotope = *std::min_element(precursorIsotopes.begin(), precursorIsotopes.end());
+        OpenMS::UInt maxIsotope = *std::max_element(precursorIsotopes.begin(), precursorIsotopes.end());
         //loop through each fragment ion
         for (int ionIndex = 0; ionIndex < ionList.size(); ++ionIndex) {
             //compute search peak matching tolerance
             double tol = OpenMS::Math::ppmToMass(20.0, ionList[ionIndex].monoMz);
 
             OpenMS::Int peakIndex = -1;
-            for (int i = 0; i <= precursorIsotopes.back() && peakIndex == -1; ++i)
+            for (int i = 0; i <= maxIsotope && peakIndex == -1; ++i)
             {
                 //find nearest peak to ion mz within tolerance
                 peakIndex = currentSpectrumCentroid.findNearest(ionList[ionIndex].monoMz + (isotopeStep * i), tol);
@@ -138,8 +140,8 @@ int main(int argc, char * argv[])
 
 
 
-            std::string isotope_range = std::to_string(precursorIsotopes.front());
-            if (precursorIsotopes.size() > 1) isotope_range += "-" + std::to_string(precursorIsotopes.back());
+            std::string isotope_range = std::to_string(minIsotope);
+            if (precursorIsotopes.size() > 1) isotope_range += "-" + std::to_string(maxIsotope);
 
             std::string ion_type = (ionList[ionIndex].type == OpenMS::Residue::ResidueType::BIon) ? "B" : "Y";
             ion_type += std::to_string(ionList[ionIndex].sequence.size());
