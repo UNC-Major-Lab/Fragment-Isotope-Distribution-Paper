@@ -9,7 +9,7 @@
 module load gcc/4.8.1
 module load r/3.2.2
 
-source ../../config.sh
+source ../config.sh
 
 set OUT_DIR = ${ROOT_OUT_DIR}"/compare_to_experimental/HT"
 
