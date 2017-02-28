@@ -13,7 +13,7 @@ data.calc <- read.table(infile2, sep="\t", header=T)
 data <- subset(data, (data$ion.index == 67 | data$ion.index == 55) & data$isotope.range <= 5)
 data.calc <- subset(data.calc, (data.calc$ion.index == 67 | data.calc$ion.index == 55) & data.calc$isotope.range <= 5)
 
-p <- ggplot(data=data, aes(x=mz,y=int))
+p <- ggplot(data=data, aes(x=mz,y=int,label=label))
 
 pdf(outfile, width=8.5, height=11)
 
@@ -24,6 +24,7 @@ print(
   + facet_grid(isotope.range ~ ion.name, scale="free")
   + ylab("Intensity normalized to base peak")
   + xlab("m/z")
+  + geom_label(aes(y = 0.5))
 )
 
 dev.off()

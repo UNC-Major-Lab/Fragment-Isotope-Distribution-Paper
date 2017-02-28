@@ -10,6 +10,7 @@
 
 #include "Ion.h"
 #include "SpectrumUtilities.h"
+#include "Stats.h"
 
 void normalizeDist(std::vector<std::pair<double, double> > &dist)
 {
@@ -25,14 +26,14 @@ void normalizeDist(std::vector<std::pair<double, double> > &dist)
 }
 
 void outputDist(std::ofstream &out, std::vector<std::pair<double, double> > &dist, std::string ion_name, int ionIndex,
-                std::string isotope_range, std::string name)
+                std::string isotope_range, std::string name, double score)
 {
 
 
     for (int i = 0; i < dist.size(); ++i)
     {
         out << isotope_range << "\t" << ionIndex << "\t" << ion_name << "\t" << dist[i].first << "\t"
-                 << dist[i].second << "\t" << name << std::endl;
+                 << dist[i].second << "\t" << name << "\t" << score << std::endl;
     }
 }
 
@@ -59,7 +60,7 @@ int main(int argc, char * argv[])
     std::ofstream calc_out(argv[4]);
 
     out << "isotope.range" << "\t" << "ion.index" << "\t" << "ion.name" << "\t" << "mz" << "\t" << "int" << std::endl;
-    calc_out << "isotope.range" << "\t" << "ion.index" << "\t" << "ion.name" << "\t" << "mz" << "\t" << "int" << "\t" << "method" << std::endl;
+    calc_out << "isotope.range" << "\t" << "ion.index" << "\t" << "ion.name" << "\t" << "mz" << "\t" << "int" << "\t" << "method" << "\t" << "label" << std::endl;
 
     const Ion precursorIon = Ion(OpenMS::AASequence::fromString("[-18.010565]ELYENKPRRPYIL"), OpenMS::Residue::Full, 3);
 
@@ -173,14 +174,20 @@ int main(int argc, char * argv[])
             }
             out << isotope_range << "\t" << ionIndex << "\t" << ion_name << "\t" << ionList[ionIndex].monoMz + 3.3 << "\t" << 0 << std::endl;
 
-
+            normalizeDist(observedDist);
             normalizeDist(exactConditionalFragmentDist);
             normalizeDist(approxFragmentFromWeightDist);
             normalizeDist(approxFragmentFromWeightAndSulfurDist);
 
-            outputDist(calc_out, exactConditionalFragmentDist, ion_name, ionIndex, isotope_range, "Exact Fragment");
-            outputDist(calc_out, approxFragmentFromWeightDist, ion_name, ionIndex, isotope_range, "Approx Fragment");
-            outputDist(calc_out, approxFragmentFromWeightAndSulfurDist, ion_name, ionIndex, isotope_range, "Approx Fragment S");
+            //compute chi-squared with observed to Conditional
+            double exactCondFragmentX2 = Stats::computeX2(observedDist, exactConditionalFragmentDist);
+            double approxFragmentFromWeightX2 = Stats::computeX2(observedDist, approxFragmentFromWeightDist);
+            double approxFragmentFromWeightAndSulfurX2 = Stats::computeX2(observedDist,
+                                                                          approxFragmentFromWeightAndSulfurDist);
+
+            outputDist(calc_out, exactConditionalFragmentDist, ion_name, ionIndex, isotope_range, "Exact Fragment", exactCondFragmentX2);
+            outputDist(calc_out, approxFragmentFromWeightDist, ion_name, ionIndex, isotope_range, "Approx Fragment", approxFragmentFromWeightX2);
+            outputDist(calc_out, approxFragmentFromWeightAndSulfurDist, ion_name, ionIndex, isotope_range, "Approx Fragment S", approxFragmentFromWeightAndSulfurX2);
         }
 
     }
