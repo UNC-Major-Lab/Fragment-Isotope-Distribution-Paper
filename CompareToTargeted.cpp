@@ -33,7 +33,7 @@ void outputDist(std::ofstream &out, std::vector<std::pair<double, double> > &dis
     for (int i = 0; i < dist.size(); ++i)
     {
         out << isotope_range << "\t" << ionIndex << "\t" << ion_name << "\t" << dist[i].first << "\t"
-                 << dist[i].second << "\t" << name << "\t" << std::endl;
+                 << dist[i].second << "\t" << name << std::endl;
     }
 }
 
