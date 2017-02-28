@@ -198,9 +198,9 @@ int main(int argc, char * argv[])
             outputDist(calc_out, approxFragmentFromWeightDist, ion_name, ionIndex, isotope_range, "Approx Fragment");
             outputDist(calc_out, approxFragmentFromWeightAndSulfurDist, ion_name, ionIndex, isotope_range, "Approx Fragment S");
 
-            outputScores(calc_out, ion_name, ionIndex, isotope_range, "Exact Fragment", exactCondFragmentX2, observedDist.front().first, 1.0);
-            outputScores(calc_out, ion_name, ionIndex, isotope_range, "Approx Fragment", approxFragmentFromWeightX2, observedDist.front().first, 0.8);
-            outputScores(calc_out, ion_name, ionIndex, isotope_range, "Approx Fragment S", approxFragmentFromWeightAndSulfurX2, observedDist.front().first, 0.6);
+            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Exact Fragment", exactCondFragmentX2, observedDist.front().first, 1.0);
+            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Approx Fragment", approxFragmentFromWeightX2, observedDist.front().first, 0.8);
+            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Approx Fragment S", approxFragmentFromWeightAndSulfurX2, observedDist.front().first, 0.6);
         }
 
     }
