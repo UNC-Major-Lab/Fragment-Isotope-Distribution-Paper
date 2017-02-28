@@ -27,7 +27,7 @@ print(
   + facet_grid(isotope.range ~ ion.name, scale="free")
   + ylab("Intensity normalized to base peak")
   + xlab("m/z")
-  + geom_text(data=data.scores, aes(group=method, color=method, x=x, y=y, label=label) size=1)
+  + geom_text(data=data.scores, aes(group=method, color=method, x=x, y=y, label=label), size=1)
 )
 
 dev.off()
