@@ -9,13 +9,10 @@ from math import isnan
 root_dir = sys.argv[1]
 num_bins = float(sys.argv[2])
 prefix = sys.argv[3]
-job_id = int(sys.argv[4])
+job_id = int(sys.argv[4])-1
 num_jobs = int(sys.argv[5])
 
 comp2bin2count = defaultdict(dict)
-
-max_job = num_jobs * job_id
-min_job = max_job - num_jobs
 
 max_val = -float("inf")
 min_val = float("inf")
@@ -24,7 +21,7 @@ for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
     if os.path.isfile(fp) and ".out" in f and prefix in f:
         job = int(f.split("_")[-1].split(".")[0])
-        if job <= min_job or job > max_job: continue
+        if job % num_jobs != job_id: continue
 
         infile = open(fp)
         for line in infile:
@@ -40,7 +37,7 @@ for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
     if os.path.isfile(fp) and ".out" in f and prefix in f:
         job = int(f.split("_")[-1].split(".")[0])
-        if job <= min_job or job > max_job: continue
+        if job % num_jobs != job_id: continue
 
         infile = open(fp)
         for line in infile:
