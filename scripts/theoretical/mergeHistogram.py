@@ -7,11 +7,10 @@ from math import floor
 from math import isnan
 
 root_dir = sys.argv[1]
-bin_size = float(sys.argv[2])
-prefix = sys.argv[3]
-job_id = int(sys.argv[4])
-num_jobs = int(sys.argv[5])
-do_iso = sys.argv[6]
+prefix = sys.argv[2]
+job_id = int(sys.argv[3])
+num_jobs = int(sys.argv[4])
+do_iso = sys.argv[5]
 
 max_job = num_jobs * job_id
 min_job = max_job - num_jobs

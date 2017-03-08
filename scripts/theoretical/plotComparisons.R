@@ -17,7 +17,7 @@ if (fragments == "F") {
     pdf(outfile, width=9, height=6)
 
     print(p
-        + geom_bar(stat='identity', width=binWidth)
+        + geom_bar(stat='identity')
         + facet_wrap(~ V1, scale="free")
         + scale_x_continuous(expand=c(0,0))
         + xlab("residual")
@@ -33,7 +33,7 @@ if (fragments == "F") {
     pdf(outfile, width=12, height=18)
 
     print(p
-        + geom_bar(stat='identity', width=binWidth)
+        + geom_bar(stat='identity')
         + facet_wrap(V3 ~ V1, scale="free")
         + scale_x_continuous(expand=c(0,0))
         + xlab("residual")

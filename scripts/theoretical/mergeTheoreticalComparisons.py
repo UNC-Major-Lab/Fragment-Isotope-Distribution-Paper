@@ -7,7 +7,7 @@ from math import floor
 from math import isnan
 
 root_dir = sys.argv[1]
-bin_size = float(sys.argv[2])
+num_bins = float(sys.argv[2])
 prefix = sys.argv[3]
 job_id = int(sys.argv[4])
 num_jobs = int(sys.argv[5])
@@ -16,6 +16,24 @@ comp2iso2bin2count = dict()
 
 max_job = num_jobs * job_id
 min_job = max_job - num_jobs
+
+max_val = -float("inf")
+min_val = float("inf")
+
+for f in os.listdir(root_dir):
+    fp = root_dir+"/"+f
+    if os.path.isfile(fp) and ".out" in f and f.startswith(prefix):
+        job = int(f.split("_")[-1].split(".")[0])
+        if job <= min_job or job > max_job: continue
+
+        infile = open(fp)
+        for line in infile:
+            [score, iso, comp] = line.strip().split("\t")
+            score = float(score)
+            max_val = max(max_val, score)
+            min_val = min(min_val, score)
+
+bin_size = (max_val-min_val) / num_bins
 
 for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
