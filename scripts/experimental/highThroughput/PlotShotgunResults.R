@@ -76,5 +76,5 @@ for (searchDepth in 2:5) {
   write.table(out.table, sep="\t", file=paste(outPath, sep = "", "/chi-squared_incomplete_",searchDepth, ".tab"))
   savePlot(plotX2_Complete, paste(outPath, sep = "", "/chi-squared_complete_",searchDepth, ".eps"))
   out.table <- ddply(meltedX2_Complete, "variable", summarize, median=median(value), min=min(value), max=max(value), sd=sd(value), count=length(value))
-  write.table(out.table, sep="\t", file=paste(outPath, sep = "", "/chi-squared_complete_",searchDepth, ".eps"))
+  write.table(out.table, sep="\t", file=paste(outPath, sep = "", "/chi-squared_complete_",searchDepth, ".tab"))
 }
