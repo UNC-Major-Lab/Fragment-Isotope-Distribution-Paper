@@ -18,7 +18,8 @@ data.scores <- subset(data.scores, (data.scores$ion.index == 67 | data.scores$io
 
 p <- ggplot(data=data, aes(x=mz,y=int))
 
-pdf(outfile, width=8.5, height=11)
+setEPS()
+postscript(outfile, width=8.5, height=11)
 
 print(
   p

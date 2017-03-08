@@ -14,7 +14,8 @@ if (fragments == "F") {
 
     p <- ggplot(data=data, aes(x=V2, y=V3, group=V1, fill=factor(V1)))
 
-    pdf(outfile, width=9, height=6)
+    setEPS()
+    postscript(outfile, width=9, height=6)
 
     print(p
         + geom_bar(stat='identity')
@@ -30,7 +31,8 @@ if (fragments == "F") {
 
     p <- ggplot(data=data, aes(x=V2, y=V4, group=V1, fill=factor(V1)))
 
-    pdf(outfile, width=12, height=18)
+    setEPS()
+    postscript(outfile, width=12, height=18)
 
     print(p
         + geom_bar(stat='identity')
