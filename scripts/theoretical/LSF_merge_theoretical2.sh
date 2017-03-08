@@ -15,11 +15,11 @@ set BIN_SIZE_RESIDUAL = 30
 set BIN_SIZE_CHISQUARE = 30
 set IN_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
 
-python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "merged_precursor_scores_" 1 10 F > ${IN_DIR}"/precursor_scores.txt"
-python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "merged_precursor_residuals_" 1 10 F > ${IN_DIR}"/precursor_residuals.txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "merged_precursor_scores_" 1 50 F > ${IN_DIR}"/precursor_scores.txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "merged_precursor_residuals_" 1 50 F > ${IN_DIR}"/precursor_residuals.txt"
 
-python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "merged_fragment_scores_" 1 10 T > ${IN_DIR}"/fragment_scores.txt"
-python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "merged_fragment_residuals_" 1 10 T > ${IN_DIR}"/fragment_residuals.txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "merged_fragment_scores_" 1 50 T > ${IN_DIR}"/fragment_scores.txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "merged_fragment_residuals_" 1 50 T > ${IN_DIR}"/fragment_residuals.txt"
 
 Rscript plotComparisons.R ${IN_DIR}"/precursor_residuals.txt" ${IN_DIR}"/precursor_residuals.eps" ${BIN_SIZE_RESIDUAL} F
 Rscript plotComparisons.R ${IN_DIR}"/precursor_scores.txt" ${IN_DIR}"/precursor_chisquared.eps" ${BIN_SIZE_CHISQUARE} F
