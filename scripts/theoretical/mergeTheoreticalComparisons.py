@@ -27,7 +27,7 @@ for f in os.listdir(root_dir):
                 comp2iso2bin2count[comp] = dict()
             if not comp2iso2bin2count[comp].has_key(iso):
                 comp2iso2bin2count[comp][iso] = defaultdict(int)
-            bin = round(float(score)/comp2bin_size[comp])*comp2bin_size[comp]
+            bin = round(float(score)/bin_size)*bin_size
             comp2iso2bin2count[comp][iso][bin]+=1
         infile.close()
 

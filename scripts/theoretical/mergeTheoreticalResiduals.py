@@ -23,7 +23,7 @@ for f in os.listdir(root_dir):
         infile = open(fp)
         for line in infile:
             [residual, comp] = line.strip().split("\t")
-            bin = round(float(residual)/comp2bin_size[comp])*comp2bin_size[comp]
+            bin = round(float(residual)/bin_size)*bin_size
             if not comp2bin2count[comp].has_key(bin):
                 comp2bin2count[comp][bin]=0
             comp2bin2count[comp][bin]+=1
