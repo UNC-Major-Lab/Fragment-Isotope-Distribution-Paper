@@ -14,9 +14,9 @@ num_jobs = int(sys.argv[5])
 
 comp2iso2bin2count = dict()
 
-
-max_val = -float("inf")
-min_val = float("inf")
+comp2max_val = dict()
+comp2min_val = dict()
+comp2bin_size = defaultdict(float)
 
 for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
@@ -28,11 +28,19 @@ for f in os.listdir(root_dir):
         for line in infile:
             [score, iso, comp] = line.strip().split("\t")
             score = float(score)
-            max_val = max(max_val, score)
-            min_val = min(min_val, score)
+
+
+            if not comp2max_val.has_key(comp):
+                max_val = -float("inf")
+                min_val = float("inf")
+
+            comp2max_val[comp] = max(comp2max_val[comp], score)
+            comp2min_val[comp] = min(comp2min_val[comp], score)
 
         infile.close()
-bin_size = (max_val-min_val) / num_bins
+
+for comp in comp2max_val:
+    comp2bin_size[comp] = (comp2max_val[comp]-comp2min_val[comp]) / num_bins
 
 for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
@@ -47,7 +55,7 @@ for f in os.listdir(root_dir):
                 comp2iso2bin2count[comp] = dict()
             if not comp2iso2bin2count[comp].has_key(iso):
                 comp2iso2bin2count[comp][iso] = defaultdict(int)
-            bin = round(float(score)/bin_size)*bin_size
+            bin = round(float(score)/comp2bin_size[comp])*comp2bin_size[comp]
             comp2iso2bin2count[comp][iso][bin]+=1
         infile.close()
 

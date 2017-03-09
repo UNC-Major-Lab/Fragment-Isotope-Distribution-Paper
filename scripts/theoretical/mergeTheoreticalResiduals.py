@@ -14,8 +14,11 @@ num_jobs = int(sys.argv[5])
 
 comp2bin2count = defaultdict(dict)
 
-max_val = -float("inf")
-min_val = float("inf")
+comp2max_val = dict()
+comp2min_val = dict()
+comp2bin_size = defaultdict(float)
+
+
 
 for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
@@ -27,11 +30,17 @@ for f in os.listdir(root_dir):
         for line in infile:
             [residual, comp] = line.strip().split("\t")
             residual = float(residual)
-            max_val = max(max_val, residual)
-            min_val = min(min_val, residual)
+
+            if not comp2max_val.has_key(comp):
+                max_val = -float("inf")
+                min_val = float("inf")
+
+            comp2max_val[comp] = max(comp2max_val[comp], residual)
+            comp2min_val[comp] = min(comp2min_val[comp], residual)
         infile.close()
 
-bin_size = (max_val-min_val) / num_bins
+for comp in comp2max_val:
+    comp2bin_size[comp] = (comp2max_val[comp]-comp2min_val[comp]) / num_bins
 
 for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
@@ -42,7 +51,7 @@ for f in os.listdir(root_dir):
         infile = open(fp)
         for line in infile:
             [residual, comp] = line.strip().split("\t")
-            bin = round(float(residual)/bin_size)*bin_size
+            bin = round(float(residual)/comp2bin_size[comp])*comp2bin_size[comp]
             if not comp2bin2count[comp].has_key(bin):
                 comp2bin2count[comp][bin]=0
             comp2bin2count[comp][bin]+=1
