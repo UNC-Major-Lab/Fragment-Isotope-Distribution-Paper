@@ -11,8 +11,8 @@ module load r/3.2.2
 
 source ../config.sh
 
-set BIN_SIZE_RESIDUAL = 30
-set BIN_SIZE_CHISQUARE = 30
+set BIN_SIZE_RESIDUAL = 0.0025
+set BIN_SIZE_CHISQUARE = 0.025
 set IN_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
 
 python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "merged_precursor_scores_" F > ${IN_DIR}"/precursor_scores.txt"
