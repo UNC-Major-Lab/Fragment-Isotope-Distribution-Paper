@@ -23,7 +23,7 @@ if do_iso == 'F':
                 if not comp2bin2count[comp].has_key(bin):
                     comp2bin2count[comp][bin] = 0
                 comp2bin2count[comp][bin]+=count
-            close(fp)
+            infile.close()
 
     for comp in comp2bin2count:
         for bin in comp2bin2count[comp]:
@@ -43,7 +43,7 @@ else:
                 if not comp2iso2bin2count[comp].has_key(iso):
                     comp2iso2bin2count[comp][iso] = defaultdict(int)
                 comp2iso2bin2count[comp][iso][bin]+=count
-            close(fp)
+            infile.close()
 
     for comp in comp2iso2bin2count:
         for iso in comp2iso2bin2count[comp]:

@@ -31,7 +31,7 @@ for f in os.listdir(root_dir):
             max_val = max(max_val, score)
             min_val = min(min_val, score)
 
-        close(fp)
+        infile.close()
 bin_size = (max_val-min_val) / num_bins
 
 for f in os.listdir(root_dir):
@@ -49,7 +49,7 @@ for f in os.listdir(root_dir):
                 comp2iso2bin2count[comp][iso] = defaultdict(int)
             bin = round(float(score)/bin_size)*bin_size
             comp2iso2bin2count[comp][iso][bin]+=1
-        close(fp)
+        infile.close()
 
 for comp in comp2iso2bin2count:
     for iso in comp2iso2bin2count[comp]:

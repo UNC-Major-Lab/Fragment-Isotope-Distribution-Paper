@@ -29,7 +29,7 @@ for f in os.listdir(root_dir):
             residual = float(residual)
             max_val = max(max_val, residual)
             min_val = min(min_val, residual)
-        close(fp)
+        infile.close()
 
 bin_size = (max_val-min_val) / num_bins
 
@@ -46,7 +46,7 @@ for f in os.listdir(root_dir):
             if not comp2bin2count[comp].has_key(bin):
                 comp2bin2count[comp][bin]=0
             comp2bin2count[comp][bin]+=1
-        close(fp)
+        infile.close()
 
 for comp in comp2bin2count:
     for bin in comp2bin2count[comp]:
