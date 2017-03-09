@@ -150,10 +150,10 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     //for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "p" << std::endl;
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "f" << std::endl;
+    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "Averagine" << std::endl;
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_S_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "fs" << std::endl;
+    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "Sulfur-specific Averagine" << std::endl;
 }
 
 void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& precursor, EmpiricalFormula& fragment)
