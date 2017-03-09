@@ -32,7 +32,7 @@ for f in os.listdir(root_dir):
 
             if not comp2max_val.has_key(comp):
                 comp2max_val[comp] = -float("inf")
-                comp2max_val[comp] = float("inf")
+                comp2min_val[comp] = float("inf")
 
             comp2max_val[comp] = max(comp2max_val[comp], score)
             comp2min_val[comp] = min(comp2min_val[comp], score)
