@@ -32,8 +32,8 @@ for f in os.listdir(root_dir):
             residual = float(residual)
 
             if not comp2max_val.has_key(comp):
-                max_val = -float("inf")
-                min_val = float("inf")
+                comp2max_val[max_val] = -float("inf")
+                comp2max_val[min_val[] = float("inf")
 
             comp2max_val[comp] = max(comp2max_val[comp], residual)
             comp2min_val[comp] = min(comp2min_val[comp], residual)
