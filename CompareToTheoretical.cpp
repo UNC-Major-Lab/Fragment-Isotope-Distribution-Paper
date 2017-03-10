@@ -139,10 +139,10 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     //out_scores << scores[2] << "\t" << label << "\t" << "p" << std::endl;
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_prob);
-    out_scores << scores[2] << "\t" << label << "\t" << "f" << std::endl;
+    out_scores << scores[2] << "\t" << label << "\t" << "Averagine" << std::endl;
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_S_prob);
-    out_scores << scores[2] << "\t" << label << "\t" << "fs" << std::endl;
+    out_scores << scores[2] << "\t" << label << "\t" << "Sulfur-specific Averagine" << std::endl;
 
 
     //Residuals
