@@ -10,7 +10,7 @@ set(my_executables
         CompareToTargeted
         CreateAveragineModel
         GetSulfurDistribution
-        #SpeedTest
+        SpeedTest
         )
 
 ## list all classes here, which are required by your executables
@@ -22,7 +22,7 @@ set(my_sources
         CompareToTargeted.cpp
         CreateAveragineModel.cpp
         GetSulfurDistribution.cpp
-        #SpeedTest.cpp
+        SpeedTest.cpp
         Stats.h
         Ion.h
         Ion.cpp
