@@ -22,7 +22,7 @@ max_sulfur = sys.argv[4]
 now = datetime.utcnow();
 
 print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-print "<models maxIsotope=\"" + max_isotope + "\" maxSulfur=\"" + max_sulfur + "\" createdDate=\"" + now.isoformat(' ') + "\">\n"
+print "<models maxIsotope=\"" + max_isotope + "\" maxSulfur=\"" + max_sulfur + "\" createdDate=\"" + now.isoformat(' ') + "\">"
 
 iterateAndPrint(root_dir);
 iterateAndPrint(root_sulfur_dir);
