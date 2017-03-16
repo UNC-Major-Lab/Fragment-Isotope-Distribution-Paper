@@ -2,6 +2,7 @@
 import sys
 import os
 import re
+from datetime import datetime
 
 def iterateAndPrint(root_dir):
     for d in os.listdir(root_dir):
@@ -18,8 +19,10 @@ root_sulfur_dir = sys.argv[2]
 max_isotope = sys.argv[3]
 max_sulfur = sys.argv[4]
 
+now = datetime.utcnow();
+
 print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-print "<models max_isotope=\"" + max_isotope + "\" max_sulfur=\"" + max_sulfur + "\">\n"
+print "<models maxIsotope=\"" + max_isotope + "\" maxSulfur=\"" + max_sulfur + "\" createdDate=\"" + now.isoformat(' ') + "\">\n"
 
 iterateAndPrint(root_dir);
 iterateAndPrint(root_sulfur_dir);
