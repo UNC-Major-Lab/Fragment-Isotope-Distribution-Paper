@@ -120,7 +120,7 @@ void sample_average_isotopic_distribution(std::string distribution_path, float m
 {
     std::ofstream* outfiles = openOutputFiles(base_path, false);
 
-    FASTAParser parser(distribution_path, max_mass, 5, 100);
+    FASTAParser parser(distribution_path, max_mass, 1, 100);
     for (auto itr = parser.begin(); itr != parser.end(); ++itr)
     {
         write_distribution(*itr, outfiles);
