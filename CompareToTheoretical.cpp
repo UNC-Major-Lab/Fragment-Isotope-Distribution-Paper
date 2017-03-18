@@ -11,13 +11,15 @@
 #include <OpenMS/CHEMISTRY/Residue.h>
 #include <OpenMS/CHEMISTRY/EnzymaticDigestion.h>
 #include <OpenMS/CHEMISTRY/IsotopeDistribution.h>
+#include <OpenMS/CHEMISTRY/IsotopeSplineDB.h>
 #include <OpenMS/MATH/STATISTICS/StatisticFunctions.h>
 
 #include "Stats.h"
 
 using namespace OpenMS;
 
-static const OpenMS::ElementDB* elementDB = OpenMS::ElementDB::getInstance();
+static const ElementDB* elementDB = ElementDB::getInstance();
+static const IsotopeSplineDB* isotopeDB = IsotopeSplineDB::getInstance();
 
 std::random_device rd;
 std::mt19937 gen(rd());
@@ -123,12 +125,15 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     approx_fragment_S_dist.estimateForFragmentFromPeptideWeightAndS(pep_mass, num_s_prec, frag_mass, num_s_frag, isolated_precursor_isotopes);
     approx_fragment_S_dist.renormalize();
 
+    IsotopeDistribution approx_fragment_spline_dist = isotopeDB->estimateForFragmentFromPeptideWeight(pep_mass, frag_mass, isolated_precursor_isotopes);
+    approx_fragment_spline_dist.renormalize();
 
 
     std::vector<double> exact_fragment_prob =  fillProbabilities(exact_fragment_dist, depth);
     std::vector<double> approx_precursor_prob = fillProbabilities(approx_precursor_dist, depth);
     std::vector<double> approx_fragment_prob = fillProbabilities(approx_fragment_dist, depth);
     std::vector<double> approx_fragment_S_prob = fillProbabilities(approx_fragment_S_dist, depth);
+    std::vector<double> approx_fragment_spline_prob = fillProbabilities(approx_fragment_spline_dist, depth);
 
     //std::vector<double> decoy_prob = sampleDecoy(i+1);
     //std::vector<double> sampled_exact_fragment_prob = sampleFromDistribution(exact_fragment_prob);
@@ -144,6 +149,9 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     scores = calculateScores(exact_fragment_prob, approx_fragment_S_prob);
     out_scores << scores[2] << "\t" << label << "\t" << "Sulfur-specific Averagine" << std::endl;
 
+    scores = calculateScores(exact_fragment_prob, approx_fragment_spline_prob);
+    out_scores << scores[2] << "\t" << label << "\t" << "Spline" << std::endl;
+
 
     //Residuals
     //scores = calculateResiduals(exact_fragment_prob, approx_precursor_prob);
@@ -154,6 +162,9 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_S_prob);
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "Sulfur-specific Averagine" << std::endl;
+
+    scores = calculateResiduals(exact_fragment_prob, approx_fragment_spline_prob);
+    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "Spline" << std::endl;
 }
 
 void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& precursor, EmpiricalFormula& fragment)
@@ -193,25 +204,21 @@ void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
     averagine.estimateFromPeptideWeight(average_weight);
     averagineS.estimateFromPeptideWeightAndS(average_weight, num_S);
     //averagine.estimateFromWeightAndComp(average_weight, 4.86151, 7.68282, 1.3005, 1.56299, 0.047074, 0);
-    //spline.estimateFromPeptideWeightFast(average_weight);
-
-    averagine.renormalize();
-    averagineS.renormalize();
-    //spline.renormalize();
+    spline = isotopeDB->estimateFromPeptideWeight(average_weight, depth);
 
     std::vector<double> exact_prob =  fillProbabilities(exact, depth);
     std::vector<double> averagine_prob = fillProbabilities(averagine, depth);
     std::vector<double> averagineS_prob = fillProbabilities(averagineS, depth);
-    //std::vector<double> spline_prob =  fillProbabilities(spline, depth);
+    std::vector<double> spline_prob =  fillProbabilities(spline, depth);
 
     std::vector<double> scores;
     scores = calculateScores(exact_prob, averagine_prob);
     out_scores << scores[2] << "\t" << "exact vs averagine" << std::endl;
     scores = calculateScores(exact_prob, averagineS_prob);
     out_scores << scores[2] << "\t" << "exact vs sulfur-specific averagine" << std::endl;
-    /*scores = calculateScores(exact_prob, spline_prob);
+    scores = calculateScores(exact_prob, spline_prob);
     out_scores << scores[2] << "\t" << average_weight << "\t" << "exact vs spline" << std::endl;
-    scores = calculateScores(averagine_prob, spline_prob);
+    /*scores = calculateScores(averagine_prob, spline_prob);
     out_scores << scores[2] << "\t" << average_weight << "\t" << "averagine vs spline" << std::endl;
     */
 
@@ -220,9 +227,9 @@ void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs averagine" << std::endl;
     scores = calculateResiduals(exact_prob, averagineS_prob);
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs sulfur-specific averagine" << std::endl;
-    /*scores = calculateResiduals(exact_prob, spline_prob);
+    scores = calculateResiduals(exact_prob, spline_prob);
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs spline" << std::endl;
-    scores = calculateResiduals(averagine_prob, spline_prob);
+    /*scores = calculateResiduals(averagine_prob, spline_prob);
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "averagine vs spline" << std::endl;
     */
 }
