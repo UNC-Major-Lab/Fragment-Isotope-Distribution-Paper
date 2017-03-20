@@ -13,6 +13,8 @@ job_id = int(sys.argv[4])-1
 num_jobs = int(sys.argv[5])
 
 comp2iso2bin2count = dict()
+comp2iso2mean = defaultdict(float)
+comp2iso2count = defaultdict(float)
 
 for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
@@ -30,6 +32,10 @@ for f in os.listdir(root_dir):
             bin = round(float(score)/bin_size)*bin_size
             comp2iso2bin2count[comp][iso][bin]+=1
         infile.close()
+
+for comp in comp2iso2mean:
+    for iso in comp2iso2mean[comp]:
+        print "\t".join([comp, iso, comp2iso2mean[comp][iso]/comp2iso2count[comp][iso]])
 
 for comp in comp2iso2bin2count:
     for iso in comp2iso2bin2count[comp]:

@@ -13,6 +13,8 @@ job_id = int(sys.argv[4])-1
 num_jobs = int(sys.argv[5])
 
 comp2bin2count = defaultdict(dict)
+comp2mean = defaultdict(float)
+comp2count = defaultdict(float)
 
 for f in os.listdir(root_dir):
     fp = root_dir+"/"+f
@@ -27,7 +29,12 @@ for f in os.listdir(root_dir):
             if not comp2bin2count[comp].has_key(bin):
                 comp2bin2count[comp][bin]=0
             comp2bin2count[comp][bin]+=1
+            comp2mean[comp]+=float(residual)
+            comp2count[comp]+=1
         infile.close()
+
+for comp in comp2mean:
+    print "\t".join([comp, comp2mean[comp]/comp2count[comp]])
 
 for comp in comp2bin2count:
     for bin in comp2bin2count[comp]:

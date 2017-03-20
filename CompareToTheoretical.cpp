@@ -179,7 +179,6 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
 void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& precursor, EmpiricalFormula& fragment)
 {
     static Size MAX_ISOTOPE = 4;
-    static Size LENGTH = MAX_ISOTOPE+1;
 
     int num_s_frag = fragment.getNumberOf(ElementDB::getInstance()->getElement("Sulfur"));
     int num_s_prec = precursor.getNumberOf(ElementDB::getInstance()->getElement("Sulfur"));

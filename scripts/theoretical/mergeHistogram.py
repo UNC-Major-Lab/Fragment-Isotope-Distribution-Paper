@@ -18,11 +18,14 @@ if do_iso == 'F':
         if os.path.isfile(fp) and ".out" in f and f.startswith(prefix):
             infile = open(fp)
             for line in infile:
-                [comp, bin, count] = line.strip().split("\t")
-                count = int(count)
-                if not comp2bin2count[comp].has_key(bin):
-                    comp2bin2count[comp][bin] = 0
-                comp2bin2count[comp][bin]+=count
+                if (len(line.strip().split("\t")) == 2):
+                    1
+                else:
+                    [comp, bin, count] = line.strip().split("\t")
+                    count = int(count)
+                    if not comp2bin2count[comp].has_key(bin):
+                        comp2bin2count[comp][bin] = 0
+                    comp2bin2count[comp][bin]+=count
             infile.close()
 
     for comp in comp2bin2count:
@@ -38,11 +41,14 @@ else:
 
             infile = open(fp)
             for line in infile:
-                [comp, bin, iso, count] = line.strip().split("\t")
-                count = int(count)
-                if not comp2iso2bin2count[comp].has_key(iso):
-                    comp2iso2bin2count[comp][iso] = defaultdict(int)
-                comp2iso2bin2count[comp][iso][bin]+=count
+                if (len(line.strip().split("\t")) == 2):
+                    1
+                else:
+                    [comp, bin, iso, count] = line.strip().split("\t")
+                    count = int(count)
+                    if not comp2iso2bin2count[comp].has_key(iso):
+                        comp2iso2bin2count[comp][iso] = defaultdict(int)
+                    comp2iso2bin2count[comp][iso][bin]+=count
             infile.close()
 
     for comp in comp2iso2bin2count:
