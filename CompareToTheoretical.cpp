@@ -169,16 +169,16 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     //for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "p" << std::endl;
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_prob);
-    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Averagine"][label].first.push_back(scores[i]);
+    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Averagine"][label].second.push_back(scores[i]);
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_S_prob);
-    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Sulfur-specific Averagine"][label].first.push_back(scores[i]);
+    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Sulfur-specific Averagine"][label].second.push_back(scores[i]);
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_spline_prob);
-    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Spline"][label].first.push_back(scores[i]);
+    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Spline"][label].second.push_back(scores[i]);
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_splineS_prob);
-    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Sulfur-specific spline"][label].first.push_back(scores[i]);
+    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Sulfur-specific spline"][label].second.push_back(scores[i]);
 }
 
 void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& precursor, EmpiricalFormula& fragment)
@@ -241,13 +241,13 @@ void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
 
 
     scores = calculateResiduals(exact_prob, averagine_prob);
-    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Averagine"].first.push_back(scores[i]);
+    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Averagine"].second.push_back(scores[i]);
     scores = calculateResiduals(exact_prob, averagineS_prob);
-    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Sulfur-specific averagine"].first.push_back(scores[i]);
+    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Sulfur-specific averagine"].second.push_back(scores[i]);
     scores = calculateResiduals(exact_prob, spline_prob);
-    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Spline"].first.push_back(scores[i]);
+    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Spline"].second.push_back(scores[i]);
     scores = calculateResiduals(exact_prob, splineS_prob);
-    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Sulfur-specific spline"].first.push_back(scores[i]);
+    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Sulfur-specific spline"].second.push_back(scores[i]);
     /*scores = calculateResiduals(averagine_prob, spline_prob);
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "averagine vs spline" << std::endl;
     */
