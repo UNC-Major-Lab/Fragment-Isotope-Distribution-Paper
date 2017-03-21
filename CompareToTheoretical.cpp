@@ -31,8 +31,8 @@ std::uniform_real_distribution<> dis(0, 1);
 
 std::set<AASequence> uniquePeptides;
 
-std::map<std::string, std::pair<std::vector<double>, std::vector<double>>> precursor_method2val;
-std::map<std::string, std::map<std::string, std::pair<std::vector<double>, std::vector<double>>>> fragment_method2iso2val;
+std::map<std::string, std::pair<std::vector<double>, std::vector<double> > > precursor_method2val;
+std::map<std::string, std::map<std::string, std::pair<std::vector<double>, std::vector<double> > > > fragment_method2iso2val;
 
 
 bool isValidPeptide(AASequence& pep) {
@@ -314,8 +314,8 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
     std::ofstream out_scores(path_chisquared);
     std::ofstream out_stats(path_stats);
 
-    std::map<std::string, std::map<int, int>> precursor_method2bin2count;
-    std::map<std::string, std::map<std::string, std::map<int, int>>> fragment_method2iso2bin2count;
+    std::map<std::string, std::map<int, int> > precursor_method2bin2count;
+    std::map<std::string, std::map<std::string, std::map<int, int> > > fragment_method2iso2bin2count;
 
     for (auto const &method_itr : precursor_method2val)
     {
@@ -353,28 +353,24 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
 
 void init()
 {
-    precursor_method2val.insert(std::make_pair("Averagine", std::make_pair(std::vector<double>(), std::vector<double>())));
-    precursor_method2val.insert(std::make_pair("Sulfur-specific averagine", std::make_pair(std::vector<double>(), std::vector<double>())));
-    precursor_method2val.insert(std::make_pair("Spline", std::make_pair(std::vector<double>(), std::vector<double>())));
-    precursor_method2val.insert(std::make_pair("Sulfurs-specific spline", std::make_pair(std::vector<double>(), std::vector<double>())));
+    typedef std::map<int, std::pair<std::vector<double>, std::vector<double> > > iso2valType;
+    precursor_method2val["Averagine"] = std::make_pair(std::vector<double>(), std::vector<double>());
+    precursor_method2val["Sulfur-specific averagine"] = std::make_pair(std::vector<double>(), std::vector<double>());
+    precursor_method2val["Spline"] = std::make_pair(std::vector<double>(), std::vector<double>());
+    precursor_method2val["Sulfurs-specific spline"] = std::make_pair(std::vector<double>(), std::vector<double>());
 
-    fragment_method2iso2val.insert(std::make_pair("Averagine", std::map<int, std::pair<std::vector<double>, std::vector<double>>>()));
-    fragment_method2iso2val.insert(std::make_pair("Sulfur-specific averagine", std::map<int, std::pair<std::vector<double>, std::vector<double>>>()));
-    fragment_method2iso2val.insert(std::make_pair("Spline", std::map<int, std::pair<std::vector<double>, std::vector<double>>>()));
-    fragment_method2iso2val.insert(std::make_pair("Sulfurs-specific spline", std::map<int, std::pair<std::vector<double>, std::vector<double>>>()));
 
     for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
         std::string label = "0-" + std::to_string(i);
-        fragment_method2iso2val["Averagine"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
-        fragment_method2iso2val["Sulfur-specific averagine"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
-        fragment_method2iso2val["Spline"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
-        fragment_method2iso2val["Sulfurs-specific spline"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
+        fragment_method2iso2val["Averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+        fragment_method2iso2val["Sulfur-specific averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+        fragment_method2iso2val["Spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+        fragment_method2iso2val["Sulfurs-specific spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
         label = std::to_string(i);
-        fragment_method2iso2val["Averagine"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
-        fragment_method2iso2val["Sulfur-specific averagine"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
-        fragment_method2iso2val["Spline"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
-        fragment_method2iso2val["Sulfurs-specific spline"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
-
+        fragment_method2iso2val["Averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+        fragment_method2iso2val["Sulfur-specific averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+        fragment_method2iso2val["Spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+        fragment_method2iso2val["Sulfurs-specific spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
     }
 }
 
