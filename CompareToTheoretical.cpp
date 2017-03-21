@@ -4,6 +4,8 @@
 #include <numeric>
 #include <string>
 #include <set>
+#include <functional>
+#include <string>
 
 #include <OpenMS/FORMAT/FASTAFile.h>
 #include <OpenMS/CHEMISTRY/AASequence.h>
@@ -21,14 +23,17 @@ using namespace OpenMS;
 static const ElementDB* elementDB = ElementDB::getInstance();
 static const IsotopeSplineDB* isotopeDB = IsotopeSplineDB::getInstance();
 
+static Size MAX_ISOTOPE = 4;
+
 std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<> dis(0, 1);
 
 std::set<AASequence> uniquePeptides;
 
-std::ofstream out_residual;
-std::ofstream out_scores;
+std::map<std::string, std::pair<std::vector<double>, std::vector<double>>> precursor_method2val;
+std::map<std::string, std::map<std::string, std::pair<std::vector<double>, std::vector<double>>>> fragment_method2iso2val;
+
 
 bool isValidPeptide(AASequence& pep) {
     String p = pep.toString();
@@ -148,37 +153,37 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     //out_scores << scores[2] << "\t" << label << "\t" << "p" << std::endl;
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_prob);
-    out_scores << scores[2] << "\t" << label << "\t" << "Averagine" << std::endl;
+    fragment_method2iso2val["Averagine"][label].first.push_back(scores[2]);
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_S_prob);
-    out_scores << scores[2] << "\t" << label << "\t" << "Sulfur-specific Averagine" << std::endl;
+    fragment_method2iso2val["Sulfur-specific Averagine"][label].first.push_back(scores[2]);
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_spline_prob);
-    out_scores << scores[2] << "\t" << label << "\t" << "Spline" << std::endl;
+    fragment_method2iso2val["Spline"][label].first.push_back(scores[2]);
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_splineS_prob);
-    out_scores << scores[2] << "\t" << label << "\t" << "Sulfur-specific Spline" << std::endl;
+    fragment_method2iso2val["Sulfur-specific spline"][label].first.push_back(scores[2]);
 
     //Residuals
     //scores = calculateResiduals(exact_fragment_prob, approx_precursor_prob);
     //for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "p" << std::endl;
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "Averagine" << std::endl;
+    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Averagine"][label].first.push_back(scores[i]);
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_S_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "Sulfur-specific Averagine" << std::endl;
+    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Sulfur-specific Averagine"][label].first.push_back(scores[i]);
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_spline_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "Spline" << std::endl;
+    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Spline"][label].first.push_back(scores[i]);
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_splineS_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "Sulfur-specific Spline" << std::endl;
+    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Sulfur-specific spline"][label].first.push_back(scores[i]);
 }
 
 void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& precursor, EmpiricalFormula& fragment)
 {
-    static Size MAX_ISOTOPE = 4;
+
 
     int num_s_frag = fragment.getNumberOf(ElementDB::getInstance()->getElement("Sulfur"));
     int num_s_prec = precursor.getNumberOf(ElementDB::getInstance()->getElement("Sulfur"));
@@ -223,26 +228,26 @@ void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
 
     std::vector<double> scores;
     scores = calculateScores(exact_prob, averagine_prob);
-    out_scores << scores[2] << "\t" << "exact vs averagine" << std::endl;
+    precursor_method2val["Averagine"].first.push_back(scores[2]);
     scores = calculateScores(exact_prob, averagineS_prob);
-    out_scores << scores[2] << "\t" << "exact vs sulfur-specific averagine" << std::endl;
+    precursor_method2val["Sulfur-specific averagine"].first.push_back(scores[2]);
     scores = calculateScores(exact_prob, spline_prob);
-    out_scores << scores[2] << "\t" << "exact vs spline" << std::endl;
+    precursor_method2val["Spline"].first.push_back(scores[2]);
     scores = calculateScores(exact_prob, splineS_prob);
-    out_scores << scores[2] << "\t" << "exact vs sulfurs-specific spline" << std::endl;
+    precursor_method2val["Sulfur-specific spline"].first.push_back(scores[2]);
     /*scores = calculateScores(averagine_prob, spline_prob);
     out_scores << scores[2] << "\t" << average_weight << "\t" << "averagine vs spline" << std::endl;
     */
 
 
     scores = calculateResiduals(exact_prob, averagine_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs averagine" << std::endl;
+    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Averagine"].first.push_back(scores[i]);
     scores = calculateResiduals(exact_prob, averagineS_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs sulfur-specific averagine" << std::endl;
+    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Sulfur-specific averagine"].first.push_back(scores[i]);
     scores = calculateResiduals(exact_prob, spline_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs spline" << std::endl;
+    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Spline"].first.push_back(scores[i]);
     scores = calculateResiduals(exact_prob, splineS_prob);
-    for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "exact vs sulfur-specific spline" << std::endl;
+    for (int i = 0; i < scores.size(); ++i) precursor_method2val["Sulfur-specific spline"].first.push_back(scores[i]);
     /*scores = calculateResiduals(averagine_prob, spline_prob);
     for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << "averagine vs spline" << std::endl;
     */
@@ -303,9 +308,79 @@ void testTheoreticalPeptides(std::string fasta_path, int job_id, int num_jobs, b
     }
 }
 
+void writeResults(std::string path_residual, std::string path_chisquared, std::string path_stats)
+{
+    std::ofstream out_residual(path_residual);
+    std::ofstream out_scores(path_chisquared);
+    std::ofstream out_stats(path_stats);
+
+    std::map<std::string, std::map<int, int>> precursor_method2bin2count;
+    std::map<std::string, std::map<std::string, std::map<int, int>>> fragment_method2iso2bin2count;
+
+    for (auto const &method_itr : precursor_method2val)
+    {
+        std::string const &key = method_itr.first;
+        std::vector<double> const &chi = method_itr.second.first;
+        std::vector<double> const &res = method_itr.second.second;
+        double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
+        double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
+
+        out_stats << mean_chi << "\t" << key << std::endl;
+        out_stats << mean_res << "\t" << key << std::endl;
+    }
+
+    for (auto const &method_itr : fragment_method2iso2val)
+    {
+        std::string const &key = method_itr.first;
+        for (auto const &iso_itr : fragment_method2iso2val[key])
+        {
+            std::string const &iso = iso_itr.first;
+            std::vector<double> const &chi = iso_itr.second.first;
+            std::vector<double> const &res = iso_itr.second.second;
+            double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
+            double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
+
+            out_stats << mean_chi << "\t" << iso << "\t" << key << std::endl;
+            out_stats << mean_res << "\t" << iso << "\t" << key << std::endl;
+        }
+    }
+
+
+    out_residual.close();
+    out_scores.close();
+    out_stats.close();
+}
+
+void init()
+{
+    precursor_method2val.insert(std::make_pair("Averagine", std::make_pair(std::vector<double>(), std::vector<double>())));
+    precursor_method2val.insert(std::make_pair("Sulfur-specific averagine", std::make_pair(std::vector<double>(), std::vector<double>())));
+    precursor_method2val.insert(std::make_pair("Spline", std::make_pair(std::vector<double>(), std::vector<double>())));
+    precursor_method2val.insert(std::make_pair("Sulfurs-specific spline", std::make_pair(std::vector<double>(), std::vector<double>())));
+
+    fragment_method2iso2val.insert(std::make_pair("Averagine", std::map<int, std::pair<std::vector<double>, std::vector<double>>>()));
+    fragment_method2iso2val.insert(std::make_pair("Sulfur-specific averagine", std::map<int, std::pair<std::vector<double>, std::vector<double>>>()));
+    fragment_method2iso2val.insert(std::make_pair("Spline", std::map<int, std::pair<std::vector<double>, std::vector<double>>>()));
+    fragment_method2iso2val.insert(std::make_pair("Sulfurs-specific spline", std::map<int, std::pair<std::vector<double>, std::vector<double>>>()));
+
+    for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
+        std::string label = "0-" + std::to_string(i);
+        fragment_method2iso2val["Averagine"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
+        fragment_method2iso2val["Sulfur-specific averagine"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
+        fragment_method2iso2val["Spline"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
+        fragment_method2iso2val["Sulfurs-specific spline"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
+        label = std::to_string(i);
+        fragment_method2iso2val["Averagine"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
+        fragment_method2iso2val["Sulfur-specific averagine"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
+        fragment_method2iso2val["Spline"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
+        fragment_method2iso2val["Sulfurs-specific spline"].insert(std::make_pair(label, std::make_pair(std::vector<double>(), std::vector<double>())));
+
+    }
+}
+
 void usage()
 {
-    std::cout << "CompareToTheoretical fasta_path job_id num_jobs do_frag residual_file score_file" << std::endl;
+    std::cout << "CompareToTheoretical fasta_path job_id num_jobs do_frag residual_file score_file stats_file" << std::endl;
 }
 
 int main(int argc, char * argv[])
@@ -315,13 +390,13 @@ int main(int argc, char * argv[])
         usage();
     }
 
-    out_residual.open(argv[5]);
-    out_scores.open(argv[6]);
+    init();
 
     testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]), atoi(argv[4]));
 
-    out_residual.close();
-    out_scores.close();
+    writeResults(argv[5], argv[6], argv[7]);
+
+
 
     return 0;
 }
