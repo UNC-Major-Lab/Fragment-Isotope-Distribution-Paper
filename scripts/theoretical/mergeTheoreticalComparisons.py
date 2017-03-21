@@ -35,7 +35,7 @@ for f in os.listdir(root_dir):
 
 for comp in comp2iso2mean:
     for iso in comp2iso2mean[comp]:
-        print "\t".join([comp, iso, comp2iso2mean[comp][iso]/comp2iso2count[comp][iso]])
+        print "\t".join([comp, iso, str(comp2iso2mean[comp][iso]/comp2iso2count[comp][iso])])
 
 for comp in comp2iso2bin2count:
     for iso in comp2iso2bin2count[comp]:

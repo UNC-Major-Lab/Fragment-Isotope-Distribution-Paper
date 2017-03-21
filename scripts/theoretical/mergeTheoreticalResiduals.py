@@ -34,7 +34,7 @@ for f in os.listdir(root_dir):
         infile.close()
 
 for comp in comp2mean:
-    print "\t".join([comp, comp2mean[comp]/comp2count[comp]])
+    print "\t".join([comp, str(comp2mean[comp]/comp2count[comp])])
 
 for comp in comp2bin2count:
     for bin in comp2bin2count[comp]:
