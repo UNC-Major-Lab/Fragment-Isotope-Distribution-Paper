@@ -323,13 +323,32 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
             for (auto const &iso_itr : fragment_method2iso2val[key])
             {
                 std::string const &iso = iso_itr.first;
-                std::vector<double> const &chi = iso_itr.second.first;
-                std::vector<double> const &res = iso_itr.second.second;
+                std::vector<double> chi = iso_itr.second.first;
+                std::vector<double> res = iso_itr.second.second;
+                std::sort(chi.begin(), chi.end());
+                std::sort(res.begin(), res.end());
+
                 double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
                 double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
 
-                out_stats << mean_chi << "\t" << iso << "\t" << key << std::endl;
-                out_stats << mean_res << "\t" << iso << "\t" << key << std::endl;
+                double median_chi = chi[chi.size()/2];
+                double median_res = res[res.size()/2];
+
+                double q1_chi = chi[chi.size()/4];
+                double q1_res = res[res.size()/4];
+
+                double q3_chi = chi[3*chi.size()/4];
+                double q3_res = res[3*res.size()/4];
+
+                double min_chi = chi[0];
+                double min_res = res[0];
+
+                double max_chi = chi[chi.size()-1];
+                double max_res = res[res.size()-1];
+
+                out_stats << mean_chi << "\t" << min_chi << "\t" << q1_chi << "\t" << median_chi << "\t" << q3_chi << "\t" << max_chi << "\t" << iso << "\t" << key << std::endl;
+                out_stats << mean_res << "\t" << min_res << "\t" << q1_res << "\t" << median_res << "\t" << q3_res << "\t" << max_res << "\t" << iso << "\t" << key << std::endl;
+
             }
         }
     } else
@@ -339,16 +358,35 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
         for (auto const &method_itr : precursor_method2val)
         {
             std::string const &key = method_itr.first;
-            std::vector<double> const &chi = method_itr.second.first;
-            std::vector<double> const &res = method_itr.second.second;
+            std::vector<double> chi = method_itr.second.first;
+            std::vector<double> res = method_itr.second.second;
             double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
             double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
 
-            out_stats << mean_chi << "\t" << key << std::endl;
-            out_stats << mean_res << "\t" << key << std::endl;
+            std::sort(chi.begin(), chi.end());
+            std::sort(res.begin(), res.end());
+
+            double median_chi = chi[chi.size()/2];
+            double median_res = res[res.size()/2];
+
+            double q1_chi = chi[chi.size()/4];
+            double q1_res = res[res.size()/4];
+
+            double q3_chi = chi[3*chi.size()/4];
+            double q3_res = res[3*res.size()/4];
+
+            double min_chi = chi[0];
+            double min_res = res[0];
+
+            double max_chi = chi[chi.size()-1];
+            double max_res = res[res.size()-1];
+
+            out_stats << mean_chi << "\t" << min_chi << "\t" << q1_chi << "\t" << median_chi << "\t" << q3_chi << "\t" << max_chi << "\t" << key << std::endl;
+            out_stats << mean_res << "\t" << min_res << "\t" << q1_res << "\t" << median_res << "\t" << q3_res << "\t" << max_res << "\t" << key << std::endl;
+
         }
     }
-    
+
     out_residual.close();
     out_scores.close();
     out_stats.close();
