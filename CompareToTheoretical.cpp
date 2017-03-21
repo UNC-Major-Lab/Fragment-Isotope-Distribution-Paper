@@ -224,7 +224,7 @@ void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
     std::vector<double> averagine_prob = fillProbabilities(averagine, depth);
     std::vector<double> averagineS_prob = fillProbabilities(averagineS, depth);
     std::vector<double> spline_prob =  fillProbabilities(spline, depth);
-    std::vector<double> splineS_prob =  fillProbabilities(spline, depth);
+    std::vector<double> splineS_prob =  fillProbabilities(splineS, depth);
 
     std::vector<double> scores;
     scores = calculateScores(exact_prob, averagine_prob);
@@ -308,70 +308,78 @@ void testTheoreticalPeptides(std::string fasta_path, int job_id, int num_jobs, b
     }
 }
 
-void writeResults(std::string path_residual, std::string path_chisquared, std::string path_stats)
+void writeResults(std::string path_residual, std::string path_chisquared, std::string path_stats, bool doFragments)
 {
     std::ofstream out_residual(path_residual);
     std::ofstream out_scores(path_chisquared);
     std::ofstream out_stats(path_stats);
 
-    std::map<std::string, std::map<int, int> > precursor_method2bin2count;
-    std::map<std::string, std::map<std::string, std::map<int, int> > > fragment_method2iso2bin2count;
-
-    for (auto const &method_itr : precursor_method2val)
+    if (doFragments)
     {
-        std::string const &key = method_itr.first;
-        std::vector<double> const &chi = method_itr.second.first;
-        std::vector<double> const &res = method_itr.second.second;
-        double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
-        double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
-
-        out_stats << mean_chi << "\t" << key << std::endl;
-        out_stats << mean_res << "\t" << key << std::endl;
-    }
-
-    for (auto const &method_itr : fragment_method2iso2val)
-    {
-        std::string const &key = method_itr.first;
-        for (auto const &iso_itr : fragment_method2iso2val[key])
+        std::map<std::string, std::map<std::string, std::map<int, int> > > fragment_method2iso2bin2count;
+        for (auto const &method_itr : fragment_method2iso2val)
         {
-            std::string const &iso = iso_itr.first;
-            std::vector<double> const &chi = iso_itr.second.first;
-            std::vector<double> const &res = iso_itr.second.second;
+            std::string const &key = method_itr.first;
+            for (auto const &iso_itr : fragment_method2iso2val[key])
+            {
+                std::string const &iso = iso_itr.first;
+                std::vector<double> const &chi = iso_itr.second.first;
+                std::vector<double> const &res = iso_itr.second.second;
+                double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
+                double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
+
+                out_stats << mean_chi << "\t" << iso << "\t" << key << std::endl;
+                out_stats << mean_res << "\t" << iso << "\t" << key << std::endl;
+            }
+        }
+    } else
+    {
+        std::map<std::string, std::map<int, int> > precursor_method2bin2count;
+
+        for (auto const &method_itr : precursor_method2val)
+        {
+            std::string const &key = method_itr.first;
+            std::vector<double> const &chi = method_itr.second.first;
+            std::vector<double> const &res = method_itr.second.second;
             double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
             double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
 
-            out_stats << mean_chi << "\t" << iso << "\t" << key << std::endl;
-            out_stats << mean_res << "\t" << iso << "\t" << key << std::endl;
+            out_stats << mean_chi << "\t" << key << std::endl;
+            out_stats << mean_res << "\t" << key << std::endl;
         }
     }
-
-
+    
     out_residual.close();
     out_scores.close();
     out_stats.close();
 }
 
-void init()
+void init(bool doFragments)
 {
-    typedef std::map<int, std::pair<std::vector<double>, std::vector<double> > > iso2valType;
-    precursor_method2val["Averagine"] = std::make_pair(std::vector<double>(), std::vector<double>());
-    precursor_method2val["Sulfur-specific averagine"] = std::make_pair(std::vector<double>(), std::vector<double>());
-    precursor_method2val["Spline"] = std::make_pair(std::vector<double>(), std::vector<double>());
-    precursor_method2val["Sulfurs-specific spline"] = std::make_pair(std::vector<double>(), std::vector<double>());
 
-
-    for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
-        std::string label = "0-" + std::to_string(i);
-        fragment_method2iso2val["Averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
-        fragment_method2iso2val["Sulfur-specific averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
-        fragment_method2iso2val["Spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
-        fragment_method2iso2val["Sulfurs-specific spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
-        label = std::to_string(i);
-        fragment_method2iso2val["Averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
-        fragment_method2iso2val["Sulfur-specific averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
-        fragment_method2iso2val["Spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
-        fragment_method2iso2val["Sulfurs-specific spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+    if (doFragments)
+    {
+        for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
+            std::string label = "0-" + std::to_string(i);
+            fragment_method2iso2val["Averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+            fragment_method2iso2val["Sulfur-specific averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+            fragment_method2iso2val["Spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+            fragment_method2iso2val["Sulfurs-specific spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+            label = std::to_string(i);
+            fragment_method2iso2val["Averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+            fragment_method2iso2val["Sulfur-specific averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+            fragment_method2iso2val["Spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+            fragment_method2iso2val["Sulfurs-specific spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+        }
+    } else
+    {
+        precursor_method2val["Averagine"] = std::make_pair(std::vector<double>(), std::vector<double>());
+        precursor_method2val["Sulfur-specific averagine"] = std::make_pair(std::vector<double>(), std::vector<double>());
+        precursor_method2val["Spline"] = std::make_pair(std::vector<double>(), std::vector<double>());
+        precursor_method2val["Sulfurs-specific spline"] = std::make_pair(std::vector<double>(), std::vector<double>());
     }
+
+
 }
 
 void usage()
@@ -386,11 +394,11 @@ int main(int argc, char * argv[])
         usage();
     }
 
-    init();
+    init(atoi(argv[4]));
 
     testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]), atoi(argv[4]));
 
-    writeResults(argv[5], argv[6], argv[7]);
+    writeResults(argv[5], argv[6], argv[7], atoi(argv[4]));
 
 
 
