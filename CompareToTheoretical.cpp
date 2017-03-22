@@ -281,12 +281,14 @@ void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& 
 {
     static Size MIN_PEPTIDE_LENGTH = 5;
     static Size MAX_PEPTIDE_LENGTH = 80;
+    static double MAX_MASS = 9000;
 
     std::vector<AASequence> peptides;
     digestor.digest(AASequence::fromString(protein.sequence), peptides);
     for (Size j = 0; j < peptides.size(); ++j)
     {
         if (peptides[j].size() >= MIN_PEPTIDE_LENGTH && peptides[j].size() <= MAX_PEPTIDE_LENGTH
+            && peptides[j].getAverageWeight() < MAX_MASS
             && isValidPeptide(peptides[j]) && uniquePeptides.find(peptides[j]) == uniquePeptides.end())
         {
             uniquePeptides.insert(peptides[j]);
