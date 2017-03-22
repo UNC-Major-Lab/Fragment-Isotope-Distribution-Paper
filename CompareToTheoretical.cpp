@@ -214,9 +214,10 @@ void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
 
     double average_weight = p.getAverageWeight();
     exact = p.getIsotopeDistribution(depth);
-    averagine.estimateFromPeptideWeight(average_weight);
-    averagineS.estimateFromPeptideWeightAndS(average_weight, num_S);
-    //averagine.estimateFromWeightAndComp(average_weight, 4.86151, 7.68282, 1.3005, 1.56299, 0.047074, 0);
+    //averagine.estimateFromPeptideWeight(average_weight);
+    //averagineS.estimateFromPeptideWeightAndS(average_weight, num_S);
+    averagine.estimateFromWeightAndComp(average_weight, 4.86151, 7.68282, 1.3005, 1.56299, 0.047074, 0);
+    averagineS.estimateFromWeightAndCompAndS(average_weight, num_S, 4.86151, 7.68282, 1.3005, 1.56299, 0);
     spline = isotopeDB->estimateFromPeptideWeight(average_weight, depth);
     splineS = isotopeDB->estimateFromPeptideWeightAndS(average_weight, num_S, depth);
 
