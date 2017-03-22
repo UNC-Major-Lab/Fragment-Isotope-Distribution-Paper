@@ -289,7 +289,7 @@ void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& 
     for (Size j = 0; j < peptides.size(); ++j)
     {
         if (peptides[j].size() >= MIN_PEPTIDE_LENGTH && peptides[j].size() <= MAX_PEPTIDE_LENGTH
-            && peptides[j].getAverageWeight() < MAX_MASS && peptides[j].getFormula().getNumberOf(elementDB->getElement("Sulfur")) <= 10
+            && peptides[j].getAverageWeight() < MAX_MASS && peptides[j].getFormula().getNumberOf(elementDB->getElement("Sulfur")) <= 5
             && isValidPeptide(peptides[j]) && uniquePeptides.find(peptides[j]) == uniquePeptides.end())
         {
             uniquePeptides.insert(peptides[j]);
