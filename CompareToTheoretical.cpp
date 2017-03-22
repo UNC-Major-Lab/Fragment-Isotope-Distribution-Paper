@@ -329,6 +329,7 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
                 std::sort(res.begin(), res.end());
 
                 double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
+                for (int i = 0; i < res.size(); ++i) res[i] = std::abs(res[i]);
                 double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
 
                 double median_chi = chi[chi.size()/2];
@@ -361,6 +362,8 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
             std::vector<double> chi = method_itr.second.first;
             std::vector<double> res = method_itr.second.second;
             double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
+
+            for (int i = 0; i < res.size(); ++i) res[i] = std::abs(res[i]);
             double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
 
             std::sort(chi.begin(), chi.end());
