@@ -207,7 +207,7 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
 
 void testTheoreticalPeptideDistribution(EmpiricalFormula &p)
 {
-    UInt depth = 11;
+    UInt depth = 6;
     IsotopeDistribution exact, averagine(depth), spline(depth), averagineS(depth), splineS(depth);
 
     int num_S = p.getNumberOf(elementDB->getElement("Sulfur"));
@@ -288,7 +288,7 @@ void testTheoreticalProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& 
     for (Size j = 0; j < peptides.size(); ++j)
     {
         if (peptides[j].size() >= MIN_PEPTIDE_LENGTH && peptides[j].size() <= MAX_PEPTIDE_LENGTH
-            && peptides[j].getAverageWeight() < MAX_MASS
+            && peptides[j].getAverageWeight() < MAX_MASS && peptides[j].getFormula().getNumberOf(elementDB->getElement("Sulfur")) <= 10
             && isValidPeptide(peptides[j]) && uniquePeptides.find(peptides[j]) == uniquePeptides.end())
         {
             uniquePeptides.insert(peptides[j]);
