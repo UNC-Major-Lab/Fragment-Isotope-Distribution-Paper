@@ -14,6 +14,7 @@
 #include "FASTAParser.h"
 
 static const OpenMS::ResidueDB* residueDB = OpenMS::ResidueDB::getInstance();
+static const ElementDB* elementDB = ElementDB::getInstance();
 
 static std::string AMINO_ACIDS = "ADEFGHIKLNPQRSTVWY";
 static std::string AMINO_ACIDS_SULFUR = "CM";
@@ -92,11 +93,11 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
     return random_peptide;
 }
 
-void sample_isotopic_distributions(std::string base_path, float max_mass, int num_samples, int num_sulfurs, bool append)
+void sample_isotopic_distributions(std::string base_path, std::string distribution_path, float max_mass, int num_samples, int num_sulfurs, bool append)
 {
     std::ofstream* outfiles = openOutputFiles(base_path, append);
 
-    int max_length = max_mass/100;
+    /*int max_length = max_mass/100;
 
     for (int peptide_length = 0; peptide_length <= max_length; ++peptide_length)
     {
@@ -109,6 +110,13 @@ void sample_isotopic_distributions(std::string base_path, float max_mass, int nu
                 write_distribution(random_sequence, outfiles);
             }
         }
+    }*/
+
+    FASTAParser parser(distribution_path, max_mass, 1, 100);
+    for (auto itr = parser.begin(); itr != parser.end(); ++itr)
+    {
+        if (itr->getFormula().getNumberOf(elementDB->getElement("Sulfur")) == num_sulfurs)
+            write_distribution(*itr, outfiles);
     }
 
     closeOutputFiles(outfiles);
@@ -151,23 +159,24 @@ void usage()
 
 int main(int argc, const char ** argv)
 {
-    if (argc != 7)
-    {
-        usage();
-    }
+    //if (argc != 7)
+    //{
+    //    usage();
+    //}
 
     int mode = atoi(argv[1]);
 
     if (mode == 0)
     {
-        std::string out_path = argv[2];
-        float max_mass = atof(argv[3]);
-        int num_samples = atoi(argv[4]);
-        int S = atoi(argv[5]);
+        std::string dist_path = argv[2];
+        std::string out_path = argv[3];
+        float max_mass = atof(argv[4]);
+        int num_samples = atoi(argv[5]);
+        int S = atoi(argv[6]);
 
-        max_depth = atoi(argv[6]) + 1;
+        max_depth = atoi(argv[7]) + 1;
 
-        sample_isotopic_distributions(out_path, max_mass, num_samples, S, false);
+        sample_isotopic_distributions(out_path, dist_path, max_mass, num_samples, S, false);
     }
     else if (mode == 1)
     {
