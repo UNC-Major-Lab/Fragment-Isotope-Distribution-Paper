@@ -15,8 +15,8 @@ def iterateAndPrint(root_dir):
                         print line.rstrip()
 
 root_dir = sys.argv[1]
-max_isotope = sys.argv[3]
-max_sulfur = sys.argv[4]
+max_isotope = sys.argv[2]
+max_sulfur = sys.argv[3]
 
 now = datetime.utcnow();
 
