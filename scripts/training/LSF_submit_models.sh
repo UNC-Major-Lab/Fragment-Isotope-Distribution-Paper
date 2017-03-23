@@ -6,7 +6,7 @@ set S = $1
 if ($S < 0) then
     set dir = "Average_Spline"
 else
-    set $dir = "S$S"
+    set dir = "S$S"
 endif
 
 set max_mass = $2
