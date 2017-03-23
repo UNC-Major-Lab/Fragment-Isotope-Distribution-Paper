@@ -15,13 +15,13 @@ def iterateAndPrint(root_dir):
                         print line.rstrip()
 
 root_dir = sys.argv[1]
-max_isotope = sys.argv[2]
+max_depth = sys.argv[2]
 max_sulfur = sys.argv[3]
 
 now = datetime.utcnow();
 
 print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-print "<models maxIsotope=\"" + max_isotope + "\" maxSulfur=\"" + max_sulfur + "\" createdDate=\"" + now.isoformat(' ') + "\">"
+print "<models maxIsotope=\"" + max_depth + "\" maxSulfur=\"" + max_sulfur + "\" createdDate=\"" + now.isoformat(' ') + "\">"
 
 iterateAndPrint(root_dir);
 
