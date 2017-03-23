@@ -3,7 +3,7 @@
 source ../config.sh
 
 set S = $1
-if ($S == "-1") then
+if ("$S" == "-1") then
     $S = "Average_Spline"
 else
     $S = "S$S"
