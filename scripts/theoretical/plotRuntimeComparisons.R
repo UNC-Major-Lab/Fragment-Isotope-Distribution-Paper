@@ -2,7 +2,7 @@ library(ggplot2)
 
 args = commandArgs(trailingOnly=TRUE)
 infile <- args[1]
-otufile <- args[2]
+outfile <- args[2]
 
 data <- read.table(infile, sep="\t", header=T)
 
