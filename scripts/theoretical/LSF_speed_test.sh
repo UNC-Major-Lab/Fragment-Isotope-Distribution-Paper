@@ -6,6 +6,8 @@
 #BSUB -n 1
 #BSUB -M 1
 
+module load r/3.2.2
+
 source ../config.sh
 
 set OUT_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
