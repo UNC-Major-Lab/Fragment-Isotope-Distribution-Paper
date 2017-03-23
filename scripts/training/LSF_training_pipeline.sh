@@ -9,6 +9,6 @@ bsub < LSF_create_training_data.sh > out
 JOBID=`head -1 out | sed 's/.*<\\([0-9]*\\)>.*/\\1/'`
 rm out
 
-TRAINING_JOBS = 7
+TRAINING_JOBS='7'
 
 bsub < LSF_combine_models.sh  -w 'numended('$JOBID',>='$TRAINING_JOBS')'
