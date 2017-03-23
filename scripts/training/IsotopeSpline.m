@@ -1,7 +1,7 @@
 % Describe what it does
 % Describe the input
 % Describe the output
-function IsotopeSpline(max_sampled_mass, S, precursor_isotope, infile, outfile_res_hist, outfile_scatter, outfile_res, outfile_gof, outfile_model)
+function IsotopeSpline(S, precursor_isotope, infile, outfile_res_hist, outfile_scatter, outfile_res, outfile_gof, outfile_model)
 	% For orientation:
 	% M(:,1) = probabilities = Y-axis
 	% M(:,2) = precursor masses = X-axis
@@ -102,7 +102,7 @@ function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	% Open the <model> tag
 	fprintf(fileID, '\t<model');
 	% Write composition attributes if this was a sulfur specific model
-  	if S!='-1'
+  	if S~='-1'
 			fprintf(fileID, strcat([' S=''', S, '''']));
 	end
 	% Write remaining attributes
