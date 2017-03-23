@@ -1,6 +1,6 @@
 #!/bin/csh
 #BSUB -L /bin/csh
-#BSUB -J LSF_create_training_data.sh[1-6]
+#BSUB -J LSF_create_training_data.sh[1-7]
 #BSUB -q week
 #BSUB -o /netscr/dennisg/Isotopes.log.%J
 #BSUB -n 1
@@ -11,7 +11,7 @@ module load matlab
 
 source ../config.sh
 
-set S = `expr $LSB_JOBINDEX - 1`
+set S = `expr $LSB_JOBINDEX - 2`
 
 set OUT_DIR = ${SULFUR_OUT_DIR}"/S${S}"
 
@@ -30,7 +30,7 @@ mkdir ${OUT_DIR}/spline/hist/
 mkdir ${OUT_DIR}/spline/res/
 mkdir ${OUT_DIR}/spline/scatter/
 
-${BUILD_DIR}/GenerateTrainingData 0 $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMPLES $S $MAX_ISOTOPE
+${BUILD_DIR}/GenerateTrainingData 0 $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $NUM_SAMPLES $S $MAX_ISOTOPE_DEPTH
 
 chmod 775 ${OUT_DIR}/data/*
 

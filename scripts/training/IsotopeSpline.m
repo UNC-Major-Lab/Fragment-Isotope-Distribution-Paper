@@ -102,7 +102,7 @@ function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	% Open the <model> tag
 	fprintf(fileID, '\t<model');
 	% Write composition attributes if this was a sulfur specific model
-  	if S~='NA'
+  	if S>=0
 		fprintf(fileID, strcat([' S=''', S, '''']));
 	end
 	% Write remaining attributes

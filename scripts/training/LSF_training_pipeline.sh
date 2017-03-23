@@ -1,9 +1,11 @@
 #!/bin/csh
 
-if ($1 == 1) then
-    bsub < LSF_get_sulfur_distribution.sh
-    bsub < LSF_create_average_training_data.sh -w 'ended('LSF_get_sulfur_distribution.sh')'
-    bsub < LSF_create_training_data.sh
-else if ($1 == 2) then
-    bsub < LSF_combine_models.sh
-endif
+source ../config.sh
+
+set MAX_TRAINING_JOBS = `expr $MAX_SULFUR + 2`
+
+bsub < LSF_create_training_data.sh > out
+JOBID=`head -1 out | sed 's/.*<\\([0-9]*\\)>.*/\\1/'`
+rm out
+
+bsub < LSF_combine_models.sh  -w 'numended('$JOBID',>='$MAX_TRAINING_JOBS')'
