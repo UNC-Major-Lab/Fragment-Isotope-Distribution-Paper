@@ -19,4 +19,4 @@ set MAX_DEPTH = 11
 set NUM_TESTS = 1e5
 
 ${BUILD_DIR}/SpeedTest $MIN_MASS $MAX_MASS $MAX_DEPTH $NUM_TESTS > ${OUT_DIR}"/runtimes.out"
-Rscript plotRuntimeComparisons.R ${OUT_DIR}"/runtimes.out" {OUT_DIR}"/runtimes.eps"
+Rscript plotRuntimeComparisons.R ${OUT_DIR}"/runtimes.out" ${OUT_DIR}"/runtimes.eps"
