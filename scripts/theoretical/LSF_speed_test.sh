@@ -8,7 +8,7 @@
 
 source ../config.sh
 
-set IN_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
+set OUT_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
 
 set MIN_MASS = 400
 set MAX_MASS = 9500

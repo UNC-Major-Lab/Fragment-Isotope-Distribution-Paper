@@ -433,7 +433,7 @@ void usage()
 
 int main(int argc, char * argv[])
 {
-    if (argc != 7)
+    if (argc != 8)
     {
         usage();
     }
