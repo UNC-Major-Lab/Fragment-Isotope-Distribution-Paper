@@ -2,12 +2,14 @@
 
 source ../config.sh
 
-set S = $1
+set S = $argv[1]
+echo $S
 if ($S < 0) then
     $S = "Average_Spline"
 else
     $S = "S$S"
 endif
+echo $S
 
 set max_mass = $2
 
