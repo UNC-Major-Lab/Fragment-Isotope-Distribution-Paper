@@ -6,6 +6,7 @@
 #BSUB -n 1
 #BSUB -M 1
 
+module load gcc/4.8.1
 module load r/3.2.2
 
 source ../config.sh
