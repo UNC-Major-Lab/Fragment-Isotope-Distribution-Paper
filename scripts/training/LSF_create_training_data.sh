@@ -2,7 +2,7 @@
 #BSUB -L /bin/csh
 #BSUB -J LSF_create_training_data.sh[1-7]
 #BSUB -q week
-#BSUB -o /netscr/dennisg/Isotopes.log.%J
+#BSUB -o /netscr/dennisg/log/Isotopes.log.%J
 #BSUB -n 1
 
 module load gcc/4.8.1
@@ -13,7 +13,7 @@ source ../config.sh
 
 set S = `expr $LSB_JOBINDEX - 2`
 
-set OUT_DIR = ${SULFUR_OUT_DIR}"/S${S}"
+set OUT_DIR = ${SPLINE_OUT_DIR}"/S${S}"
 
 mkdir -p $OUT_DIR
 

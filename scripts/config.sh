@@ -4,7 +4,7 @@ set BUILD_DIR=${SOURCE_DIR}"/build/"
 set DATA_DIR=${SOURCE_DIR}"/data/"
 
 set ROOT_OUT_DIR="/netscr/dennisg/MSFragmentDeisotoper/"
-set AVERAGINE_OUT_DIR=${ROOT_OUT_DIR}"/Averagine/"
+set SPLINE_OUT_DIR=${ROOT_OUT_DIR}"/Averagine/"
 
 set LOG_DIR="/netscr/dennisg/log/"
 

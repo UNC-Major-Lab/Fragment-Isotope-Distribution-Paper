@@ -11,7 +11,7 @@ endif
 
 set max_mass = $2
 
-set OUT_DIR = ${SULFUR_OUT_DIR}"/${S}"
+set OUT_DIR = ${SPLINE_OUT_DIR}"/${S}"
 
 foreach file (${OUT_DIR}/data/*)
     if (-d $file) then
