@@ -2,18 +2,16 @@
 
 source ../config.sh
 
-set S = $argv[1]
-echo $S
+set S = $1
 if ($S < 0) then
-    $S = "Average_Spline"
+    set dir = "Average_Spline"
 else
-    $S = "S$S"
+    set $dir = "S$S"
 endif
-echo $S
 
 set max_mass = $2
 
-set OUT_DIR = ${SPLINE_OUT_DIR}"/${S}"
+set OUT_DIR = ${SPLINE_OUT_DIR}"/${dir}"
 
 foreach file (${OUT_DIR}/data/*)
     if (-d $file) then

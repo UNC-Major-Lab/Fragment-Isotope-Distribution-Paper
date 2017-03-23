@@ -13,7 +13,13 @@ source ../config.sh
 
 set S = `expr $LSB_JOBINDEX - 2`
 
-set OUT_DIR = ${SPLINE_OUT_DIR}"/S${S}"
+if ($S < 0) then
+    set dir = "Average_Spline"
+else
+    set $dir = "S$S"
+endif
+
+set OUT_DIR = ${SPLINE_OUT_DIR}"/${dir}"
 
 mkdir -p $OUT_DIR
 
