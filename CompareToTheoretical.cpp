@@ -311,7 +311,29 @@ void testTheoreticalPeptides(std::string fasta_path, int job_id, int num_jobs, b
     }
 }
 
-void writeResults(std::string path_residual, std::string path_chisquared, std::string path_stats, bool doFragments)
+std::vector<double> getStats(std::vector<double> &vals)
+{
+    std::vector<double> results(6);
+
+    std::sort(vals.begin(), vals.end());
+
+    // mean
+    results.push_back(std::accumulate(vals.begin(), vals.end(), 0.0, std::plus<double>()) / vals.size());
+    // min
+    results.push_back(vals[0]);
+    // Q1
+    results.push_back(vals[vals.size()/4]);
+    // median
+    results.push_back(vals[vals.size()/2]);
+    // Q3
+    results.push_back(vals[3*vals.size()/4]);
+    // max
+    results.push_back(vals[vals.size()-1]);
+
+    return results;
+}
+
+void writeResults(std::string path_residual, std::string path_chisquared, std::string path_stats, bool doFragments, double bin_size_chi, double bin_size_res)
 {
     std::ofstream out_residual(path_residual);
     std::ofstream out_scores(path_chisquared);
@@ -319,78 +341,120 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
 
     if (doFragments)
     {
-        std::map<std::string, std::map<std::string, std::map<int, int> > > fragment_method2iso2bin2count;
+        std::map<std::string, std::map<std::string, std::map<double, int> > > fragment_method2iso2bin2count_chi;
+        std::map<std::string, std::map<std::string, std::map<double, int> > > fragment_method2iso2bin2count_res;
         for (auto const &method_itr : fragment_method2iso2val)
         {
             std::string const &key = method_itr.first;
             for (auto const &iso_itr : fragment_method2iso2val[key])
             {
                 std::string const &iso = iso_itr.first;
-                std::vector<double> chi = iso_itr.second.first;
                 std::vector<double> res = iso_itr.second.second;
-                std::sort(chi.begin(), chi.end());
-                std::sort(res.begin(), res.end());
-
-                double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
                 for (int i = 0; i < res.size(); ++i) res[i] = std::abs(res[i]);
-                double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
 
-                double median_chi = chi[chi.size()/2];
-                double median_res = res[res.size()/2];
+                std::vector<double> chi = iso_itr.second.first;
+                std::vector<double> results_chi = getStats(chi);
+                std::vector<double> results_res = getStats(res);
 
-                double q1_chi = chi[chi.size()/4];
-                double q1_res = res[res.size()/4];
 
-                double q3_chi = chi[3*chi.size()/4];
-                double q3_res = res[3*res.size()/4];
+                out_stats << results_chi[0] << "\t" << results_chi[1] << "\t" << results_chi[2] << "\t"
+                          << results_chi[3] << "\t" << results_chi[4] << "\t" << results_chi[5] << "\t"
+                          << iso << "\t" << key << "\t" << "chi" << std::endl;
 
-                double min_chi = chi[0];
-                double min_res = res[0];
+                out_stats << results_res[0] << "\t" << results_res[1] << "\t" << results_res[2] << "\t"
+                          << results_res[3] << "\t" << results_res[4] << "\t" << results_res[5] << "\t"
+                          << iso << "\t" << key << "\t" << "res" << std::endl;
 
-                double max_chi = chi[chi.size()-1];
-                double max_res = res[res.size()-1];
+                for (int i = 0; i < chi.size(); ++i)
+                {
+                    double bin = std::floor(chi[i]/bin_size_chi)*bin_size_chi;
+                    fragment_method2iso2bin2count_chi[key][iso][bin] += 1;
+                }
 
-                out_stats << mean_chi << "\t" << min_chi << "\t" << q1_chi << "\t" << median_chi << "\t" << q3_chi << "\t" << max_chi << "\t" << iso << "\t" << key << std::endl;
-                out_stats << mean_res << "\t" << min_res << "\t" << q1_res << "\t" << median_res << "\t" << q3_res << "\t" << max_res << "\t" << iso << "\t" << key << std::endl;
-
+                for (int i = 0; i < iso_itr.second.second.size(); ++i)
+                {
+                    double bin = std::floor(iso_itr.second.second[i]/bin_size_res)*bin_size_res;
+                    fragment_method2iso2bin2count_res[key][iso][bin] += 1;
+                }
             }
         }
+
+        for (auto const &method_itr : fragment_method2iso2bin2count_chi)
+        {
+            for (auto const &iso_itr : fragment_method2iso2bin2count_chi[method_itr.first])
+            {
+                for (auto const &bin_itr : fragment_method2iso2bin2count_chi[method_itr.first][iso_itr.first])
+                {
+                    out_scores << method_itr.first << "\t" << iso_itr.first << "\t" << bin_itr.first << "\t" << bin_itr.second << std::endl;
+                }
+            }
+        }
+
+        for (auto const &method_itr : fragment_method2iso2bin2count_res)
+        {
+            for (auto const &iso_itr : fragment_method2iso2bin2count_res[method_itr.first])
+            {
+                for (auto const &bin_itr : fragment_method2iso2bin2count_res[method_itr.first][iso_itr.first])
+                {
+                    out_residual << method_itr.first << "\t" << iso_itr.first << "\t" << bin_itr.first << "\t" << bin_itr.second << std::endl;
+                }
+            }
+        }
+
     } else
     {
-        std::map<std::string, std::map<int, int> > precursor_method2bin2count;
+        std::map<std::string, std::map<double, int> > precursor_method2bin2count_chi;
+        std::map<std::string, std::map<double, int> > precursor_method2bin2count_res;
 
         for (auto const &method_itr : precursor_method2val)
         {
             std::string const &key = method_itr.first;
-            std::vector<double> chi = method_itr.second.first;
+
             std::vector<double> res = method_itr.second.second;
-            double mean_chi = std::accumulate(chi.begin(), chi.end(), 0.0, std::plus<double>()) / chi.size();
-
             for (int i = 0; i < res.size(); ++i) res[i] = std::abs(res[i]);
-            double mean_res = std::accumulate(res.begin(), res.end(), 0.0, std::plus<double>()) / res.size();
 
-            std::sort(chi.begin(), chi.end());
-            std::sort(res.begin(), res.end());
+            std::vector<double> chi = method_itr.second.first;
+            std::vector<double> results_chi = getStats(chi);
+            std::vector<double> results_res = getStats(res);
 
-            double median_chi = chi[chi.size()/2];
-            double median_res = res[res.size()/2];
+            out_stats << results_chi[0] << "\t" << results_chi[1] << "\t" << results_chi[2] << "\t"
+                      << results_chi[3] << "\t" << results_chi[4] << "\t" << results_chi[5] << "\t"
+                      << key << "\t" << "chi" << std::endl;
+            out_stats << results_res[0] << "\t" << results_res[1] << "\t" << results_res[2] << "\t"
+                      << results_res[3] << "\t" << results_res[4] << "\t" << results_res[5] << "\t"
+                      << key << "\t" << "res" << std::endl;
 
-            double q1_chi = chi[chi.size()/4];
-            double q1_res = res[res.size()/4];
+            for (int i = 0; i < chi.size(); ++i)
+            {
+                double bin = std::floor(chi[i]/bin_size_chi)*bin_size_chi;
+                precursor_method2bin2count_chi[key][bin] += 1;
+            }
 
-            double q3_chi = chi[3*chi.size()/4];
-            double q3_res = res[3*res.size()/4];
-
-            double min_chi = chi[0];
-            double min_res = res[0];
-
-            double max_chi = chi[chi.size()-1];
-            double max_res = res[res.size()-1];
-
-            out_stats << mean_chi << "\t" << min_chi << "\t" << q1_chi << "\t" << median_chi << "\t" << q3_chi << "\t" << max_chi << "\t" << key << std::endl;
-            out_stats << mean_res << "\t" << min_res << "\t" << q1_res << "\t" << median_res << "\t" << q3_res << "\t" << max_res << "\t" << key << std::endl;
+            for (int i = 0; i < method_itr.second.second.size(); ++i)
+            {
+                double bin = std::floor(method_itr.second.second[i]/bin_size_res)*bin_size_res;
+                precursor_method2bin2count_res[key][bin] += 1;
+            }
 
         }
+
+        for (auto const &method_itr : precursor_method2bin2count_chi)
+        {
+            for (auto const &bin_itr : precursor_method2bin2count_chi[method_itr.first])
+            {
+                out_scores << method_itr.first << "\t" << bin_itr.first << "\t" << bin_itr.second << std::endl;
+            }
+        }
+
+        for (auto const &method_itr : precursor_method2bin2count_res)
+        {
+            for (auto const &bin_itr : precursor_method2bin2count_res[method_itr.first])
+            {
+                out_residual << method_itr.first << "\t" << bin_itr.first << "\t" << bin_itr.second << std::endl;
+            }
+        }
+
+
     }
 
     out_residual.close();
@@ -428,23 +492,22 @@ void init(bool doFragments)
 
 void usage()
 {
-    std::cout << "CompareToTheoretical fasta_path job_id num_jobs do_frag residual_file score_file stats_file" << std::endl;
+    std::cout << "CompareToTheoretical fasta_path job_id num_jobs do_frag residual_file score_file stats_file bin_size_chi bin_size_res" << std::endl;
 }
 
 int main(int argc, char * argv[])
 {
-    if (argc != 8)
+    if (argc != 10)
     {
         usage();
+        return 0;
     }
 
     init(atoi(argv[4]));
 
     testTheoreticalPeptides(argv[1], atoi(argv[2])-1, atoi(argv[3]), atoi(argv[4]));
 
-    writeResults(argv[5], argv[6], argv[7], atoi(argv[4]));
-
-
+    writeResults(argv[5], argv[6], argv[7], atoi(argv[4]), atof(argv[8]), atof(argv[9]));
 
     return 0;
 }
