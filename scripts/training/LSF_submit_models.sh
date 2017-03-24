@@ -9,8 +9,6 @@ else
     set dir = "S$S"
 endif
 
-echo $S
-
 set max_mass = $2
 
 set OUT_DIR = ${SPLINE_OUT_DIR}"/${dir}"
