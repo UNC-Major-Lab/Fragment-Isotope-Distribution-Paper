@@ -100,7 +100,7 @@ int main(int argc, const char ** argv)
     float max_mass = atof(argv[3]);
     int S = atoi(argv[4]);
     int max_depth = atoi(argv[5]);
-    bool mono = atoi(argv[6]);
+    bool mono = argv[6] == "1";
 
     sample_isotopic_distributions(out_path, fasta_path, max_mass, S, max_depth, mono);
 
