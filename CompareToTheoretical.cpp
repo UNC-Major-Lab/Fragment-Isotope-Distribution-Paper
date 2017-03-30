@@ -313,7 +313,7 @@ void testTheoreticalPeptides(std::string fasta_path, int job_id, int num_jobs, b
 
 std::vector<double> getStats(std::vector<double> &vals)
 {
-    std::vector<double> results(6);
+    std::vector<double> results;
 
     std::sort(vals.begin(), vals.end());
 
