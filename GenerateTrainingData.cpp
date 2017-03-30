@@ -52,7 +52,9 @@ void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, in
     {
         double mass = mono ? precursor_ef.getMonoWeight() : precursor_ef.getAverageWeight();
 
-        outfiles[precursor_isotope] << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass << std::endl;
+
+        //outfiles[precursor_isotope] << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass << std::endl;
+        std::cout << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass << std::endl;
     }
 }
 
@@ -101,7 +103,7 @@ int main(int argc, const char ** argv)
     float max_mass = atof(argv[3]);
     int S = atoi(argv[4]);
     int max_depth = atoi(argv[5]);
-    bool mono = argv[6] == "1";
+    bool mono = strncmp(argv[6], "1", 1) == 0 ? true : false;
 
     sample_isotopic_distributions(out_path, fasta_path, max_mass, S, max_depth, mono);
 
