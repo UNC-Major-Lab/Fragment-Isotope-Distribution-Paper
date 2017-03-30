@@ -105,6 +105,8 @@ int main(int argc, const char ** argv)
     int max_depth = atoi(argv[5]);
     bool mono = strncmp(argv[6], "1", 1) == 0 ? true : false;
 
+    std::cout << mono << std::endl;
+
     sample_isotopic_distributions(out_path, fasta_path, max_mass, S, max_depth, mono);
 
     return 0;
