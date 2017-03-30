@@ -36,7 +36,7 @@ mkdir ${OUT_DIR}/spline/hist/
 mkdir ${OUT_DIR}/spline/res/
 mkdir ${OUT_DIR}/spline/scatter/
 
-${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $S $MAX_ISOTOPE_DEPTH
+${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $S $MAX_ISOTOPE_DEPTH $MONO
 
 chmod 775 ${OUT_DIR}/data/*
 
