@@ -53,9 +53,7 @@ void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, in
         double mass = mono ? precursor_ef.getMonoWeight() : precursor_ef.getAverageWeight();
 
 
-        outfiles[precursor_isotope] << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass
-                                    << "\t" << precursor_ef.getMonoWeight() << "\t" << precursor_ef.getAverageWeight() << std::endl;
-        //std::cout << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass << std::endl;
+        outfiles[precursor_isotope] << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass << std::endl;
     }
 }
 
