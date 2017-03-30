@@ -90,9 +90,10 @@ void usage()
 
 int main(int argc, const char ** argv)
 {
-    if (argc != 6)
+    if (argc != 7)
     {
         usage();
+        return 0;
     }
 
     std::string fasta_path = argv[1];
