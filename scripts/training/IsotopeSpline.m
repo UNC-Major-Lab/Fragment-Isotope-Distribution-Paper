@@ -1,7 +1,7 @@
 % Describe what it does
 % Describe the input
 % Describe the output
-function IsotopeSpline(S, precursor_isotope, infile, outfile_res_hist, outfile_scatter, outfile_res, outfile_gof, outfile_model)
+function IsotopeSpline(breakSteps, S, precursor_isotope, infile, outfile_res_hist, outfile_scatter, outfile_res, outfile_gof, outfile_model)
 	% For orientation:
 	% M(:,1) = probabilities = Y-axis
 	% M(:,2) = precursor masses = X-axis
@@ -9,9 +9,7 @@ function IsotopeSpline(S, precursor_isotope, infile, outfile_res_hist, outfile_s
 	
 	
 	order = 4;
-	
-	breakSteps = 1000;	% The amount of daltons in between each spline break.
-						% We're using the same value for both X and Y.
+
 	min_mass = 50;		% The lower bound of our spline breaks (in daltons)
 	
 	min_knot = min(M(:,2));
