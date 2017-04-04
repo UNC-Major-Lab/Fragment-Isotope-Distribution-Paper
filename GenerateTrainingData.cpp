@@ -23,6 +23,7 @@ static std::string AMINO_ACIDS_SULFUR = "CM";
 std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_int_distribution<> dis_AA(0, AMINO_ACIDS.length()-1);
+std::uniform_int_distribution<> dis_AA_NS(0, AMINO_ACIDS_NO_SULFUR.length()-1);
 std::uniform_int_distribution<> dis_S(0, AMINO_ACIDS_SULFUR.length()-1);
 
 
@@ -103,7 +104,7 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
         // random amino acid insertion (non Sulfur and Selenium amino acids)
         for (int aa_index = 0; aa_index < peptide_length; ++aa_index)
         {
-            random_peptide += residueDB->getResidue(AMINO_ACIDS_NO_SULFUR[dis_AA(gen)]);
+            random_peptide += residueDB->getResidue(AMINO_ACIDS_NO_SULFUR[dis_AA_NS(gen)]);
         }
     }
 
