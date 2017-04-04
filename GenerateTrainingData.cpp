@@ -14,7 +14,16 @@
 #include "FASTAParser.h"
 
 static const ElementDB* elementDB = ElementDB::getInstance();
+static const OpenMS::ResidueDB* residueDB = OpenMS::ResidueDB::getInstance();
 
+static std::string AMINO_ACIDS = "ADEFGHIKLNPQRSTVWYCM";
+static std::string AMINO_ACIDS_NO_SULFUR = "ADEFGHIKLNPQRSTVWY";
+static std::string AMINO_ACIDS_SULFUR = "CM";
+
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_int_distribution<> dis_AA(0, AMINO_ACIDS.length()-1);
+std::uniform_int_distribution<> dis_S(0, AMINO_ACIDS_SULFUR.length()-1);
 
 
 std::ofstream* openOutputFiles(std::string base_path, int max_depth)
@@ -57,7 +66,7 @@ void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, in
     }
 }
 
-void sample_isotopic_distributions(std::string base_path, std::string fasta_path, float max_mass, int num_sulfurs, int max_depth, bool mono)
+void proteome_isotopic_distributions(std::string base_path, std::string fasta_path, float max_mass, int num_sulfurs, int max_depth, bool mono)
 {
     std::ofstream* outfiles = openOutputFiles(base_path, max_depth);
 
@@ -68,11 +77,64 @@ void sample_isotopic_distributions(std::string base_path, std::string fasta_path
         {
             write_distribution(*itr, outfiles, max_depth, mono);
         }
-
     }
 
     closeOutputFiles(outfiles, max_depth);
 }
+
+OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_sulfurs)
+{
+    OpenMS::AASequence random_peptide;
+
+    if (num_sulfurs < 0)
+    {
+        for (int aa_index = 0; aa_index < peptide_length; ++aa_index)
+        {
+            random_peptide += residueDB->getResidue(AMINO_ACIDS[dis_AA(gen)]);
+        }
+    }
+    else
+    {
+        // for insertion of sulfur containing amino acids
+        for (int i = 0; i < num_sulfurs; ++i)
+        {
+            random_peptide += residueDB->getResidue(AMINO_ACIDS_SULFUR[dis_S(gen)]);
+        }
+
+        // random amino acid insertion (non Sulfur and Selenium amino acids)
+        for (int aa_index = 0; aa_index < peptide_length; ++aa_index)
+        {
+            random_peptide += residueDB->getResidue(AMINO_ACIDS_NO_SULFUR[dis_AA(gen)]);
+        }
+    }
+
+    return random_peptide;
+}
+
+void sample_isotopic_distributions(std::string base_path, float max_mass, int num_sulfurs, int max_depth, bool mono)
+{
+    std::ofstream* outfiles = openOutputFiles(base_path, max_depth);
+
+    int max_length = max_mass/100;
+
+    for (int peptide_length = 0; peptide_length <= max_length; ++peptide_length)
+    {
+        for (int sample = 0; sample < 100; ++sample)
+        {
+            OpenMS::AASequence random_sequence = create_random_peptide_sequence(peptide_length, num_sulfurs);
+
+            if (random_sequence.size() > 0 && random_sequence.getMonoWeight() <= max_mass)
+            {
+                write_distribution(random_sequence, outfiles, max_depth, mono);
+            }
+        }
+    }
+
+    closeOutputFiles(outfiles, max_depth);
+}
+
+
+
 
 
 
@@ -104,9 +166,8 @@ int main(int argc, const char ** argv)
     int max_depth = atoi(argv[5]);
     bool mono = strncmp(argv[6], "1", 1) == 0 ? true : false;
 
-    std::cout << mono << std::endl;
-
-    sample_isotopic_distributions(out_path, fasta_path, max_mass, S, max_depth, mono);
+    //proteome_isotopic_distributions(out_path, fasta_path, max_mass, S, max_depth, mono);
+    sample_isotopic_distributions(out_path, max_mass, S, max_depth, mono);
 
     return 0;
 }
