@@ -58,7 +58,7 @@ void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, in
     OpenMS::EmpiricalFormula precursor_ef = p.getFormula();
     OpenMS::IsotopeDistribution precursor_id = precursor_ef.getIsotopeDistribution(0);
 
-    for (int precursor_isotope = 0; precursor_isotope < max_depth; ++precursor_isotope)
+    for (int precursor_isotope = 0; precursor_isotope < max_depth && precursor_isotope < precursor_id.size(); ++precursor_isotope)
     {
         double mass = mono ? precursor_ef.getMonoWeight() : precursor_ef.getAverageWeight();
 
