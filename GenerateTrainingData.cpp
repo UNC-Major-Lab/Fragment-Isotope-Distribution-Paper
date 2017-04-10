@@ -106,7 +106,7 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, std::vecto
         for (int aa_index = 0; aa_index < peptide_length; ++aa_index)
         {
             double rand = dis_AA(gen);
-            int index = std::lower_bound(aa2prob.begin(), aa2prob.end(), rand) - aa2prob.begin();
+            int index = std::lower_bound(aa2prob.begin(), aa2prob.end(), rand) - aa2prob.begin() - 1;
             random_peptide += residueDB->getResidue(AMINO_ACIDS_NO_SULFUR[index]);
         }
     }
