@@ -90,7 +90,7 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, std::vecto
         for (int aa_index = 0; aa_index < peptide_length; ++aa_index)
         {
             double rand = dis_AA(gen);
-            int index = std::lower_bound(aa2prob.begin(), aa2prob.end(), rand) - aa2prob.begin();
+            int index = std::lower_bound(aa2prob.begin(), aa2prob.end(), rand) - aa2prob.begin() - 1;
             random_peptide += residueDB->getResidue(AMINO_ACIDS[index]);
         }
     }
@@ -173,7 +173,7 @@ void sample_isotopic_distributions(std::string base_path, std::string fasta_path
     int max_length = max_mass/100;
 
 
-    for (int peptide_length = 0; peptide_length <= max_length; ++peptide_length)
+    for (int peptide_length = 1; peptide_length <= max_length; ++peptide_length)
     {
         for (int sample = 0; sample < 100; ++sample)
         {
