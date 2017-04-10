@@ -153,7 +153,7 @@ std::vector<double> calcPrefixSum(std::map<char, double> aa2prob, bool sulfur)
     std::string AAs = sulfur ? AMINO_ACIDS : AMINO_ACIDS_NO_SULFUR;
     std::vector<double> prefixSum;
 
-    prefixSum.push_back(0d);
+    prefixSum.push_back(0);
 
     for (int i = 0; i < AAs.size(); ++i)
     {
