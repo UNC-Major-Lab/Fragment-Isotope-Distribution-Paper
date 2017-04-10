@@ -148,7 +148,7 @@ std::map<char, double> getAAProbabilities(std::string fasta_path, bool sulfur)
     return aa2prob;
 }
 
-std::vector<double> void calcPrefixSum(std::map<char, double> aa2prob, bool sulfur)
+std::vector<double> calcPrefixSum(std::map<char, double> aa2prob, bool sulfur)
 {
     std::string AAs = sulfur ? AMINO_ACIDS : AMINO_ACIDS_NO_SULFUR;
     std::vector<double> prefixSum;
