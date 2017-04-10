@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <algorithm>
 
 #include <OpenMS/CHEMISTRY/Element.h>
 #include <OpenMS/CHEMISTRY/AASequence.h>
@@ -22,9 +23,7 @@ static std::string AMINO_ACIDS_SULFUR = "CM";
 
 std::random_device rd;
 std::mt19937 gen(rd());
-std::uniform_int_distribution<> dis_AA(0, AMINO_ACIDS.length()-1);
-std::uniform_int_distribution<> dis_AA_NS(0, AMINO_ACIDS_NO_SULFUR.length()-1);
-std::uniform_int_distribution<> dis_S(0, AMINO_ACIDS_SULFUR.length()-1);
+std::uniform_real_distribution<> dis_AA(0,1);
 
 
 std::ofstream* openOutputFiles(std::string base_path, int max_depth)
@@ -82,7 +81,7 @@ void proteome_isotopic_distributions(std::string base_path, std::string fasta_pa
     closeOutputFiles(outfiles, max_depth);
 }
 
-OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_sulfurs)
+OpenMS::AASequence create_random_peptide_sequence(int peptide_length, std::vector<double> aa2prob, int num_sulfurs)
 {
     OpenMS::AASequence random_peptide;
 
@@ -90,7 +89,9 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
     {
         for (int aa_index = 0; aa_index < peptide_length; ++aa_index)
         {
-            random_peptide += residueDB->getResidue(AMINO_ACIDS[dis_AA(gen)]);
+            double rand = dis_AA(gen);
+            int index = std::lower_bound(aa2prob.begin(), aa2prob.end(), rand) - aa2prob.begin();
+            random_peptide += residueDB->getResidue(AMINO_ACIDS[index]);
         }
     }
     else
@@ -98,32 +99,85 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, int num_su
         // for insertion of sulfur containing amino acids
         for (int i = 0; i < num_sulfurs; ++i)
         {
-            random_peptide += residueDB->getResidue(AMINO_ACIDS_SULFUR[dis_S(gen)]);
+            random_peptide += residueDB->getResidue(AMINO_ACIDS_SULFUR[0]);
         }
 
         // random amino acid insertion (non Sulfur and Selenium amino acids)
         for (int aa_index = 0; aa_index < peptide_length; ++aa_index)
         {
-            random_peptide += residueDB->getResidue(AMINO_ACIDS_NO_SULFUR[dis_AA_NS(gen)]);
+            double rand = dis_AA(gen);
+            int index = std::lower_bound(aa2prob.begin(), aa2prob.end(), rand) - aa2prob.begin();
+            random_peptide += residueDB->getResidue(AMINO_ACIDS_NO_SULFUR[index]);
         }
     }
 
     return random_peptide;
 }
 
-void sample_isotopic_distributions(std::string base_path, float max_mass, int num_sulfurs, int max_depth, bool mono)
+
+std::map<char, double> getAAProbabilities(std::string fasta_path, bool sulfur)
 {
+    std::map<char, double> aa2prob;
+    for (char aa : AMINO_ACIDS)
+    {
+        aa2prob[aa] = 0.0;
+    }
+
+    std::vector<FASTAFile::FASTAEntry> proteins;
+    FASTAFile().load(fasta_path, proteins);
+
+    int count = 0;
+    for (Size i = 0; i < proteins.size(); ++i)
+    {
+        for (int j = 0; j < proteins[i].sequence.size(); ++j)
+        {
+            char aa = proteins[i].sequence[j];
+            if ((sulfur && AMINO_ACIDS.find(aa) != -1) || (!sulfur && AMINO_ACIDS_NO_SULFUR.find(aa) != -1))
+            {
+                aa2prob[aa]++;
+                count++;
+            }
+        }
+    }
+
+    for (auto &aa : aa2prob)
+    {
+        aa.second /= count;
+    }
+
+    return aa2prob;
+}
+
+std::vector<double> void calcPrefixSum(std::map<char, double> aa2prob, bool sulfur)
+{
+    std::string AAs = sulfur ? AMINO_ACIDS : AMINO_ACIDS_NO_SULFUR;
+    std::vector<double> prefixSum;
+
+    prefixSum.push_back(0d);
+
+    for (int i = 0; i < AAs.size(); ++i)
+    {
+        prefixSum.push_back(aa2prob[AAs[i]] + prefixSum[i]);
+    }
+
+    return prefixSum;
+}
+
+void sample_isotopic_distributions(std::string base_path, std::string fasta_path, float max_mass, int num_sulfurs, int max_depth, bool mono)
+{
+
+    std::vector<double> aa2prob = calcPrefixSum(getAAProbabilities(fasta_path, num_sulfurs == -1), num_sulfurs == -1);
+
     std::ofstream* outfiles = openOutputFiles(base_path, max_depth);
 
     int max_length = max_mass/100;
 
-    std::cout << max_length << "\t" << max_mass << std::endl;
 
     for (int peptide_length = 0; peptide_length <= max_length; ++peptide_length)
     {
         for (int sample = 0; sample < 100; ++sample)
         {
-            OpenMS::AASequence random_sequence = create_random_peptide_sequence(peptide_length, num_sulfurs);
+            OpenMS::AASequence random_sequence = create_random_peptide_sequence(peptide_length, aa2prob, num_sulfurs);
 
             if (random_sequence.size() > 0 && random_sequence.getMonoWeight() <= max_mass)
             {
@@ -169,7 +223,7 @@ int main(int argc, const char ** argv)
     bool mono = strncmp(argv[6], "1", 1) == 0 ? true : false;
 
     //proteome_isotopic_distributions(out_path, fasta_path, max_mass, S, max_depth, mono);
-    sample_isotopic_distributions(out_path, max_mass, S, max_depth, mono);
+    sample_isotopic_distributions(out_path, fasta_path, max_mass, S, max_depth, mono);
 
     return 0;
 }
