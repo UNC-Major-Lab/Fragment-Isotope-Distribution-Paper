@@ -24,7 +24,7 @@ static std::string AMINO_ACIDS_SULFUR = "CM";
 std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<> dis_AA(0,1);
-
+std::uniform_int_distribution<> dis_SULFUR(0,1);
 
 std::ofstream* openOutputFiles(std::string base_path, int max_depth)
 {
@@ -99,7 +99,7 @@ OpenMS::AASequence create_random_peptide_sequence(int peptide_length, std::vecto
         // for insertion of sulfur containing amino acids
         for (int i = 0; i < num_sulfurs; ++i)
         {
-            random_peptide += residueDB->getResidue(AMINO_ACIDS_SULFUR[0]);
+            random_peptide += residueDB->getResidue(AMINO_ACIDS_SULFUR[dis_SULFUR(gen)]);
         }
 
         // random amino acid insertion (non Sulfur and Selenium amino acids)
