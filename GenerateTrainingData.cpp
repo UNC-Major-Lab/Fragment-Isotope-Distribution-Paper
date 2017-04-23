@@ -175,7 +175,7 @@ void sample_isotopic_distributions(std::string base_path, std::string fasta_path
 
     for (int peptide_length = 1; peptide_length <= max_length; ++peptide_length)
     {
-        for (int sample = 0; sample < 100; ++sample)
+        for (int sample = 0; sample < 1000; ++sample)
         {
             OpenMS::AASequence random_sequence = create_random_peptide_sequence(peptide_length, aa2prob, num_sulfurs);
 
