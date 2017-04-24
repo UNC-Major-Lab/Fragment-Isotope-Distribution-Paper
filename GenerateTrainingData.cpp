@@ -163,7 +163,7 @@ std::vector<double> calcPrefixSum(std::map<char, double> aa2prob, bool sulfur)
     return prefixSum;
 }
 
-void sample_isotopic_distributions(std::string base_path, std::string fasta_path, float max_mass, int num_sulfurs, int max_depth, bool mono)
+void sample_isotopic_distributions(std::string base_path, std::string fasta_path, float max_mass, int num_sulfurs, int num_samples, int max_depth, bool mono)
 {
 
     std::vector<double> aa2prob = calcPrefixSum(getAAProbabilities(fasta_path, num_sulfurs == -1), num_sulfurs == -1);
@@ -175,7 +175,7 @@ void sample_isotopic_distributions(std::string base_path, std::string fasta_path
 
     for (int peptide_length = 1; peptide_length <= max_length; ++peptide_length)
     {
-        for (int sample = 0; sample < 1000; ++sample)
+        for (int sample = 0; sample < num_samples; ++sample)
         {
             OpenMS::AASequence random_sequence = create_random_peptide_sequence(peptide_length, aa2prob, num_sulfurs);
 
@@ -196,11 +196,12 @@ void sample_isotopic_distributions(std::string base_path, std::string fasta_path
 
 void usage()
 {
-    std::cout << "GenerateTrainingData fasta_path out_path max_mass num_samples S max_depth mono" << std::endl;
+    std::cout << "GenerateTrainingData fasta_path out_path max_mass S num_samples max_depth mono" << std::endl;
     std::cout << "fasta_path: The path to the fasta file to train the splines on." << std::endl;
     std::cout << "out_path: The path to the directory that will store the training data, e.g. ~/data/" << std::endl;
     std::cout << "max_mass: maximum mass allowed for sampled peptides, e.g. 8500" << std::endl;
     std::cout << "S: number of sulfurs that should be in the fragment ion. Use -1 for all (e.g. 0,1,2..)" << std::endl;
+    std::cout << "num_samples: number of random peptides to make for each peptide length" << std::endl;
     std::cout << "max_depth: The number of isotopes to generate training data for, e.g. 3 = M0,M1,M2" << std::endl;
     std::cout << "mono: should monoisotopic masses be used or average? 1=mono, 0=average" << std::endl;
     std::cout << std::endl;
@@ -219,11 +220,12 @@ int main(int argc, const char ** argv)
     std::string out_path = argv[2];
     float max_mass = atof(argv[3]);
     int S = atoi(argv[4]);
-    int max_depth = atoi(argv[5]);
-    bool mono = strncmp(argv[6], "1", 1) == 0 ? true : false;
+    int num_samples = atoi(argv[5]);
+    int max_depth = atoi(argv[6]);
+    bool mono = strncmp(argv[7], "1", 1) == 0 ? true : false;
 
     //proteome_isotopic_distributions(out_path, fasta_path, max_mass, S, max_depth, mono);
-    sample_isotopic_distributions(out_path, fasta_path, max_mass, S, max_depth, mono);
+    sample_isotopic_distributions(out_path, fasta_path, max_mass, S, num_samples, max_depth, mono);
 
     return 0;
 }
