@@ -210,7 +210,7 @@ void usage()
 
 int main(int argc, const char ** argv)
 {
-    if (argc != 7)
+    if (argc != 8)
     {
         usage();
         return 0;
