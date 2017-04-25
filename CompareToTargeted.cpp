@@ -7,10 +7,13 @@
 
 #include <OpenMS/FORMAT/MzMLFile.h>
 #include <OpenMS/MATH/MISC/MathFunctions.h>
+#include <OpenMS/CHEMISTRY/IsotopeSplineDB.h>
 
 #include "Ion.h"
 #include "SpectrumUtilities.h"
 #include "Stats.h"
+
+static const OpenMS::IsotopeSplineDB* isotopeDB = OpenMS::IsotopeSplineDB::getInstance();
 
 void normalizeDist(std::vector<std::pair<double, double> > &dist)
 {
@@ -120,6 +123,8 @@ int main(int argc, char * argv[])
             std::vector<std::pair<double, double> > approxPrecursorFromWeightDist;
             std::vector<std::pair<double, double> > approxFragmentFromWeightDist;
             std::vector<std::pair<double, double> > approxFragmentFromWeightAndSulfurDist;
+            std::vector<std::pair<double, double> > approxFragmentSplineFromWeightDist;
+            std::vector<std::pair<double, double> > approxFragmentSplineFromWeightAndSulfurDist;
             std::vector<std::pair<double, double> > exactConditionalFragmentDist;
             std::vector<std::pair<double, double> > observedDist;
 
@@ -140,6 +145,20 @@ int main(int argc, char * argv[])
                                                     ionList[ionIndex],
                                                     precursorIon.sequence,
                                                     precursorIon.charge);
+
+            SpectrumUtilities::approxFragmentSplineFromWeightIsotopeDist(approxFragmentSplineFromWeightDist,
+                                                                         precursorIsotopes,
+                                                                         ionList[ionIndex],
+                                                                         precursorIon.sequence,
+                                                                         precursorIon.charge,
+                                                                         isotopeDB);
+
+            SpectrumUtilities::approxFragmentSplineFromWeightAndSIsotopeDist(approxFragmentSplineFromWeightAndSulfurDist,
+                                                                             precursorIsotopes,
+                                                                             ionList[ionIndex],
+                                                                             precursorIon.sequence,
+                                                                             precursorIon.charge,
+                                                                             isotopeDB);
 
 
 
@@ -190,18 +209,28 @@ int main(int argc, char * argv[])
             double approxFragmentFromWeightX2 = Stats::computeX2(observedDist, approxFragmentFromWeightDist);
             double approxFragmentFromWeightAndSulfurX2 = Stats::computeX2(observedDist,
                                                                           approxFragmentFromWeightAndSulfurDist);
+            double approxFragmentSplineFromWeightX2 = Stats::computeX2(observedDist,
+                                                                          approxFragmentSplineFromWeightDist);
+            double approxFragmentSplineFromWeightAndSulfurX2 = Stats::computeX2(observedDist,
+                                                                          approxFragmentSplineFromWeightAndSulfurDist);
             normalizeDist(observedDist);
             normalizeDist(exactConditionalFragmentDist);
             normalizeDist(approxFragmentFromWeightDist);
             normalizeDist(approxFragmentFromWeightAndSulfurDist);
+            normalizeDist(approxFragmentSplineFromWeightDist);
+            normalizeDist(approxFragmentSplineFromWeightAndSulfurDist);
 
-            outputDist(calc_out, exactConditionalFragmentDist, ion_name, ionIndex, isotope_range, "Exact Fragment");
-            outputDist(calc_out, approxFragmentFromWeightDist, ion_name, ionIndex, isotope_range, "Approx Fragment");
-            outputDist(calc_out, approxFragmentFromWeightAndSulfurDist, ion_name, ionIndex, isotope_range, "Approx Fragment S");
+            outputDist(calc_out, exactConditionalFragmentDist, ion_name, ionIndex, isotope_range, "Exact");
+            outputDist(calc_out, approxFragmentFromWeightDist, ion_name, ionIndex, isotope_range, "Averagine");
+            outputDist(calc_out, approxFragmentFromWeightAndSulfurDist, ion_name, ionIndex, isotope_range, "Sulfur-specific Averagine");
+            outputDist(calc_out, approxFragmentSplineFromWeightDist, ion_name, ionIndex, isotope_range, "Spline");
+            outputDist(calc_out, approxFragmentSplineFromWeightAndSulfurDist, ion_name, ionIndex, isotope_range, "Sulfur-specific spline");
 
-            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Exact Fragment", exactCondFragmentX2, observedDist.front().first, 1.0);
-            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Approx Fragment", approxFragmentFromWeightX2, observedDist.front().first, 0.8);
-            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Approx Fragment S", approxFragmentFromWeightAndSulfurX2, observedDist.front().first, 0.6);
+            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Exact", exactCondFragmentX2, observedDist.front().first, 1.0);
+            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Averagine", approxFragmentFromWeightX2, observedDist.front().first, 0.8);
+            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Sulfur-specific Averagine", approxFragmentFromWeightAndSulfurX2, observedDist.front().first, 0.6);
+            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Spline", approxFragmentSplineFromWeightX2, observedDist.front().first, 0.4);
+            outputScores(scores_out, ion_name, ionIndex, isotope_range, "Sulfur-specific spline", approxFragmentSplineFromWeightAndSulfurX2, observedDist.front().first, 0.2);
         }
 
     }

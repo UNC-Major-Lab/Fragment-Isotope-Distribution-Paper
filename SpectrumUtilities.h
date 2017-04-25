@@ -269,6 +269,99 @@ namespace SpectrumUtilities {
         }
     }
 
+    static void approxFragmentSplineFromWeightIsotopeDist(std::vector<std::pair<double, double> > &approxDist,
+                                                    const std::set<OpenMS::UInt> &precursorIsotopes,
+                                                    const Ion &fragmentIon,
+                                                    const OpenMS::AASequence &precursorSequence,
+                                                    const OpenMS::Int &precursorCharge,
+                                                    const OpenMS::IsotopeSplineDB* isotopeDB)
+    {
+        //clear vector for distribution
+        approxDist.clear();
+
+        //precursor average weight
+        double precursorAvgWeight = precursorSequence.getAverageWeight(OpenMS::Residue::Full, precursorCharge);
+        //fragment average weight
+        double fragmentAvgWeight = fragmentIon.formula.getAverageWeight();
+
+        //construct distribution
+        OpenMS::IsotopeDistribution fragmentDist(*std::max_element(precursorIsotopes.begin(), precursorIsotopes.end()) + 1);
+
+        //estimate approx distribution from peptide weight
+        fragmentDist = isotopeDB->estimateForFragmentFromPeptideWeight(precursorAvgWeight, fragmentAvgWeight, precursorIsotopes);
+        //re-normalize distribution
+        fragmentDist.renormalize();
+
+        //get isotope vector
+        std::vector<std::pair<OpenMS::Size, double> > isotopePeaks = fragmentDist.getContainer();
+
+        //ion mz
+        double ionMZ = fragmentIon.monoWeight / fragmentIon.charge;
+
+        //loop through calculated isotopic distribution, fill with actual mz values
+        for (int i = 0; i < isotopePeaks.size(); ++i) {
+
+            //compute mz of isotope peak
+            double isoMZ = ionMZ + ( OpenMS::Constants::NEUTRON_MASS_U / fragmentIon.charge ) * i;
+
+            //set distribution pair
+            std::pair<double, double> theo;
+            theo.first = isoMZ;
+            theo.second = isotopePeaks[i].second;
+            approxDist.push_back(theo);
+        }
+    }
+
+    static void approxFragmentSplineFromWeightAndSIsotopeDist(std::vector<std::pair<double, double> > &approxDist,
+                                                        const std::set<OpenMS::UInt> &precursorIsotopes,
+                                                        const Ion &fragmentIon,
+                                                        const OpenMS::AASequence &precursorSequence,
+                                                        const OpenMS::Int &precursorCharge,
+                                                        const OpenMS::IsotopeSplineDB* isotopeDB)
+    {
+        //clear vector for distribution
+        approxDist.clear();
+
+        //precursor average weight
+        double precursorAvgWeight = precursorSequence.getAverageWeight(OpenMS::Residue::Full, precursorCharge);
+        //precursor number of sulfurs
+        int precursorSulfurs = precursorSequence.getFormula(OpenMS::Residue::Full,
+                                                            precursorCharge).getNumberOf(ELEMENTS->getElement("Sulfur"));
+        //fragment average weight
+        double fragmentAvgWeight = fragmentIon.formula.getAverageWeight();
+        //fragment number of sulfurs
+        int fragmentSulfurs = fragmentIon.formula.getNumberOf(ELEMENTS->getElement("Sulfur"));
+
+        //construct distribution
+        OpenMS::IsotopeDistribution fragmentDist(*std::max_element(precursorIsotopes.begin(), precursorIsotopes.end()) + 1);
+
+        //estimate approx distribution from peptide weight
+        fragmentDist = isotopeDB->estimateForFragmentFromPeptideWeightAndS(precursorAvgWeight, precursorSulfurs,
+                                                              fragmentAvgWeight, fragmentSulfurs,
+                                                              precursorIsotopes);
+        //re-normalize distribution
+        fragmentDist.renormalize();
+
+        //get isotope vector
+        std::vector<std::pair<OpenMS::Size, double> > isotopePeaks = fragmentDist.getContainer();
+
+        //ion mz
+        double ionMZ = fragmentIon.monoWeight / fragmentIon.charge;
+
+        //loop through calculated isotopic distribution, fill with actual mz values
+        for (int i = 0; i < isotopePeaks.size(); ++i) {
+
+            //compute mz of isotope peak
+            double isoMZ = ionMZ + ( OpenMS::Constants::NEUTRON_MASS_U / fragmentIon.charge ) * i;
+
+            //set distribution pair
+            std::pair<double, double> theo;
+            theo.first = isoMZ;
+            theo.second = isotopePeaks[i].second;
+            approxDist.push_back(theo);
+        }
+    }
+
     /**
      * Compute the exact theoretical fragment isotopic distribution based on the precursor isotope distribution calculator.
      * @param theoDist a vector to be filled with the theoretical isotopic distribution. Composed of a vector of pairs
