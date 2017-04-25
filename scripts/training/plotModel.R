@@ -16,9 +16,10 @@ if (max.sulfur == -1) {
   1
 } else {
   for (sulfur in 0:max.sulfur) {
-    scatter.infile <- paste(data.basedir, "/S", "0", "/data/Precursor", precursor, ".tab", sep="")
+    scatter.infile <- paste(data.basedir, "/S", str(sulfur), "/data/Precursor", precursor, ".tab", sep="")
     data.tmp <- read.table(scatter.infile, header=T, sep="\t")
     data.tmp <- subset(data.tmp, data.tmp$mass <= max.mass)
+    print(nrow(data.tmp))
     data.tmp$S <- sulfur
     data <- rbind(data, data.tmp)
   }
