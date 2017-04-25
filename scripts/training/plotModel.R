@@ -32,7 +32,7 @@ p <- ggplot(data, aes(x=precursor.mass, y=probability, color=as.factor(S)))
 
 print(
   p
-  + geom_point()
+  + geom_point(shape=1)
   )
 
 dev.off()
