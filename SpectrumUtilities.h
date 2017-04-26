@@ -6,6 +6,7 @@
 #define FRAGMENT_ISOTOPE_DISTRIBUTION_PAPER_SPECTRUMUTILITIES_H
 
 #include <OpenMS/CHEMISTRY/IsotopeDistribution.h>
+#include <OpenMS/CHEMISTRY/IsotopeSplineDB.h>
 #include <OpenMS/CHEMISTRY/ElementDB.h>
 #include <OpenMS/MATH/MISC/MathFunctions.h>
 
