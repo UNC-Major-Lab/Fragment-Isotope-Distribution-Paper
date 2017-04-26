@@ -30,7 +30,7 @@ if (max.sulfur == -1) {
     data.tmp$S <- sulfur
     data <- rbind(data, data.tmp)
     
-    spline.infile <- paste(data.basedir, "S", "/spline/eval/Precursor", precursor, ".tab", sep="")
+    spline.infile <- paste(data.basedir, "S", toString(sulfur), "/spline/eval/Precursor", precursor, ".tab", sep="")
     data.spline.tmp <- read.table(spline.infile, header=T, sep="\t")
     data.spline.tmp$S <- sulfur
     data.spline <- rbind(data.spline, data.spline.tmp)
