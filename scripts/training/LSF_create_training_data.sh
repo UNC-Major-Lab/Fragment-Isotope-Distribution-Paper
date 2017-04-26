@@ -35,6 +35,7 @@ mkdir ${OUT_DIR}/spline/gof/
 mkdir ${OUT_DIR}/spline/hist/
 mkdir ${OUT_DIR}/spline/res/
 mkdir ${OUT_DIR}/spline/scatter/
+mkdir ${OUT_DIR}/spline/eval/
 
 if ($S < 0) then
     ${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $S $NUM_SAMPLES $MAX_ISOTOPE_DEPTH $MONO
