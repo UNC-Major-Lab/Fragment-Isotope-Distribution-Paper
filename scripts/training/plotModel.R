@@ -11,12 +11,17 @@ outfile <- args[5]
 max.mass <- as.numeric(args[6])
 
 data <- data.frame()
+data.spline <- data.frame()
 
 if (max.sulfur == -1) {
   scatter.infile <- paste(data.basedir, "Average_Spline", "/data/Precursor", precursor, ".tab", sep="")
   data <- read.table(scatter.infile, header=T, sep="\t")
   data <- subset(data, data$precursor.mass <= max.mass)
   data$S <- -1
+  
+  spline.infile <- paste(data.basedir, "Average_Spline", "/spline/eval/Precursor", precursor, ".tab", sep="")
+  data.spline <- read.table(spline.infile, header=T, sep="\t")
+  data.spline$S <- -1
 } else {
   for (sulfur in 0:max.sulfur) {
     scatter.infile <- paste(data.basedir, "S", toString(sulfur), "/data/Precursor", precursor, ".tab", sep="")
@@ -24,6 +29,11 @@ if (max.sulfur == -1) {
     data.tmp <- subset(data.tmp, data.tmp$precursor.mass <= max.mass)
     data.tmp$S <- sulfur
     data <- rbind(data, data.tmp)
+    
+    spline.infile <- paste(data.basedir, "S", "/spline/eval/Precursor", precursor, ".tab", sep="")
+    data.spline.tmp <- read.table(spline.infile, header=T, sep="\t")
+    data.spline.tmp$S <- sulfur
+    data.spline <- rbind(data.spline, data.spline.tmp)
   }
 }
   
@@ -36,6 +46,7 @@ p <- ggplot(data, aes(x=precursor.mass, y=probability, color=as.factor(S)))
 print(
   p
   + geom_point(shape=1)
+  + geom_line(data=data.spline, aes(x=precursor.mass, y=probability, color=as.factor(S)))
   )
 
 dev.off()
