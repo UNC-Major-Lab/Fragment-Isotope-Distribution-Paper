@@ -200,11 +200,11 @@ function evaluateAndOutputSpline(outfile_path, sp_pp, min_mass, max_mass)
 	% Open our output file for writing
 	fileID = fopen(outfile_path,'w');
 	
-	fprintf(fileID, 'precursor.mass\tprobability');
+	fprintf(fileID, 'precursor.mass\tprobability\n');
 	
 	for i = min_mass:max_mass
 		y = fnval( sp_pp, i );
-		fprintf(fileID, '%d\t%d', i, y);
+		fprintf(fileID, '%d\t%d\n', i, y);
 	end
 end
 
