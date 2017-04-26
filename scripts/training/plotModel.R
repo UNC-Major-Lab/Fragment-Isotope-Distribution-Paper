@@ -48,7 +48,7 @@ p <- ggplot(data, aes(x=precursor.mass, y=probability, color=as.factor(S)))
 print(
   p
   + geom_point(shape=1)
-  + geom_line(data=data.spline, aes(x=precursor.mass, y=probability), color="black")
+  + geom_line(data=data.spline, aes(x=precursor.mass, y=probability, group=S, color="black"), color="black")
   )
 
 dev.off()
