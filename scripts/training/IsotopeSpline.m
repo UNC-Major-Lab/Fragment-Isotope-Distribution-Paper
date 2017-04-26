@@ -67,7 +67,7 @@ function IsotopeSpline(breakSteps, S, precursor_isotope, infile, outfile_res_his
 	
 	writeModelXML(outfile_model, sp_pp, S, precursor_isotope);	
 	
-	evaluateAndOutputSpline(outfile_spline_eval, sp_pp, min_knot, max_knot)
+	evaluateAndOutputSpline(outfile_spline_eval, sp_pp, min_knot, max_knot);
 	
 	exit;
 end
@@ -196,8 +196,12 @@ function output = testNonNegative(sp_pp, min_mass, max_mass)
 	end
 end
 
-function evaluateAndOutputSpline(sp_pp, min_mass, max_mass, fileID)
+function evaluateAndOutputSpline(outfile_path, sp_pp, min_mass, max_mass)
+	% Open our output file for writing
+	fileID = fopen(outfile_path,'w');
+	
 	fprintf(fileID, 'precursor.mass\tprobability');
+	
 	for i = min_mass:max_mass
 		y = fnval( sp_pp, i );
 		fprintf(fileID, '%d\t%d', i, y);
