@@ -1,7 +1,7 @@
 % Describe what it does
 % Describe the input
 % Describe the output
-function IsotopeSpline(breakSteps, S, precursor_isotope, infile, outfile_res_hist, outfile_scatter, outfile_res, outfile_gof, outfile_model)
+function IsotopeSpline(breakSteps, S, precursor_isotope, infile, outfile_res_hist, outfile_scatter, outfile_res, outfile_gof, outfile_model, outfile_spline_eval)
 	% For orientation:
 	% M(:,1) = probabilities = Y-axis
 	% M(:,2) = precursor masses = X-axis
@@ -66,6 +66,8 @@ function IsotopeSpline(breakSteps, S, precursor_isotope, infile, outfile_res_his
 	print(outfile_res,strcat('-d', ext(2:end)));
 	
 	writeModelXML(outfile_model, sp_pp, S, precursor_isotope);	
+	
+	evaluateAndOutputSpline(outfile_spline_eval, sp_pp, min_knot, max_knot)
 	
 	exit;
 end
@@ -163,10 +165,6 @@ function output = convertAndEncode(input)
 	output = regexprep(output, '\r\n', ''); 
 end
 
-
-
-
-
 function output = base64encode(input)
 %BASE64ENCODE Encode a byte array using Base64 codec.
 %
@@ -197,3 +195,12 @@ function output = testNonNegative(sp_pp, min_mass, max_mass)
 		end
 	end
 end
+
+function evaluateAndOutputSpline(sp_pp, min_mass, max_mass, fileID)
+	fprintf(fileID, 'precursor.mass\tprobability');
+	for i = min_mass:max_mass
+		y = fnval( sp_pp, i );
+		fprintf(fileID, '%d\t%d', i, y);
+	end
+end
+
