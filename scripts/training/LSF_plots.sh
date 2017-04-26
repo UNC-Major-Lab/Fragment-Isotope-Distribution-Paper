@@ -16,4 +16,11 @@ set S = `expr $LSB_JOBINDEX - 2`
 
 mkdir $OUT_DIR
 
-Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $LSB_JOBINDEX $MAX_SULFUR ${OUT_DIR}"Precursor"${LSB_JOBINDEX}"_model.eps" 20000
+
+
+if ($S < 0) then
+    Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $LSB_JOBINDEX $MAX_SULFUR ${OUT_DIR}"Average_precursor"${LSB_JOBINDEX}"_model.eps" 100000
+    Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $LSB_JOBINDEX $MAX_SULFUR ${OUT_DIR}"Average_zoom_precursor"${LSB_JOBINDEX}"_model.eps" 10000
+else
+    Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $LSB_JOBINDEX $MAX_SULFUR ${OUT_DIR}"Precursor"${LSB_JOBINDEX}"_model.eps" 10000
+endif

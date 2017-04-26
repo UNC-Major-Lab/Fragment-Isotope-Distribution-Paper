@@ -36,8 +36,16 @@ mkdir ${OUT_DIR}/spline/hist/
 mkdir ${OUT_DIR}/spline/res/
 mkdir ${OUT_DIR}/spline/scatter/
 
-${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $S $NUM_SAMPLES $MAX_ISOTOPE_DEPTH $MONO
+if ($S < 0) then
+    ${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $S $NUM_SAMPLES $MAX_ISOTOPE_DEPTH $MONO
+else
+    ${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS_SULFUR $S $NUM_SAMPLES $MAX_ISOTOPE_DEPTH_SULFUR $MONO
+endif
 
 chmod 775 ${OUT_DIR}/data/*
 
-${SOURCE_DIR}/scripts/training/LSF_submit_models.sh $S $MAX_SAMPLED_MASS
+if ($S < 0) then
+    ${SOURCE_DIR}/scripts/training/LSF_submit_models.sh $S $MAX_SAMPLED_MASS
+else
+    ${SOURCE_DIR}/scripts/training/LSF_submit_models.sh $S $MAX_SAMPLED_MASS_SULFUR
+endif
