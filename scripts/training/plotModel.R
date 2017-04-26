@@ -15,7 +15,7 @@ data <- data.frame()
 if (max.sulfur == -1) {
   scatter.infile <- paste(data.basedir, "Average_Spline", "/data/Precursor", precursor, ".tab", sep="")
   data <- read.table(scatter.infile, header=T, sep="\t")
-  data <- subset(data.tmp, data.tmp$precursor.mass <= max.mass)
+  data <- subset(data, data$precursor.mass <= max.mass)
   data$S <- -1
 } else {
   for (sulfur in 0:max.sulfur) {
