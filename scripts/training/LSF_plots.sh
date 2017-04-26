@@ -12,15 +12,15 @@ source ../config.sh
 set DATA_DIR = ${SPLINE_OUT_DIR}"/"
 set OUT_DIR = ${ROOT_OUT_DIR}"/training/"
 
-set S = `expr $LSB_JOBINDEX - 2`
+set PRECURSOR_ISOTOPE = `expr $LSB_JOBINDEX - 2`
 
 mkdir $OUT_DIR
 
 
 
 if ($S < 0) then
-    Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $LSB_JOBINDEX $MAX_SULFUR ${OUT_DIR}"Average_precursor"${LSB_JOBINDEX}"_model.eps" 100000
-    Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $LSB_JOBINDEX $MAX_SULFUR ${OUT_DIR}"Average_zoom_precursor"${LSB_JOBINDEX}"_model.eps" 10000
+    Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE $MAX_SULFUR ${OUT_DIR}"Average_precursor"${LSB_JOBINDEX}"_model.eps" 100000
+    Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE $MAX_SULFUR ${OUT_DIR}"Average_zoom_precursor"${LSB_JOBINDEX}"_model.eps" 10000
 else
-    Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $LSB_JOBINDEX $MAX_SULFUR ${OUT_DIR}"Precursor"${LSB_JOBINDEX}"_model.eps" 10000
+    Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE $MAX_SULFUR ${OUT_DIR}"Precursor"${LSB_JOBINDEX}"_model.eps" 10000
 endif
