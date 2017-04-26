@@ -59,7 +59,7 @@ void countSulfurs(AASequence& pep)
 void digestProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& digestor)
 {
     static Size MIN_PEPTIDE_LENGTH = 5;
-    static Size MAX_PEPTIDE_LENGTH = 100;
+    static Size MAX_PEPTIDE_LENGTH = 10000;
 
     std::vector<AASequence> peptides;
     digestor.digest(AASequence::fromString(protein.sequence), peptides);
