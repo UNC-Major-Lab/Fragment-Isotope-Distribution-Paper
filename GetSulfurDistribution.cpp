@@ -14,8 +14,11 @@ using namespace OpenMS;
 
 static const OpenMS::ElementDB* elementDB = OpenMS::ElementDB::getInstance();
 
+static const int binSize = 1000;
+
 std::set<AASequence> uniquePeptides;
 std::map<int, int> sulfurs2count;
+std::map<int, int> massBin2count;
 
 bool isValidPeptide(AASequence& pep) {
     String p = pep.toString();
@@ -32,6 +35,10 @@ void outputDistribution()
     {
         std::cout << itr.first << "\t" << itr.second << std::endl;
     }
+    for (auto itr : massBin2count)
+    {
+        std::cout << itr.first * binSize << "\t" << itr.second << std::endl;
+    }
 }
 
 void countSulfurs(AASequence& pep)
@@ -43,6 +50,10 @@ void countSulfurs(AASequence& pep)
     }
 
     sulfurs2count[pep_s]++;
+
+    int massBin = pep.getMonoWeight()/binSize;
+
+    massBin2count[massBin]++;
 }
 
 void digestProtein(FASTAFile::FASTAEntry& protein, EnzymaticDigestion& digestor)

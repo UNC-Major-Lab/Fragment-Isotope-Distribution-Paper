@@ -1,6 +1,6 @@
 #!/bin/csh
 #BSUB -L /bin/csh
-#BSUB -J LSF_plots.sh[1-21]
+#BSUB -J LSF_plots.sh[1-22]
 #BSUB -q hour
 #BSUB -o /netscr/dennisg/log/training_plots.log.%J
 #BSUB -n 1
@@ -11,6 +11,8 @@ source ../config.sh
 
 set DATA_DIR = ${SPLINE_OUT_DIR}"/"
 set OUT_DIR = ${ROOT_OUT_DIR}"/training/"
+
+set S = `expr $LSB_JOBINDEX - 2`
 
 mkdir $OUT_DIR
 
