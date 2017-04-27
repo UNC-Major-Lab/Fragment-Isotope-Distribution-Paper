@@ -50,7 +50,7 @@ p <- ggplot(data, aes(x=precursor.mass, y=probability, color=S))
 print(
   p
   + geom_point(shape=1)
-  + geom_line(data=data.spline, aes(x=precursor.mass, y=probability, group=S, linetype=line.type), color="black")
+  + geom_line(data=data.spline, aes(x=precursor.mass, y=probability, group=S), color="black")
   )
 
 dev.off()
