@@ -1,7 +1,7 @@
 #!/bin/csh
 #BSUB -L /bin/csh
 #BSUB -J LSF_compare_to_shotgun.sh
-#BSUB -q week
+#BSUB -q day
 #BSUB -o /netscr/dennisg/log/LSF_compare_to_shotgun.log.%J
 #BSUB -n 1
 #BSUB -M 8

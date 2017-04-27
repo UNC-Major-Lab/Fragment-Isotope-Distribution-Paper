@@ -78,7 +78,7 @@ void proteome_isotopic_distributions(std::string base_path, std::string fasta_pa
 {
     std::ofstream* outfiles = openOutputFiles(base_path, max_depth, true);
 
-    FASTAParser parser(fasta_path, max_mass, 1, 100);
+    FASTAParser parser(fasta_path, max_mass, 1, 150);
     for (auto itr = parser.begin(); itr != parser.end(); ++itr)
     {
         write_distribution(*itr, outfiles, max_depth, mono, true);

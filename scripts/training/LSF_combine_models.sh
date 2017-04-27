@@ -1,7 +1,7 @@
 #!/bin/csh
 #BSUB -L /bin/csh
 #BSUB -J LSF_combine_models.sh
-#BSUB -q week
+#BSUB -q day
 #BSUB -o /netscr/dennisg/log/LSF_combine_models.log.%J
 #BSUB -n 1
 #BSUB -M 1

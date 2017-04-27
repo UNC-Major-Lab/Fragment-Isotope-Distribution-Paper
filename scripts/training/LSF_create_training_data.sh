@@ -1,7 +1,7 @@
 #!/bin/csh
 #BSUB -L /bin/csh
 #BSUB -J LSF_create_training_data.sh[1-7]
-#BSUB -q week
+#BSUB -q day
 #BSUB -o /netscr/dennisg/log/Isotopes.log.%J
 #BSUB -n 1
 

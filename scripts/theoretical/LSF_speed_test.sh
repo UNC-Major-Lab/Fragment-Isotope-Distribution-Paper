@@ -1,7 +1,7 @@
 #!/bin/csh
 #BSUB -L /bin/csh
 #BSUB -J LSF_speed_test.sh
-#BSUB -q week
+#BSUB -q day
 #BSUB -o /netscr/dennisg/log/LSF_speed_test.log.%J
 #BSUB -n 1
 #BSUB -M 1
