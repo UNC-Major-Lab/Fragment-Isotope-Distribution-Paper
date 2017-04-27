@@ -38,9 +38,10 @@ mkdir ${OUT_DIR}/spline/scatter/
 mkdir ${OUT_DIR}/spline/eval/
 
 if ($S < 0) then
-    ${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $S $NUM_SAMPLES $MAX_ISOTOPE_DEPTH $MONO
+    ${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS $MAX_ISOTOPE_DEPTH $MONO $S $NUM_SAMPLES
+    ${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/proteome/ $MAX_SAMPLED_MASS $MAX_ISOTOPE_DEPTH $MONO
 else
-    ${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS_SULFUR $S $NUM_SAMPLES $MAX_ISOTOPE_DEPTH_SULFUR $MONO
+    ${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/data/ $MAX_SAMPLED_MASS_SULFUR $MAX_ISOTOPE_DEPTH_SULFUR $MONO $S $NUM_SAMPLES
 endif
 
 chmod 775 ${OUT_DIR}/data/*

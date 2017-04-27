@@ -26,7 +26,7 @@ std::mt19937 gen(rd());
 std::uniform_real_distribution<> dis_AA(0,1);
 std::uniform_int_distribution<> dis_SULFUR(0,1);
 
-std::ofstream* openOutputFiles(std::string base_path, int max_depth)
+std::ofstream* openOutputFiles(std::string base_path, int max_depth, bool write_sulfur)
 {
     // create all output files and write header to each
     std::ofstream* outfiles = new std::ofstream[max_depth];
@@ -36,7 +36,11 @@ std::ofstream* openOutputFiles(std::string base_path, int max_depth)
 
 
         outfiles[precursor_isotope].open(base_path + filename);
-        outfiles[precursor_isotope] << "probability" << "\tprecursor.mass" << std::endl;
+        if (write_sulfur) {
+            outfiles[precursor_isotope] << "probability" << "\tprecursor.mass" << "\tsulfur" << std::endl;
+        } else {
+            outfiles[precursor_isotope] << "probability" << "\tprecursor.mass" << std::endl;
+        }
     }
 
     return outfiles;
@@ -52,7 +56,7 @@ void closeOutputFiles(std::ofstream* outfiles, int max_depth)
     delete[] outfiles;
 }
 
-void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, int max_depth, bool mono)
+void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, int max_depth, bool mono, bool write_sulfur)
 {
     OpenMS::EmpiricalFormula precursor_ef = p.getFormula();
     OpenMS::IsotopeDistribution precursor_id = precursor_ef.getIsotopeDistribution(0);
@@ -61,21 +65,23 @@ void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, in
     {
         double mass = mono ? precursor_ef.getMonoWeight() : precursor_ef.getAverageWeight();
 
-        outfiles[precursor_isotope] << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass << std::endl;
+        if (write_sulfur) {
+            int num_sulfur = precursor_ef.getNumberOf(elementDB->getElement("Sulfur"));
+            outfiles[precursor_isotope] << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass << "\t" << num_sulfur << std::endl;
+        } else {
+            outfiles[precursor_isotope] << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass << std::endl;
+        }
     }
 }
 
-void proteome_isotopic_distributions(std::string base_path, std::string fasta_path, float max_mass, int num_sulfurs, int max_depth, bool mono)
+void proteome_isotopic_distributions(std::string base_path, std::string fasta_path, float max_mass, int max_depth, bool mono)
 {
-    std::ofstream* outfiles = openOutputFiles(base_path, max_depth);
+    std::ofstream* outfiles = openOutputFiles(base_path, max_depth, true);
 
     FASTAParser parser(fasta_path, max_mass, 1, 100);
     for (auto itr = parser.begin(); itr != parser.end(); ++itr)
     {
-        if (num_sulfurs < 0 || itr->getFormula().getNumberOf(elementDB->getElement("Sulfur")) == num_sulfurs)
-        {
-            write_distribution(*itr, outfiles, max_depth, mono);
-        }
+        write_distribution(*itr, outfiles, max_depth, mono, true);
     }
 
     closeOutputFiles(outfiles, max_depth);
@@ -168,7 +174,7 @@ void sample_isotopic_distributions(std::string base_path, std::string fasta_path
 
     std::vector<double> aa2prob = calcPrefixSum(getAAProbabilities(fasta_path, num_sulfurs == -1), num_sulfurs == -1);
 
-    std::ofstream* outfiles = openOutputFiles(base_path, max_depth);
+    std::ofstream* outfiles = openOutputFiles(base_path, max_depth, false);
 
     int max_length = max_mass/100;
 
@@ -181,7 +187,7 @@ void sample_isotopic_distributions(std::string base_path, std::string fasta_path
 
             if (random_sequence.size() > 0 && random_sequence.getMonoWeight() <= max_mass)
             {
-                write_distribution(random_sequence, outfiles, max_depth, mono);
+                write_distribution(random_sequence, outfiles, max_depth, mono, false);
             }
         }
     }
@@ -200,17 +206,18 @@ void usage()
     std::cout << "fasta_path: The path to the fasta file to train the splines on." << std::endl;
     std::cout << "out_path: The path to the directory that will store the training data, e.g. ~/data/" << std::endl;
     std::cout << "max_mass: maximum mass allowed for sampled peptides, e.g. 8500" << std::endl;
-    std::cout << "S: number of sulfurs that should be in the fragment ion. Use -1 for all (e.g. 0,1,2..)" << std::endl;
-    std::cout << "num_samples: number of random peptides to make for each peptide length" << std::endl;
     std::cout << "max_depth: The number of isotopes to generate training data for, e.g. 3 = M0,M1,M2" << std::endl;
     std::cout << "mono: should monoisotopic masses be used or average? 1=mono, 0=average" << std::endl;
+    std::cout << "S: number of sulfurs that should be in the fragment ion. Use -1 for all (e.g. 0,1,2..)" << std::endl;
+    std::cout << "num_samples: number of random peptides to make for each peptide length" << std::endl;
+
     std::cout << std::endl;
 }
 
 
 int main(int argc, const char ** argv)
 {
-    if (argc != 8)
+    if (argc != 8 && argc != 6)
     {
         usage();
         return 0;
@@ -219,13 +226,16 @@ int main(int argc, const char ** argv)
     std::string fasta_path = argv[1];
     std::string out_path = argv[2];
     float max_mass = atof(argv[3]);
-    int S = atoi(argv[4]);
-    int num_samples = atoi(argv[5]);
-    int max_depth = atoi(argv[6]);
-    bool mono = strncmp(argv[7], "1", 1) == 0 ? true : false;
+    int max_depth = atoi(argv[4]);
+    bool mono = strncmp(argv[5], "1", 1) == 0 ? true : false;
 
-    //proteome_isotopic_distributions(out_path, fasta_path, max_mass, S, max_depth, mono);
-    sample_isotopic_distributions(out_path, fasta_path, max_mass, S, num_samples, max_depth, mono);
+    if (argc == 8) {
+        int S = atoi(argv[6]);
+        int num_samples = atoi(argv[7]);
+        sample_isotopic_distributions(out_path, fasta_path, max_mass, S, num_samples, max_depth, mono);
+    } else {
+        proteome_isotopic_distributions(out_path, fasta_path, max_mass, max_depth, mono);
+    }
 
     return 0;
 }
