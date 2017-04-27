@@ -52,6 +52,7 @@ print(
   p
   + geom_point(shape=1)
   + geom_line(data=data.spline, aes(x=precursor.mass, y=probability, group=S, linetype=line.type), color="black")
+  + scale_linetype_identity()
   )
 
 dev.off()
