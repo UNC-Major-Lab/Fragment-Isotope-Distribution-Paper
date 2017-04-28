@@ -12,7 +12,6 @@ source ../config.sh
 set DATA_DIR = ${SPLINE_OUT_DIR}"/"
 set OUT_DIR = ${ROOT_OUT_DIR}"/training/"
 
-mkdir $OUT_DIR
-mkdir ${OUT_DIR}/proteome/
+mkdir -p ${OUT_DIR}/proteome/averagine
 
 ${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/proteome/ $MAX_SAMPLED_MASS $MAX_ISOTOPE_DEPTH $MONO
