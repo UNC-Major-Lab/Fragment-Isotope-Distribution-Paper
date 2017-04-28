@@ -24,7 +24,7 @@ data.averagine <- subset(data.averagine, data.averagine$precursor.mass <= max.ma
 # Average spline
 spline.infile <- paste(data.basedir, "Averagine/Average_Spline", "/spline/eval/Precursor", precursor, ".tab", sep="")
 data.spline.avg <- read.table(spline.infile, header=T, sep="\t")
-data.spline.avg <- subset(data.spline.avg, data.spline$precursor.mass <= max.mass)
+data.spline.avg <- subset(data.spline.avg, data.spline.avg$precursor.mass <= max.mass)
 
 # Sulfur-specific splines
 data.spline <- data.frame()
