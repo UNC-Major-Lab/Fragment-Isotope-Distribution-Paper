@@ -40,11 +40,11 @@ for (sulfur in 0:max.sulfur) {
 setEPS()
 postscript(outfile, width=9, height=6)
 
-p <- ggplot(data, aes(x=precursor.mass, y=probability, color=S))
+p <- ggplot()
 
 print(
   p
-  + geom_point(shape=1)
+  + geom_point(data, aes(x=precursor.mass, y=probability, color=S), shape=1)
   # sulfur-specific splines
   + geom_line(data=data.spline, aes(x=precursor.mass, y=probability, group=S), color="black")
   # average spline
