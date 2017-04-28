@@ -14,10 +14,6 @@ set OUT_DIR = ${ROOT_OUT_DIR}"/training/"
 
 set PRECURSOR_ISOTOPE = `expr $LSB_JOBINDEX - 1`
 
-mkdir $OUT_DIR
-
-
-
 Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE -1 ${OUT_DIR}"Average_precursor"${PRECURSOR_ISOTOPE}"_model.eps" 100000
 Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE -1 ${OUT_DIR}"Average_zoom_precursor"${PRECURSOR_ISOTOPE}"_model.eps" 10000
 Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE $MAX_SULFUR ${OUT_DIR}"Precursor"${PRECURSOR_ISOTOPE}"_model.eps" 10000
