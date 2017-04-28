@@ -56,15 +56,20 @@ void closeOutputFiles(std::ofstream* outfiles, int max_depth)
     delete[] outfiles;
 }
 
-void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, int max_depth, bool mono, bool write_sulfur)
+void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, int max_depth, bool mono, bool write_sulfur, bool exact)
 {
     OpenMS::EmpiricalFormula precursor_ef = p.getFormula();
-    OpenMS::IsotopeDistribution precursor_id = precursor_ef.getIsotopeDistribution(0);
+    double mass = mono ? precursor_ef.getMonoWeight() : precursor_ef.getAverageWeight();
+
+    OpenMS::IsotopeDistribution precursor_id;
+    if (exact) {
+        precursor_id = precursor_ef.getIsotopeDistribution(0);
+    } else {
+        precursor_id.estimateFromPeptideWeight(mass);
+    }
 
     for (int precursor_isotope = 0; precursor_isotope < max_depth && precursor_isotope < precursor_id.size(); ++precursor_isotope)
     {
-        double mass = mono ? precursor_ef.getMonoWeight() : precursor_ef.getAverageWeight();
-
         if (write_sulfur) {
             int num_sulfur = precursor_ef.getNumberOf(elementDB->getElement("Sulfur"));
             outfiles[precursor_isotope] << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass << "\t" << num_sulfur << std::endl;
@@ -77,14 +82,17 @@ void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, in
 void proteome_isotopic_distributions(std::string base_path, std::string fasta_path, float max_mass, int max_depth, bool mono)
 {
     std::ofstream* outfiles = openOutputFiles(base_path, max_depth, true);
+    std::ofstream* outfiles_averagine = openOutputFiles(base_path+"averagine/", max_depth, true);
 
     FASTAParser parser(fasta_path, max_mass, 1, 150);
     for (auto itr = parser.begin(); itr != parser.end(); ++itr)
     {
-        write_distribution(*itr, outfiles, max_depth, mono, true);
+        write_distribution(*itr, outfiles, max_depth, mono, true, true);
+        write_distribution(*itr, outfiles, max_depth, mono, true, false);
     }
 
     closeOutputFiles(outfiles, max_depth);
+    closeOutputFiles(outfiles_averagine, max_depth);
 }
 
 OpenMS::AASequence create_random_peptide_sequence(int peptide_length, std::vector<double> aa2prob, int num_sulfurs)
@@ -187,7 +195,7 @@ void sample_isotopic_distributions(std::string base_path, std::string fasta_path
 
             if (random_sequence.size() > 0 && random_sequence.getMonoWeight() <= max_mass)
             {
-                write_distribution(random_sequence, outfiles, max_depth, mono, false);
+                write_distribution(random_sequence, outfiles, max_depth, mono, false, true);
             }
         }
     }
