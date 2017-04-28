@@ -14,4 +14,4 @@ set OUT_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical/"
 
 set PRECURSOR_ISOTOPE = `expr $LSB_JOBINDEX - 1`
 
-Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${ROOT_OUT_DIR} $PRECURSOR_ISOTOPE $MAX_SULFUR ${OUT_DIR}"spline_comparison"${PRECURSOR_ISOTOPE}"_model.eps" 10000
+Rscript plotModelToProteome.R ${DATA_DIR}"spline_eval/" ${ROOT_OUT_DIR} $PRECURSOR_ISOTOPE $MAX_SULFUR ${OUT_DIR}"spline_comparison"${PRECURSOR_ISOTOPE}"_model.eps" 10000
