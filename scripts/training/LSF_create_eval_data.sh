@@ -14,4 +14,4 @@ set OUT_DIR = ${ROOT_OUT_DIR}"/training/"
 
 mkdir -p ${OUT_DIR}/proteome/averagine
 
-${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/proteome/ $MAX_SAMPLED_MASS $MAX_ISOTOPE_DEPTH $MONO
+${BUILD_DIR}/GenerateTrainingData $FASTA ${OUT_DIR}/proteome/ $MAX_SAMPLED_MASS_SULFUR $MAX_ISOTOPE_DEPTH $MONO
