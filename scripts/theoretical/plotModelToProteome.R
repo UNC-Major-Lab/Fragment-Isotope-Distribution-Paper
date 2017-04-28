@@ -15,7 +15,8 @@ max.mass <- as.numeric(args[6])
 scatter.infile <- paste(data.basedir, "training/proteome/Precursor", precursor, ".tab", sep="")
 data <- read.table(scatter.infile, header=T, sep="\t")
 data <- subset(data, data$precursor.mass <= max.mass)
-data$sulfur[which(data$sulfur > max.sulfur)] <- paste(">",toString(max.sulfur),"")
+data <- subset(data, data$sulfur <= max.sulfur)
+#data$sulfur[which(data$sulfur > max.sulfur)] <- paste(">",toString(max.sulfur),"")
 
 # Proteome averagine eval
 averagine.infile <- paste(data.basedir, "training/proteome/averagine/Precursor", precursor, ".tab", sep="")
