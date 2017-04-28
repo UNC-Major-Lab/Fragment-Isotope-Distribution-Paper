@@ -44,7 +44,7 @@ p <- ggplot()
 
 print(
   p
-  + geom_point(data=data, aes(x=precursor.mass, y=probability, color=S), shape=1)
+  + geom_point(data=data, aes(x=precursor.mass, y=probability, color=sulfur), shape=1)
   # sulfur-specific splines
   + geom_line(data=data.spline, aes(x=precursor.mass, y=probability, group=S), color="black")
   # average spline
