@@ -5,6 +5,8 @@
 #BSUB -o /netscr/dennisg/log/create_eval_data.log.%J
 #BSUB -n 1
 
+module load gcc/4.8.1
+
 source ../config.sh
 
 set DATA_DIR = ${SPLINE_OUT_DIR}"/"
