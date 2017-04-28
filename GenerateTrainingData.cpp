@@ -82,16 +82,34 @@ void write_distribution(const OpenMS::AASequence &p, std::ofstream* outfiles, in
 void proteome_isotopic_distributions(std::string base_path, std::string fasta_path, float max_mass, int max_depth, bool mono)
 {
     std::ofstream* outfiles = openOutputFiles(base_path, max_depth, true);
-    std::ofstream* outfiles_averagine = openOutputFiles(base_path+"averagine/", max_depth, true);
+
 
     FASTAParser parser(fasta_path, max_mass, 1, 150);
     for (auto itr = parser.begin(); itr != parser.end(); ++itr)
     {
         write_distribution(*itr, outfiles, max_depth, mono, true, true);
-        write_distribution(*itr, outfiles_averagine, max_depth, mono, true, false);
     }
 
     closeOutputFiles(outfiles, max_depth);
+
+}
+
+void averagine_isotopic_distributions(std::string base_path, float max_mass, int max_depth, bool mono)
+{
+    std::ofstream* outfiles_averagine = openOutputFiles(base_path+"averagine/", max_depth, false);
+
+    for (double mass = 50; mass < max_mass; ++mass)
+    {
+        OpenMS::IsotopeDistribution precursor_id;
+
+        precursor_id.estimateFromPeptideWeight(mass);
+
+        for (int precursor_isotope = 0; precursor_isotope < max_depth && precursor_isotope < precursor_id.size(); ++precursor_isotope)
+        {
+            outfiles_averagine[precursor_isotope] << precursor_id.getContainer()[precursor_isotope].second << "\t" << mass << std::endl;
+        }
+    }
+
     closeOutputFiles(outfiles_averagine, max_depth);
 }
 
@@ -243,6 +261,7 @@ int main(int argc, const char ** argv)
         sample_isotopic_distributions(out_path, fasta_path, max_mass, S, num_samples, max_depth, mono);
     } else {
         proteome_isotopic_distributions(out_path, fasta_path, max_mass, max_depth, mono);
+        averagine_isotopic_distributions(out_path, max_mass, max_depth, mono);
     }
 
     return 0;
