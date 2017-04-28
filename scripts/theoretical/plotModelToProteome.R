@@ -48,11 +48,11 @@ print(
   p
   + geom_point(data=data, aes(x=precursor.mass, y=probability, color=as.factor(sulfur)), shape=1)
   # sulfur-specific splines
-  + geom_line(data=data.spline, aes(x=precursor.mass, y=probability, group=S), color="grey")
+  + geom_line(data=data.spline, aes(x=precursor.mass, y=probability, group=S), color="grey30")
   # average spline
-  + geom_line(data=data.spline.avg, aes(x=precursor.mass, y=probability), color="black", size=2)
+  + geom_line(data=data.spline.avg, aes(x=precursor.mass, y=probability), color="black", size=1)
   # averagine model
-  + geom_line(data=data.averagine, aes(x=precursor.mass, y=probability), color="blue", linetype="dashed", size=2)
+  + geom_line(data=data.averagine, aes(x=precursor.mass, y=probability), color="blue", linetype="dashed", size=1)
   )
 
 dev.off()
