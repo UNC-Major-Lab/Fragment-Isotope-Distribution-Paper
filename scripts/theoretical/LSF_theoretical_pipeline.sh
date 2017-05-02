@@ -10,4 +10,4 @@ rm out
 #JOBID=`head -1 out | sed 's/.*<\\([0-9]*\\)>.*/\\1/'`
 #rm out
 
-#bsub < LSF_merge_theoretical2.sh -w 'numended('$JOBID',>=10)'
+bsub < LSF_merge_theoretical2.sh -w 'numended('$JOBID',>=100)'
