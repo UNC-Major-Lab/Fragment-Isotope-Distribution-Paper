@@ -19,4 +19,4 @@ set BIN_SIZE_CHISQUARE = 0.025
 mkdir -p $OUT_DIR
 
 ${BUILD_DIR}/CompareToTheoretical $FASTA $LSB_JOBINDEX 100 0 ${OUT_DIR}"/residuals_precursor_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/scores_precursor_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/stats_precursor_"${LSB_JOBINDEX}".out" $BIN_SIZE_CHISQUARE $BIN_SIZE_RESIDUAL
-${BUILD_DIR}/CompareToTheoretical $FASTA $LSB_JOBINDEX 100 1 ${OUT_DIR}"/residuals_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/scores_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/stats_fragment_"${LSB_JOBINDEX}".out" $BIN_SIZE_CHISQUARE $BIN_SIZE_RESIDUAL
+#${BUILD_DIR}/CompareToTheoretical $FASTA $LSB_JOBINDEX 100 1 ${OUT_DIR}"/residuals_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/scores_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/stats_fragment_"${LSB_JOBINDEX}".out" $BIN_SIZE_CHISQUARE $BIN_SIZE_RESIDUAL
