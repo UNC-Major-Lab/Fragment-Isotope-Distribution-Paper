@@ -112,7 +112,7 @@ void averagine_isotopic_distributions(std::string base_path, float max_mass, int
     closeOutputFiles(outfiles_averagine, max_depth);
 }
 
-OpenMS::AASequence create_random_peptide_sequence(int peptide_length, std::vector<double> aa2prob, int num_sulfurs)
+OpenMS::AASequence create_random_peptide_sequence(int peptide_length, std::vector<double> &aa2prob, int num_sulfurs)
 {
     OpenMS::AASequence random_peptide;
 
