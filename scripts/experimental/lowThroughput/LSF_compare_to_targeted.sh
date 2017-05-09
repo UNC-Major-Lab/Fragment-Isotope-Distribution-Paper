@@ -16,4 +16,4 @@ set OUT_DIR = ${ROOT_OUT_DIR}"/compare_to_experimental/LT"
 mkdir -p $OUT_DIR
 
 ${BUILD_DIR}/CompareToTargeted ${DATA_DIR}"/Neuro_04.mzML" ${DATA_DIR}"/Neuro_04_centroid.mzML" ${OUT_DIR}"/out04.tab" ${OUT_DIR}"/calc_out04.tab" ${OUT_DIR}"/scores_out04.tab"
-Rscript lowThroughput/IndividualSpectrumIsotopes.R ${OUT_DIR}"/out04.tab" ${OUT_DIR}"/calc_out04.tab" ${OUT_DIR}"/scores_out04.tab" ${OUT_DIR}"/low_throughput.eps"
+Rscript IndividualSpectrumIsotopes.R ${OUT_DIR}"/out04.tab" ${OUT_DIR}"/calc_out04.tab" ${OUT_DIR}"/scores_out04.tab" ${OUT_DIR}"/low_throughput.eps"
