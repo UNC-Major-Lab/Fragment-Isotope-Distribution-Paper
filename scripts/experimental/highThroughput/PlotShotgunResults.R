@@ -7,13 +7,18 @@ savePlot <- function(myplot, outfile) {
   #setEPS()
   #postscript(outfile)
   pdf(outfile)
-  print(plotX2_atDepth)
+  print(myplot)
   dev.off()
 }
 
+#args = c("/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/HT/distributionScores.out",
+#         "/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/HT/")
 args = commandArgs(trailingOnly=TRUE)
 infile1 <- args[1]
 outPath <- args[2]
+
+
+
 #load data from file
 distData <- read.table(infile1, header=T, sep="\t")
 #only distributions flagged as valid
@@ -23,7 +28,7 @@ distData <- distData[which(distData$distributionValid == 1), ]
 X2headers <- c("exactCondFragmentX2","approxFragmentFromWeightX2","approxFragmentFromWeightAndSX2","exactPrecursorX2","approxPrecursorX2")
 
 #loop through each search depth
-for (searchDepth in 2:5) {
+for (searchDepth in 2:4) {
   #truncate to distributions at search depth
   distAtDepth <- distData[which(distData$completeAtDepth == searchDepth),]
   #truncate to distributions at search depth but have complete distributions
@@ -38,16 +43,22 @@ for (searchDepth in 2:5) {
   #rename melted factors for Chi Squared data
   meltedX2_AtDepth$variable <- as.character(meltedX2_AtDepth$variable)
   meltedX2_Complete$variable <- as.character(meltedX2_Complete$variable)
+
   meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "exactCondFragmentX2"] <- "ExactFragment"
   meltedX2_Complete$variable[meltedX2_Complete$variable == "exactCondFragmentX2"] <- "ExactFragment"
+
   meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "approxFragmentFromWeightX2"] <- "ApproxFragment"
   meltedX2_Complete$variable[meltedX2_Complete$variable == "approxFragmentFromWeightX2"] <- "ApproxFragment"
+
   meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "approxFragmentFromWeightAndSX2"] <- "ApproxFragmentSulf"
   meltedX2_Complete$variable[meltedX2_Complete$variable == "approxFragmentFromWeightAndSX2"] <- "ApproxFragmentSulf"
+
   meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "exactPrecursorX2"] <- "ExactPrecursor"
   meltedX2_Complete$variable[meltedX2_Complete$variable == "exactPrecursorX2"] <- "ExactPrecursor"
-  meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "approxPrecursorX2"] <- "approxPrecursor"
-  meltedX2_Complete$variable[meltedX2_Complete$variable == "approxPrecursorX2"] <- "approxPrecursor"
+
+  meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "approxPrecursorX2"] <- "ApproxPrecursor"
+  meltedX2_Complete$variable[meltedX2_Complete$variable == "approxPrecursorX2"] <- "ApproxPrecursor"
+
   meltedX2_AtDepth$variable <- as.factor(meltedX2_AtDepth$variable)
   meltedX2_Complete$variable <- as.factor(meltedX2_Complete$variable)
   #plot chi squared density
