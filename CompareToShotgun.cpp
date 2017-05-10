@@ -125,6 +125,8 @@ int main(int argc, char * argv[])
     distributionScoreFile << "exactCondFragmentX2\t";
     distributionScoreFile << "approxFragmentFromWeightX2\t";
     distributionScoreFile << "approxFragmentFromWeightAndSX2\n";
+    distributionScoreFile << "exactPrecursorX2\t";
+    distributionScoreFile << "approxPrecursorX2\n";
 
     //output file for ion identification data
     const std::string ionFileName = "ions.out";
@@ -265,6 +267,9 @@ int main(int argc, char * argv[])
                         std::vector<std::pair<double, double> > approxFragmentFromWeightDist;
                         //vector for approx. fragment isotope dist. from peptide weight and sulfurs <mz, probability>
                         std::vector<std::pair<double, double> > approxFragmentFromWeightAndSulfurDist;
+                        std::vector<std::pair<double, double> > exactPrecursorDist;
+                        std::vector<std::pair<double, double> > approxPrecursorDist;
+
 
                         //vector for observed isotope distribution <mz, intensity>
                         std::vector<std::pair<double, double> > observedDist;
@@ -337,11 +342,19 @@ int main(int argc, char * argv[])
                                                                 precursorIon.sequence,
                                                                 precursorIon.charge);
 
+                        SpectrumUtilities::exactPrecursorIsotopeDist(exactPrecursorDist, precursorIsotopes,
+                                                                     ionList[ionIndex]);
+
+                        SpectrumUtilities::approxPrecursorFromWeightIsotopeDist(approxPrecursorDist, precursorIsotopes,
+                                                                                ionList[ionIndex]);
+
                         //compute chi-squared with observed to Conditional
                         double exactCondFragmentX2 = Stats::computeX2(observedDist, exactConditionalFragmentDist);
                         double approxFragmentFromWeightX2 = Stats::computeX2(observedDist, approxFragmentFromWeightDist);
                         double approxFragmentFromWeightAndSulfurX2 = Stats::computeX2(observedDist,
                                                                                approxFragmentFromWeightAndSulfurDist);
+                        double exactPrecursorX2 = Stats::computeX2(observedDist, exactPrecursorDist);
+                        double approxPrecursorX2 = Stats::computeX2(observedDist, approxPrecursorDist);
 
 
                         //write distribution results to file
@@ -368,7 +381,9 @@ int main(int argc, char * argv[])
                         //Chi-squared for exact and approximate distributions
                         distributionScoreFile << exactCondFragmentX2 << "\t";
                         distributionScoreFile << approxFragmentFromWeightX2 << "\t";
-                        distributionScoreFile << approxFragmentFromWeightAndSulfurX2 << "\n";
+                        distributionScoreFile << approxFragmentFromWeightAndSulfurX2 << "\t";
+                        distributionScoreFile << exactPrecursorX2 << "\t";
+                        distributionScoreFile << approxPrecursorX2 << "\n";
                     }
                 }//ion loop
             }//peptide hit loop

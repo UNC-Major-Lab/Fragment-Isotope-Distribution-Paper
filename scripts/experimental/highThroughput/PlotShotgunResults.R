@@ -20,7 +20,7 @@ distData <- read.table(infile1, header=T, sep="\t")
 distData <- distData[which(distData$distributionValid == 1), ]
 
 #Chi-squared file headers
-X2headers <- c("exactCondFragmentX2","approxFragmentFromWeightX2","approxFragmentFromWeightAndSX2")
+X2headers <- c("exactCondFragmentX2","approxFragmentFromWeightX2","approxFragmentFromWeightAndSX2","exactPrecursorX2","approxPrecursorX2")
 
 #loop through each search depth
 for (searchDepth in 2:5) {
@@ -44,6 +44,10 @@ for (searchDepth in 2:5) {
   meltedX2_Complete$variable[meltedX2_Complete$variable == "approxFragmentFromWeightX2"] <- "ApproxFragment"
   meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "approxFragmentFromWeightAndSX2"] <- "ApproxFragmentSulf"
   meltedX2_Complete$variable[meltedX2_Complete$variable == "approxFragmentFromWeightAndSX2"] <- "ApproxFragmentSulf"
+  meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "exactPrecursorX2"] <- "ExactPrecursor"
+  meltedX2_Complete$variable[meltedX2_Complete$variable == "exactPrecursorX2"] <- "ExactPrecursor"
+  meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "approxPrecursorX2"] <- "approxPrecursor"
+  meltedX2_Complete$variable[meltedX2_Complete$variable == "approxPrecursorX2"] <- "approxPrecursor"
   meltedX2_AtDepth$variable <- as.factor(meltedX2_AtDepth$variable)
   meltedX2_Complete$variable <- as.factor(meltedX2_Complete$variable)
   #plot chi squared density

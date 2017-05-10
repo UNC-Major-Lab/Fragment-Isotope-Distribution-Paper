@@ -373,13 +373,12 @@ namespace SpectrumUtilities {
      * @param ion the Ion from which the monoisotopic peak will be based.
      */
     static void exactPrecursorIsotopeDist(std::vector<std::pair<double, double> > &theoDist,
-                                   const int searchDepth, const Ion &ion)
+                                          const std::set<OpenMS::UInt> &precursorIsotopes, const Ion &ion)
     {
-        //search depth 0 reports all possible!
-        //based on previous checks, this shouldn't be tested
-        if (searchDepth == 0) {
-            return;
-        }
+        OpenMS::UInt minIsotope = 7;
+
+        //construct distribution of depth at the maximum precursor isotope isolated
+        OpenMS::UInt searchDepth = std::min(minIsotope, *std::max_element(precursorIsotopes.begin(), precursorIsotopes.end()) + 1);
 
         //clear vector for distribution
         theoDist.clear();
