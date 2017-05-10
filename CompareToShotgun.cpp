@@ -124,7 +124,7 @@ int main(int argc, char * argv[])
     //Chi-squared statistics
     distributionScoreFile << "exactCondFragmentX2\t";
     distributionScoreFile << "approxFragmentFromWeightX2\t";
-    distributionScoreFile << "approxFragmentFromWeightAndSX2\n";
+    distributionScoreFile << "approxFragmentFromWeightAndSX2\t";
     distributionScoreFile << "exactPrecursorX2\t";
     distributionScoreFile << "approxPrecursorX2\n";
 
