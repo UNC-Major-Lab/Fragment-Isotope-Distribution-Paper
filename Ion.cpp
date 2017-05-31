@@ -15,14 +15,18 @@ Ion::Ion(OpenMS::AASequence seq, OpenMS::Residue::ResidueType type, OpenMS::Int 
     this->monoMz = this->monoWeight / charge;
 }
 
-void Ion::generateFragmentIons(std::vector<Ion> &ionList, const OpenMS::AASequence pepSeq, const OpenMS::Int pepCharge) {
+void Ion::generateFragmentIons(std::vector<Ion> &ionList, const OpenMS::AASequence pepSeq, const OpenMS::Int pepCharge,
+                               double minMz, double maxMz) {
     //generate b-ions
     //loop through each b-ion
     for (int i = 1; i <= pepSeq.size() - 1; ++i) {
         //loop through each charge
         for (int charge = 1; charge <= pepCharge; ++charge) {
             //add b-ion to list
-            ionList.push_back(Ion(pepSeq.getPrefix(i), OpenMS::Residue::BIon, charge));
+            double mz = pepSeq.getPrefix(i).getMonoWeight(OpenMS::Residue::BIon, charge) / charge;
+            if (mz >= minMz && mz <= maxMz) {
+                ionList.push_back(Ion(pepSeq.getPrefix(i), OpenMS::Residue::BIon, charge));
+            }
         }
     }
     //generate y-ions
@@ -31,11 +35,17 @@ void Ion::generateFragmentIons(std::vector<Ion> &ionList, const OpenMS::AASequen
         //loop through each charge
         for (int charge = 1; charge <= pepCharge; ++charge) {
             //add b-ion to list
-            ionList.push_back(Ion(pepSeq.getSuffix(i), OpenMS::Residue::YIon, charge));
+            double mz = pepSeq.getPrefix(i).getMonoWeight(OpenMS::Residue::YIon, charge) / charge;
+            if (mz >= minMz && mz <= maxMz) {
+                ionList.push_back(Ion(pepSeq.getSuffix(i), OpenMS::Residue::YIon, charge));
+            }
         }
     }
     //generate precursor ion
-    ionList.push_back(Ion(pepSeq, OpenMS::Residue::Full, pepCharge));
+    double mz = pepSeq.getMonoWeight(OpenMS::Residue::Full, pepCharge) / pepCharge;
+    if (mz >= minMz && mz <= maxMz) {
+        ionList.push_back(Ion(pepSeq, OpenMS::Residue::Full, pepCharge));
+    }
 }
 
 std::ostream& operator<<(std::ostream &strm, const Ion &ion) {

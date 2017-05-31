@@ -18,6 +18,7 @@ public:
     double monoWeight;
     double monoMz;
 
+    Ion () {};
     /**
      * Ion constructor. Includes public members for sequence, type, charge, molecular formula,
      * and monoisotopic weight (charge included) in Daltons.
@@ -37,7 +38,7 @@ public:
      * @param pepCharge the charge of the precursor peptide
      */
     static void generateFragmentIons(std::vector<Ion> &ionList, const OpenMS::AASequence pepSeq,
-                                     const OpenMS::Int pepCharge);
+                                     const OpenMS::Int pepCharge, double minMz, double maxMz);
 
     /**
      * Function to send an ion to standard output stream. All ion members reported in addition
@@ -48,5 +49,16 @@ public:
      */
     friend std::ostream& operator<<(std::ostream &strm, const Ion &ion);
 };
+
+inline bool operator< (const Ion& lhs, const Ion& rhs){
+    if (lhs.sequence == rhs.sequence)
+    {
+        if (lhs.charge == rhs.charge) {
+            return lhs.type < rhs.type;
+        }
+        return lhs.charge < rhs.charge;
+    }
+    return lhs.sequence < rhs.sequence;
+}
 
 #endif //SPECOPS_ION_H

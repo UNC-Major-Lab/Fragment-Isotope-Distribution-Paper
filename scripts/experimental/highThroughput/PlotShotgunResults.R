@@ -6,14 +6,14 @@ library(plyr)
 savePlot <- function(myplot, outfile) {
   #setEPS()
   #postscript(outfile)
-  pdf(outfile)
+  pdf(outfile, width=11, height=7)
   print(myplot)
   dev.off()
 }
 
-#args = c("/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/HT/distributionScores.out",
-#         "/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/HT/")
-args = commandArgs(trailingOnly=TRUE)
+args = c("/Users/dennisg/Downloads/distributionScores.out",
+         "/Users/dennisg/Downloads/")
+#args = commandArgs(trailingOnly=TRUE)
 infile1 <- args[1]
 outPath <- args[2]
 
@@ -37,8 +37,8 @@ for (searchDepth in 2:4) {
   distAtDepth <- distAtDepth[which(distAtDepth$searchDepth == searchDepth+1),]
   
   #melt for chi squared data
-  meltedX2_AtDepth <- melt(distAtDepth, id.vars="ionID", measure.vars=X2headers)
-  meltedX2_Complete <- melt(distAtDepthComplete, id.vars="ionID", measure.vars=X2headers)
+  meltedX2_AtDepth <- melt(distAtDepth, id.vars=c("ionID","isSIM"), measure.vars=X2headers)
+  meltedX2_Complete <- melt(distAtDepthComplete, id.vars=c("ionID","isSIM"), measure.vars=X2headers)
   
   #rename melted factors for Chi Squared data
   meltedX2_AtDepth$variable <- as.character(meltedX2_AtDepth$variable)
@@ -77,6 +77,7 @@ for (searchDepth in 2:4) {
   #plot chi squared density
   plotX2_Complete <- ggplot(data = meltedX2_Complete, mapping = aes(x=value, color=variable)) +
     geom_density() +
+    facet_wrap(~ isSIM) +#, scales="free_y") +
     scale_x_log10() +
     theme(legend.position = "right",
           legend.text = element_text(size = 10),

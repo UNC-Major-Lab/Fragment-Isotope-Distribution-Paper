@@ -78,7 +78,7 @@ int main(int argc, char * argv[])
 
     //create list of b and y ions
     std::vector<Ion> ionList;
-    Ion::generateFragmentIons(ionList, precursorIon.sequence, precursorIon.charge);
+    Ion::generateFragmentIons(ionList, precursorIon.sequence, precursorIon.charge, 0, 3000);
 
     double isotopeStep = OpenMS::Constants::NEUTRON_MASS_U / precursorIon.charge;
 

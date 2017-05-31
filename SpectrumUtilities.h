@@ -411,21 +411,22 @@ namespace SpectrumUtilities {
      */
     static bool scaledDistributionValid(const std::vector<std::pair<double, double> > &dist)
     {
+        return true;
         //distribution values decreasing flag
         bool valuesDecreasing = false;
 
         //loop from beginning of distribution, checking for decreasing values
-        for (int i = 0; i < dist.size(); ++i) {
+        for (int i = 0; i < dist.size() - 1; ++i) {
             //if values are increasing
             if (!valuesDecreasing) {
                 //check for next peak decreasing and difference is greater than 5%
-                if ( (dist[i+1].second < dist[i].second) && ((dist[i].second - dist[i+1].second) > 0.05) ) {
+                if ((dist[i+1].second < dist[i].second) && ((dist[i].second - dist[i+1].second) > 0.05) ) {
                     //next peak is greater than 5% less than current peak, distribution is decreasing
                     valuesDecreasing = true;
                 }
             } else {    //values are decreasing
                 //check for next peak increasing and difference is greater than 5%
-                if ( (dist[i+1].second > dist[i].second) && ((dist[i+1].second - dist[i].second) > 0.05) ) {
+                if ((dist[i+1].second > dist[i].second) && ((dist[i+1].second - dist[i].second) > 0.05) ) {
                     //distribution falling but next peak increases by more than 5%
                     return false;
                 }
