@@ -18,19 +18,19 @@ mkdir -p $OUT_DIR
 ########################################################################################################################
 
 
-${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/OT_QuadIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"OT_Quad.out"
+${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/OT_QuadIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"OT_Quad.out" 200
 Rscript PlotCalibration.R ${OUT_DIR}"/OT_Quad.out" ${OUT_DIR}"/OT_Quad.pdf"
 
 
-${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/IT_QuadIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"IT_Quad.out"
+${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/IT_QuadIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"IT_Quad.out" 2000
 Rscript PlotCalibration.R ${OUT_DIR}"/IT_Quad.out" ${OUT_DIR}"/OT_Quad.pdf"
 
 
-${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/OT_ITIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"OT_IT.out"
+${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/OT_ITIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"OT_IT.out" 200
 Rscript PlotCalibration.R ${OUT_DIR}"/OT_IT.out" ${OUT_DIR}"/OT_Quad.pdf"
 
 
-${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/IT_ITIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"IT_IT.out"
+${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/IT_ITIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"IT_IT.out" 2000
 Rscript PlotCalibration.R ${OUT_DIR}"/IT_IT.out" ${OUT_DIR}"/OT_Quad.pdf"
 
 

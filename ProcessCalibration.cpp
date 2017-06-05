@@ -58,6 +58,8 @@ int main(int argc, char * argv[])
     mzMLDataFile.load(argv[1], msExperiment);
     std::ofstream out(argv[3]);
 
+    double ppmTol = std::atof(argv[4]);
+
     out << "intensity" << "\t" << "target" << "\t" << "offset" << "\t" << "width" << std::endl;
 
     for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex) {
@@ -69,7 +71,7 @@ int main(int argc, char * argv[])
 
         TargetDetails targetDetails = index2targetDetails[specIndex % index2targetDetails.size()];
 
-        double tol = OpenMS::Math::ppmToMass(200.0, targetDetails.target);
+        double tol = OpenMS::Math::ppmToMass(ppmTol, targetDetails.target);
 
         //find nearest peak to ion mz within tolerance
         OpenMS::Int peakIndex = currentSpectrum.findNearest(targetDetails.target, tol);
