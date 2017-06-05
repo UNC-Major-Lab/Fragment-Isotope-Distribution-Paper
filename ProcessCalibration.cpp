@@ -79,4 +79,6 @@ int main(int argc, char * argv[])
         double intensity = peakIndex == -1 ? 0 : currentSpectrum[peakIndex].getIntensity();
         out << intensity << "\t" << targetDetails.target << "\t" << targetDetails.offset << "\t" << targetDetails.width << std::endl;
     }
+
+    std::cout << "done" << std::endl;
 }
