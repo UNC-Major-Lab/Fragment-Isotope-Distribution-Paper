@@ -11,6 +11,7 @@ set(my_executables
         CreateAveragineModel
         GetSulfurDistribution
         SpeedTest
+        ProcessCalibration
         )
 
 ## list all classes here, which are required by your executables
@@ -28,6 +29,7 @@ set(my_sources
         Ion.cpp
         FASTAParser.cpp
         FASTAParser.h
+        ProcessCalibration.cpp
         )
 
 ## find OpenMS configuration and register target "OpenMS" (our library)

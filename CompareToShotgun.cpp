@@ -214,8 +214,8 @@ void calcDistributions(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS:
             //write distribution results to file
             distributionScoreFile << isSIM << "\t";
             distributionScoreFile << ionID << "\t";                           //ion ID
-            distributionScoreFile << SpectrumUtilities::scaledDistributionValid(observedDist)
-                                  << "\t"; //valid distribution flag
+            distributionScoreFile << SpectrumUtilities::scaledDistributionValid(observedDist) << "\t"; //valid distribution flag
+            distributionScoreFile << precursorIon.monoWeight << "\t";    //ion dist. mono weight
             distributionScoreFile << ionList[ionIndex].monoWeight << "\t";    //ion dist. mono weight
             distributionScoreFile << ionList[ionIndex].charge << "\t";        //ion distribution charge
             distributionScoreFile << exactConditionalFragmentDist.size() << "\t";       //distribution search depth
@@ -368,6 +368,7 @@ void calcDistributions(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS:
             distributionScoreFile << isSIM << "\t";
             distributionScoreFile << ionID << "\t";                           //ion ID
             distributionScoreFile << valid << "\t"; //valid distribution flag
+            distributionScoreFile << precursorIon.monoWeight << "\t";
             distributionScoreFile << ion.monoWeight << "\t";    //ion dist. mono weight
             distributionScoreFile << ion.charge << "\t";        //ion distribution charge
             distributionScoreFile << exactConditionalFragmentDist.size() << "\t";       //distribution search depth
@@ -803,6 +804,7 @@ void writeFileHeaders(std::ofstream &distributionScoreFile, std::ofstream &isoto
     distributionScoreFile << "isSIM\t";
     distributionScoreFile << "ionID\t";                       //ion ID of monoisotopic ion
     distributionScoreFile << "distributionValid\t";           //check for valid distribution
+    distributionScoreFile << "precursorMonoWeight\t";
     distributionScoreFile << "distributionMonoWeight\t";      //ion distribution monoisotopic weight
     distributionScoreFile << "ionCharge\t";                   //ion distribtuion charge
     distributionScoreFile << "searchDepth\t";                 //distribution search depth
