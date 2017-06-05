@@ -6,6 +6,7 @@ savePlot <- function(myplot, outfile) {
   dev.off()
 }
 
+args = commandArgs(trailingOnly=TRUE)
 infile1 <- args[1]
 outPath <- args[2]
 
