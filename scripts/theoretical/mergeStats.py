@@ -28,7 +28,7 @@ for f in os.listdir(root_dir):
                 [count, mean, min_v, q1, median, q3, max_v, iso, method, stat] = line.strip().split("\t")
             label = iso + "\t" + method +"\t"+stat
 
-            count = int(count)
+            count = float(count)
             mean = float(mean)
             min_v = float(min_v)
             q1 = float(q1)
