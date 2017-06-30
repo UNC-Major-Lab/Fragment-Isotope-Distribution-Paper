@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <algorithm>
 
 void CalibrationModel::finishCalibation()
 {
