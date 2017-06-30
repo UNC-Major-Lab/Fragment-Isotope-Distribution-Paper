@@ -361,11 +361,11 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
 
                 out_stats << results_chi[0] << "\t" << results_chi[1] << "\t" << results_chi[2] << "\t"
                           << results_chi[3] << "\t" << results_chi[4] << "\t" << results_chi[5] << "\t"
-                          << iso << "\t" << key << "\t" << "chi" << std::endl;
+                          << results_chi[6] << "\t" << iso << "\t" << key << "\t" << "chi" << std::endl;
 
                 out_stats << results_res[0] << "\t" << results_res[1] << "\t" << results_res[2] << "\t"
                           << results_res[3] << "\t" << results_res[4] << "\t" << results_res[5] << "\t"
-                          << iso << "\t" << key << "\t" << "res" << std::endl;
+                          << results_chi[6] << "\t" << iso << "\t" << key << "\t" << "res" << std::endl;
 
                 for (int i = 0; i < chi.size(); ++i)
                 {
