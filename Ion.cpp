@@ -15,37 +15,50 @@ Ion::Ion(OpenMS::AASequence seq, OpenMS::Residue::ResidueType type, OpenMS::Int 
     this->monoMz = this->monoWeight / charge;
 }
 
-void Ion::generateFragmentIons(std::vector<Ion> &ionList, const OpenMS::AASequence pepSeq, const OpenMS::Int pepCharge,
-                               double minMz, double maxMz) {
+std::vector<Ion> Ion::generateFragmentIons(double minMz, double maxMz) {
+    std::vector<Ion> ionList;
     //generate b-ions
     //loop through each b-ion
-    for (int i = 1; i <= pepSeq.size() - 1; ++i) {
+    for (int i = 1; i <= sequence.size() - 1; ++i) {
         //loop through each charge
-        for (int charge = 1; charge <= pepCharge; ++charge) {
+        for (int z = 1; z <= charge; ++z) {
             //add b-ion to list
-            double mz = pepSeq.getPrefix(i).getMonoWeight(OpenMS::Residue::BIon, charge) / charge;
+            double mz = sequence.getPrefix(i).getMonoWeight(OpenMS::Residue::BIon, z) / z;
             if (mz >= minMz && mz <= maxMz) {
-                ionList.push_back(Ion(pepSeq.getPrefix(i), OpenMS::Residue::BIon, charge));
+                ionList.push_back(Ion(sequence.getPrefix(i), OpenMS::Residue::BIon, z));
             }
         }
     }
     //generate y-ions
     //loop through each y-ion
-    for (int i = 1; i <= pepSeq.size() - 1; ++i) {
+    for (int i = 1; i <= sequence.size() - 1; ++i) {
         //loop through each charge
-        for (int charge = 1; charge <= pepCharge; ++charge) {
+        for (int z = 1; z <= charge; ++z) {
             //add b-ion to list
-            double mz = pepSeq.getPrefix(i).getMonoWeight(OpenMS::Residue::YIon, charge) / charge;
+            double mz = sequence.getPrefix(i).getMonoWeight(OpenMS::Residue::YIon, z) / z;
             if (mz >= minMz && mz <= maxMz) {
-                ionList.push_back(Ion(pepSeq.getSuffix(i), OpenMS::Residue::YIon, charge));
+                ionList.push_back(Ion(sequence.getSuffix(i), OpenMS::Residue::YIon, z));
             }
         }
     }
     //generate precursor ion
-    double mz = pepSeq.getMonoWeight(OpenMS::Residue::Full, pepCharge) / pepCharge;
+    double mz = sequence.getMonoWeight(OpenMS::Residue::Full, charge) / charge;
     if (mz >= minMz && mz <= maxMz) {
-        ionList.push_back(Ion(pepSeq, OpenMS::Residue::Full, pepCharge));
+        ionList.push_back(Ion(sequence, OpenMS::Residue::Full, charge));
     }
+
+    return ionList;
+}
+
+std::string Ion::getIonType() {
+    std::string ion_type = (type == OpenMS::Residue::ResidueType::BIon) ? "B" : "Y";
+    ion_type += std::to_string(sequence.size());
+    for (int i = 0; i < charge; ++i) ion_type += "+";
+    return ion_type;
+}
+
+std::string Ion::getIonName() {
+    return getIonType() + " " + sequence.toUnmodifiedString();
 }
 
 std::ostream& operator<<(std::ostream &strm, const Ion &ion) {

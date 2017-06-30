@@ -13,12 +13,15 @@
 #include "Ion.h"
 #include "Stats.h"
 #include "SpectrumUtilities.h"
+#include "IsotopeDistributions.h"
 
 //global variables
 const double FDR_THRESHOLD = 0.01;          //False discovery rate threshold (%/100)
 const OpenMS::ElementDB* ELEMENTS = OpenMS::ElementDB::getInstance();   //element database
+static const OpenMS::IsotopeSplineDB* isotopeDB = OpenMS::IsotopeSplineDB::getInstance();
 
-void usage(){
+void usage()
+{
     std::cout << "usage: CompareToShotgun input_mzML_spectra_file input_idXML_PSM_file offset_mz output_directory" << std::endl;
     std::cout << "\tinput_mzML_spectra_file: path to input .mzML file " << std::endl;
     std::cout << "\tinput_idXML_PSM_file: path to input .idXML file" << std::endl;
@@ -26,14 +29,15 @@ void usage(){
     std::cout << "\toutput_directory: path to output files" << std::endl;
 }
 
-std::set<Ion> getCompleteFragmentIons(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrum,
-                                                        const OpenMS::Precursor precursorInfo, double offset,
-                                                        double minMz, double maxMz) {
+std::set<Ion> getCompleteFragmentIons(Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrum,
+                                      const OpenMS::Precursor precursorInfo, double offset,
+                                                        double minMz, double maxMz)
+{
     int ionID = 0;
     //create list of b and y ions
-    std::vector<Ion> ionList;
+    std::vector<Ion> ionList = precursorIon.generateFragmentIons(minMz, maxMz);
     std::set<Ion> ionListComplete;
-    Ion::generateFragmentIons(ionList, precursorIon.sequence, precursorIon.charge, minMz, maxMz);
+
 
     //loop through each ion
     for (int ionIndex = 0; ionIndex < ionList.size(); ++ionIndex) {
@@ -51,13 +55,9 @@ std::set<Ion> getCompleteFragmentIons(const Ion &precursorIon, const OpenMS::MSS
             //vector for observed isotope distribution <mz, intensity>
             std::vector<std::pair<double, double> > observedDist;
             //vector for precursor isotopes captured in isolation window
-            std::set<OpenMS::UInt> precursorIsotopes;
-
-            //fill precursor isotopes vector
-            SpectrumUtilities::whichPrecursorIsotopes(precursorIsotopes,
-                                                      precursorInfo,
-                                                      precursorIon,
-                                                      offset);
+            std::set<OpenMS::UInt> precursorIsotopes = SpectrumUtilities::whichPrecursorIsotopes(precursorInfo,
+                                                                                                 precursorIon,
+                                                                                                 offset);
 
             //fill exact conditional isotope distribution vector
             SpectrumUtilities::exactConditionalFragmentIsotopeDist(exactConditionalFragmentDist,
@@ -70,7 +70,6 @@ std::set<Ion> getCompleteFragmentIons(const Ion &precursorIon, const OpenMS::MSS
             //match theoretical distribution with observed peaks
             SpectrumUtilities::observedDistribution(observedDist, exactConditionalFragmentDist, currentSpectrum);
 
-            //report on matched ion distribution depth
             bool completeFlag = true;
             for (int i = 0; i < observedDist.size(); ++i) {
                 if (observedDist[i].second == 0) {
@@ -81,25 +80,21 @@ std::set<Ion> getCompleteFragmentIons(const Ion &precursorIon, const OpenMS::MSS
             if (completeFlag) {
                 ionListComplete.insert(ionList[ionIndex]);
             }
-
-            if (*std::max_element(precursorIsotopes.begin(), precursorIsotopes.end()) > 10) {
-                int x = 1;
-            }
-
         }
     }
 
     return ionListComplete;
 }
 
-void calcDistributions(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrum,
-                       const OpenMS::Precursor &precursorInfo, double offset, std::ofstream &distributionScoreFile,
-                       std::ofstream &isotopeScoreFile, double minMz, double maxMz, bool isSIM)
+void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrum,
+                       OpenMS::Precursor &precursorInfo, double offset, std::ofstream &distributionScoreFile,
+                       std::ofstream &isotopeScoreFile, double minMz, double maxMz, std::string scanDesc)
 {
+    CalibrationModel noModel;
     int ionID = 0;
     //create list of b and y ions
-    std::vector<Ion> ionList;
-    Ion::generateFragmentIons(ionList, precursorIon.sequence, precursorIon.charge, minMz, maxMz);
+    std::vector<Ion> ionList = precursorIon.generateFragmentIons(minMz, maxMz);
+    double width = precursorInfo.getIsolationWindowLowerOffset() + precursorInfo.getIsolationWindowUpperOffset();
 
     //loop through each ion
     for (int ionIndex = 0; ionIndex < ionList.size(); ++ionIndex) {
@@ -111,116 +106,50 @@ void calcDistributions(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS:
         OpenMS::Int peakIndex = currentSpectrum.findNearest(ionList[ionIndex].monoMz, tol);
 
         if (peakIndex != -1) {
-            //vector for exact conditional fragment isotope distribution <mz, probability>
-            std::vector<std::pair<double, double> > exactConditionalFragmentDist;
-            //vector for approx. fragment isotope distribution from peptide weight <mz, probability>
-            std::vector<std::pair<double, double> > approxFragmentFromWeightDist;
-            //vector for approx. fragment isotope dist. from peptide weight and sulfurs <mz, probability>
-            std::vector<std::pair<double, double> > approxFragmentFromWeightAndSulfurDist;
-            std::vector<std::pair<double, double> > exactPrecursorDist;
-            std::vector<std::pair<double, double> > approxPrecursorDist;
 
+            std::set<OpenMS::UInt> precursorIsotopes = SpectrumUtilities::whichPrecursorIsotopes(precursorInfo,
+                                                                                                 precursorIon,
+                                                                                                 offset);
 
-            //vector for observed isotope distribution <mz, intensity>
-            std::vector<std::pair<double, double> > observedDist;
-            std::vector<std::pair<double, double> > oriObservedDist;
-            //vector for precursor isotopes captured in isolation window
-            std::set<OpenMS::UInt> precursorIsotopes;
+            IsotopeDistributions isotopeDistributions(precursorIsotopes, ionList[ionIndex], precursorIon, isotopeDB, currentSpectrum, noModel, precursorInfo, width);
 
-            //fill precursor isotopes vector
-            SpectrumUtilities::whichPrecursorIsotopes(precursorIsotopes,
-                                                      precursorInfo,
-                                                      precursorIon,
-                                                      offset);
+            //OpenMS::UInt max_isotope = *std::max_element(precursorIsotopes.begin(), precursorIsotopes.end());
+            //double nextMass = (ionList[ionIndex].monoWeight + (max_isotope+1)*OpenMS::Constants::C13C12_MASSDIFF_U) / ionList[ionIndex].charge;
+            //peakIndex = currentSpectrum.findNearest(nextMass , tol);
+            //if (peakIndex != -1) continue;
 
-            //fill exact conditional isotope distribution vector
-            SpectrumUtilities::exactConditionalFragmentIsotopeDist(exactConditionalFragmentDist,
-                                                                   precursorIsotopes,
-                                                                   ionList[ionIndex],
-                                                                   precursorIon.sequence,
-                                                                   precursorIon.charge);
-
-
-            //match theoretical distribution with observed peaks
-            SpectrumUtilities::observedDistribution(observedDist, exactConditionalFragmentDist, currentSpectrum);
-
-            //report on matched ion distribution depth
-            bool completeFlag = true;
-            int completeAtDepth = 0;
-            for (int i = 0; i < observedDist.size(); ++i) {
-                if (observedDist[i].second != 0) {
-                    if (completeFlag) {
-                        ++completeAtDepth;
-                    }
-                } else {
-                    completeFlag = false;
-                }
-            }
-
-            //scale observed intensities across distribution
-            oriObservedDist = observedDist;
-            SpectrumUtilities::scaleDistribution(observedDist);
-
-            //fill approx fragment isotope distribution
-            SpectrumUtilities::approxFragmentFromWeightIsotopeDist(approxFragmentFromWeightDist,
-                                                                   precursorIsotopes,
-                                                                   ionList[ionIndex],
-                                                                   precursorIon.sequence,
-                                                                   precursorIon.charge);
-            //fill approx fragment isotope distribution with sulfurs
-            SpectrumUtilities::approxFragmentFromWeightAndSIsotopeDist(approxFragmentFromWeightAndSulfurDist,
-                                                                       precursorIsotopes,
-                                                                       ionList[ionIndex],
-                                                                       precursorIon.sequence,
-                                                                       precursorIon.charge);
-
-            SpectrumUtilities::exactPrecursorIsotopeDist(exactPrecursorDist, precursorIsotopes,
-                                                         ionList[ionIndex]);
-
-            SpectrumUtilities::approxPrecursorFromWeightIsotopeDist(approxPrecursorDist, precursorIsotopes,
-                                                                    ionList[ionIndex]);
-
-
-            //if (completeFlag)
-            if (completeAtDepth >= 2 && completeAtDepth <= 4)
+            if (!isotopeDistributions.isValid) continue;
+            //if (!isotopeDistributions.completeFlag) continue;
+            if (isotopeDistributions.completeAtDepth >= 2 && isotopeDistributions.completeAtDepth <= 4)
             {
-                for (int i = 0; i < observedDist.size(); ++i)
+                for (int i = 0; i < isotopeDistributions.scaledObservedDist.size(); ++i)
                 {
-                    double resExactFragment = observedDist[i].second - exactConditionalFragmentDist[i].second;
-                    double resAveragineFragment = observedDist[i].second - approxFragmentFromWeightDist[i].second;
-                    double resAveragineSulfurFragment =
-                            observedDist[i].second - approxFragmentFromWeightAndSulfurDist[i].second;
-                    double resExactPrecursor = observedDist[i].second - exactPrecursorDist[i].second;
-                    double resAveraginePrecursor = observedDist[i].second - approxPrecursorDist[i].second;
+                    double resExactFragment = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.exactConditionalFragmentDist[i].second;
+                    double resAveragineFragment = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.approxFragmentFromWeightDist[i].second;
+                    double resAveragineSulfurFragment = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.approxFragmentFromWeightAndSulfurDist[i].second;
+                    double resExactPrecursor = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.exactPrecursorDist[i].second;
+                    double resAveraginePrecursor = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.approxPrecursorFromWeightDist[i].second;
 
-                    isotopeScoreFile << isSIM << "\t" << completeAtDepth << "\t" << i << "\t"
-                                     << ionList[ionIndex].monoMz << "\t" << observedDist[i].first << "\t"
-                                     << oriObservedDist[i].second << "\t"
+                    isotopeScoreFile << scanDesc << "\t" << isotopeDistributions.completeAtDepth << "\t" << i << "\t"
+                                     << ionList[ionIndex].monoMz << "\t" << isotopeDistributions.scaledObservedDist[i].first << "\t"
+                                     << precursorIon.monoWeight << "\t"
+                                     << isotopeDistributions.observedDist[i].second << "\t"
                                      << resExactFragment << "\t" << resAveragineFragment << "\t"
                                      << resAveragineSulfurFragment << "\t" << resExactPrecursor << "\t"
                                      << resAveraginePrecursor << std::endl;
                 }
             }
 
-            //compute chi-squared with observed to Conditional
-            double exactCondFragmentX2 = Stats::computeX2(observedDist, exactConditionalFragmentDist);
-            double approxFragmentFromWeightX2 = Stats::computeX2(observedDist, approxFragmentFromWeightDist);
-            double approxFragmentFromWeightAndSulfurX2 = Stats::computeX2(observedDist,
-                                                                          approxFragmentFromWeightAndSulfurDist);
-            double exactPrecursorX2 = Stats::computeX2(observedDist, exactPrecursorDist);
-            double approxPrecursorX2 = Stats::computeX2(observedDist, approxPrecursorDist);
-
-
             //write distribution results to file
-            distributionScoreFile << isSIM << "\t";
+            distributionScoreFile << scanDesc << "\t";
             distributionScoreFile << ionID << "\t";                           //ion ID
-            distributionScoreFile << SpectrumUtilities::scaledDistributionValid(observedDist) << "\t"; //valid distribution flag
+            distributionScoreFile << isotopeDistributions.isValid << "\t"; //valid distribution flag
             distributionScoreFile << precursorIon.monoWeight << "\t";    //ion dist. mono weight
             distributionScoreFile << ionList[ionIndex].monoWeight << "\t";    //ion dist. mono weight
             distributionScoreFile << ionList[ionIndex].charge << "\t";        //ion distribution charge
-            distributionScoreFile << exactConditionalFragmentDist.size() << "\t";       //distribution search depth
-            distributionScoreFile << completeFlag << "\t";                    //complete dist. found
-            distributionScoreFile << completeAtDepth << "\t";                 //complete dist. up to depth
+            distributionScoreFile << isotopeDistributions.exactConditionalFragmentDist.size() << "\t";       //distribution search depth
+            distributionScoreFile << isotopeDistributions.completeFlag << "\t";                    //complete dist. found
+            distributionScoreFile << isotopeDistributions.completeAtDepth << "\t";                 //complete dist. up to depth
 
             distributionScoreFile << precursorIsotopes.size() << "\t";
             for (auto j : precursorIsotopes) {
@@ -235,22 +164,26 @@ void calcDistributions(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS:
                     getNumberOf(ELEMENTS->getElement("Sulfur")) << "\t";
 
             //Chi-squared for exact and approximate distributions
-            distributionScoreFile << exactCondFragmentX2 << "\t";
-            distributionScoreFile << approxFragmentFromWeightX2 << "\t";
-            distributionScoreFile << approxFragmentFromWeightAndSulfurX2 << "\t";
-            distributionScoreFile << exactPrecursorX2 << "\t";
-            distributionScoreFile << approxPrecursorX2 << "\n";
+            distributionScoreFile << isotopeDistributions.exactCondFragmentX2 << "\t";
+            distributionScoreFile << isotopeDistributions.approxFragmentFromWeightX2 << "\t";
+            distributionScoreFile << isotopeDistributions.approxFragmentFromWeightAndSulfurX2 << "\t";
+            distributionScoreFile << isotopeDistributions.exactPrecursorX2 << "\t";
+            distributionScoreFile << isotopeDistributions.approxPrecursorX2 << "\t";
+            distributionScoreFile << isotopeDistributions.approxFragmentSplineFromWeightX2 << "\t";
+            distributionScoreFile << isotopeDistributions.approxFragmentSplineFromWeightAndSulfurX2 << "\n";
         }
     }
 }
 
-void calcDistributions(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrum,
-                       const OpenMS::Precursor &precursorInfo, double offset, std::ofstream &distributionScoreFile,
-                       std::ofstream &isotopeScoreFile, bool isSIM, std::set<Ion> &ionList)
+void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrum,
+                       OpenMS::Precursor &precursorInfo, double offset, std::ofstream &distributionScoreFile,
+                       std::ofstream &isotopeScoreFile, std::string scanDesc, std::set<Ion> &ionList)
 {
+    CalibrationModel noModel;
+    double width = precursorInfo.getIsolationWindowLowerOffset() + precursorInfo.getIsolationWindowUpperOffset();
     int ionID = 0;
     //loop through each ion
-    for (const Ion &ion : ionList) {
+    for (Ion ion : ionList) {
         ++ionID;
         //compute search peak matching tolerance
         double tol = OpenMS::Math::ppmToMass(SpectrumUtilities::ERROR_PPM, ion.monoMz);
@@ -259,121 +192,50 @@ void calcDistributions(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS:
         OpenMS::Int peakIndex = currentSpectrum.findNearest(ion.monoMz, tol);
 
         if (peakIndex != -1) {
-            //vector for exact conditional fragment isotope distribution <mz, probability>
-            std::vector<std::pair<double, double> > exactConditionalFragmentDist;
-            //vector for approx. fragment isotope distribution from peptide weight <mz, probability>
-            std::vector<std::pair<double, double> > approxFragmentFromWeightDist;
-            //vector for approx. fragment isotope dist. from peptide weight and sulfurs <mz, probability>
-            std::vector<std::pair<double, double> > approxFragmentFromWeightAndSulfurDist;
-            std::vector<std::pair<double, double> > exactPrecursorDist;
-            std::vector<std::pair<double, double> > approxPrecursorDist;
+            std::set<OpenMS::UInt> precursorIsotopes = SpectrumUtilities::whichPrecursorIsotopes(precursorInfo, precursorIon, offset);
+
+            IsotopeDistributions isotopeDistributions(precursorIsotopes, ion, precursorIon, isotopeDB, currentSpectrum, noModel, precursorInfo, width);
 
 
-            //vector for observed isotope distribution <mz, intensity>
-            std::vector<std::pair<double, double> > oriObservedDist;
-            std::vector<std::pair<double, double> > observedDist;
-            //vector for precursor isotopes captured in isolation window
-            std::set<OpenMS::UInt> precursorIsotopes;
-
-            //fill precursor isotopes vector
-            SpectrumUtilities::whichPrecursorIsotopes(precursorIsotopes,
-                                                      precursorInfo,
-                                                      precursorIon,
-                                                      offset);
-
-            //fill exact conditional isotope distribution vector
-            SpectrumUtilities::exactConditionalFragmentIsotopeDist(exactConditionalFragmentDist,
-                                                                   precursorIsotopes,
-                                                                   ion,
-                                                                   precursorIon.sequence,
-                                                                   precursorIon.charge);
+            //OpenMS::UInt max_isotope = *std::max_element(precursorIsotopes.begin(), precursorIsotopes.end());
+            //double nextMass = (ion.monoWeight + (max_isotope+1)*OpenMS::Constants::C13C12_MASSDIFF_U) / ion.charge;
+            //peakIndex = currentSpectrum.findNearest(nextMass , tol);
+            //if (peakIndex != -1) continue;
 
 
-            //match theoretical distribution with observed peaks
-            SpectrumUtilities::observedDistribution(observedDist, exactConditionalFragmentDist, currentSpectrum);
-
-            //report on matched ion distribution depth
-            bool completeFlag = true;
-            int completeAtDepth = 0;
-            for (int i = 0; i < observedDist.size(); ++i) {
-                if (observedDist[i].second != 0) {
-                    if (completeFlag) {
-                        ++completeAtDepth;
-                    }
-                } else {
-                    completeFlag = false;
-                }
-            }
-
-            //scale observed intensities across distribution
-            oriObservedDist = observedDist;
-            SpectrumUtilities::scaleDistribution(observedDist);
-
-
-            //fill approx fragment isotope distribution
-            SpectrumUtilities::approxFragmentFromWeightIsotopeDist(approxFragmentFromWeightDist,
-                                                                   precursorIsotopes,
-                                                                   ion,
-                                                                   precursorIon.sequence,
-                                                                   precursorIon.charge);
-            //fill approx fragment isotope distribution with sulfurs
-            SpectrumUtilities::approxFragmentFromWeightAndSIsotopeDist(approxFragmentFromWeightAndSulfurDist,
-                                                                       precursorIsotopes,
-                                                                       ion,
-                                                                       precursorIon.sequence,
-                                                                       precursorIon.charge);
-
-            SpectrumUtilities::exactPrecursorIsotopeDist(exactPrecursorDist, precursorIsotopes,
-                                                         ion);
-
-            SpectrumUtilities::approxPrecursorFromWeightIsotopeDist(approxPrecursorDist, precursorIsotopes,
-                                                                    ion);
-
-            if (*std::max_element(precursorIsotopes.begin(), precursorIsotopes.end()) > 10) {
-                int x = 1;
-            }
+            if (!isotopeDistributions.isValid) continue;
             //if (completeFlag && completeAtDepth > 1)
-            if (completeAtDepth > 1)
+            if (isotopeDistributions.completeAtDepth > 1)
             {
                 //for (int i = 0; i < observedDist.size(); ++i)
-                for (int i = 0; i < completeAtDepth; ++i)
+                for (int i = 0; i < isotopeDistributions.completeAtDepth; ++i)
                 {
-                    double resExactFragment = observedDist[i].second - exactConditionalFragmentDist[i].second;
-                    double resAveragineFragment = observedDist[i].second - approxFragmentFromWeightDist[i].second;
-                    double resAveragineSulfurFragment =
-                            observedDist[i].second - approxFragmentFromWeightAndSulfurDist[i].second;
-                    double resExactPrecursor = observedDist[i].second - exactPrecursorDist[i].second;
-                    double resAveraginePrecursor = observedDist[i].second - approxPrecursorDist[i].second;
+                    double resExactFragment = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.exactConditionalFragmentDist[i].second;
+                    double resAveragineFragment = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.approxFragmentFromWeightDist[i].second;
+                    double resAveragineSulfurFragment = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.approxFragmentFromWeightAndSulfurDist[i].second;
+                    double resExactPrecursor = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.exactPrecursorDist[i].second;
+                    double resAveraginePrecursor = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.approxPrecursorFromWeightDist[i].second;
 
-                    isotopeScoreFile << isSIM << "\t" << completeAtDepth << "\t" << i << "\t"
-                                     << ion.monoMz << "\t" << observedDist[i].first << "\t"
-                                     << oriObservedDist[i].second << "\t"
+                    isotopeScoreFile << scanDesc << "\t" << isotopeDistributions.completeAtDepth << "\t" << i << "\t"
+                                     << ion.monoMz << "\t" << isotopeDistributions.scaledObservedDist[i].first << "\t"
+                                     << precursorIon.monoWeight << "\t"
+                                     << isotopeDistributions.observedDist[i].second << "\t"
                                      << resExactFragment << "\t" << resAveragineFragment << "\t"
                                      << resAveragineSulfurFragment << "\t" << resExactPrecursor << "\t"
                                      << resAveraginePrecursor << std::endl;
                 }
             }
 
-            //compute chi-squared with observed to Conditional
-            double exactCondFragmentX2 = Stats::computeX2(observedDist, exactConditionalFragmentDist);
-            double approxFragmentFromWeightX2 = Stats::computeX2(observedDist, approxFragmentFromWeightDist);
-            double approxFragmentFromWeightAndSulfurX2 = Stats::computeX2(observedDist,
-                                                                          approxFragmentFromWeightAndSulfurDist);
-            double exactPrecursorX2 = Stats::computeX2(observedDist, exactPrecursorDist);
-            double approxPrecursorX2 = Stats::computeX2(observedDist, approxPrecursorDist);
-
-            bool valid = SpectrumUtilities::scaledDistributionValid(observedDist);
-
             //write distribution results to file
-            distributionScoreFile << isSIM << "\t";
+            distributionScoreFile << scanDesc << "\t";
             distributionScoreFile << ionID << "\t";                           //ion ID
-            distributionScoreFile << valid << "\t"; //valid distribution flag
+            distributionScoreFile << isotopeDistributions.isValid << "\t"; //valid distribution flag
             distributionScoreFile << precursorIon.monoWeight << "\t";
             distributionScoreFile << ion.monoWeight << "\t";    //ion dist. mono weight
             distributionScoreFile << ion.charge << "\t";        //ion distribution charge
-            distributionScoreFile << exactConditionalFragmentDist.size() << "\t";       //distribution search depth
-            distributionScoreFile << completeFlag << "\t";                    //complete dist. found
-            distributionScoreFile << completeAtDepth << "\t";                 //complete dist. up to depth
+            distributionScoreFile << isotopeDistributions.exactConditionalFragmentDist.size() << "\t";       //distribution search depth
+            distributionScoreFile << isotopeDistributions.completeFlag << "\t";                    //complete dist. found
+            distributionScoreFile << isotopeDistributions.completeAtDepth << "\t";                 //complete dist. up to depth
 
             distributionScoreFile << precursorIsotopes.size() << "\t";
             for (auto j : precursorIsotopes) {
@@ -387,26 +249,193 @@ void calcDistributions(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS:
                     getNumberOf(ELEMENTS->getElement("Sulfur")) << "\t";
 
             //Chi-squared for exact and approximate distributions
-            distributionScoreFile << exactCondFragmentX2 << "\t";
-            distributionScoreFile << approxFragmentFromWeightX2 << "\t";
-            distributionScoreFile << approxFragmentFromWeightAndSulfurX2 << "\t";
-            distributionScoreFile << exactPrecursorX2 << "\t";
-            distributionScoreFile << approxPrecursorX2 << "\n";
+            distributionScoreFile << isotopeDistributions.exactCondFragmentX2 << "\t";
+            distributionScoreFile << isotopeDistributions.approxFragmentFromWeightX2 << "\t";
+            distributionScoreFile << isotopeDistributions.approxFragmentFromWeightAndSulfurX2 << "\t";
+            distributionScoreFile << isotopeDistributions.exactPrecursorX2 << "\t";
+            distributionScoreFile << isotopeDistributions.approxPrecursorX2 << "\t";
+            distributionScoreFile << isotopeDistributions.approxFragmentSplineFromWeightX2 << "\t";
+            distributionScoreFile << isotopeDistributions.approxFragmentSplineFromWeightAndSulfurX2 << "\n";
         }
     }
 }
 
-void analyzeAlternatingMS2SIMExperiment(OpenMS::MzMLFile &mzMLDataFile, OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment,
-                                        double offset, double minMz, double maxMz,
-                                        std::ofstream &distributionScoreFile, std::ofstream &isotopeScoreFile)
+std::map<int, std::string> analyzeAlternatingMS2SIMExperiment(OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment,
+                                                              double minMz, double maxMz)
 {
-    std::map<int, bool> scan2isSIM;
+    std::map<int, std::string> scan2scanDesc;
+
+    for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex)
+    {
+        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
+
+        if (currentSpectrum.getMSLevel() == 2)
+        {
+            bool isSIM = currentSpectrum.getInstrumentSettings().getScanWindows()[0].begin >= minMz;
+            std::string scanDesc = isSIM ? "SIM " + std::to_string(minMz) + "-" + std::to_string(maxMz) : "Full";
+            scan2scanDesc[specIndex] = scanDesc;
+        }
+    }
+
+    return scan2scanDesc;
+}
+
+
+std::map<int, std::string> analyzeAlternatingMS2FragExperiment(OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment)
+{
+    std::map<int, std::string> scan2scanDesc;
+
+    for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex)
+    {
+        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
+
+        if (currentSpectrum.getMSLevel() == 2)
+        {
+            bool isCID = currentSpectrum.getPrecursors()[0].getActivationMethods().find(OpenMS::Precursor::ActivationMethod::CID) != currentSpectrum.getPrecursors()[0].getActivationMethods().end();
+            std::string scanDesc = isCID ? "CID" : "HCD";
+            scan2scanDesc[specIndex] = scanDesc;
+        }
+    }
+
+    return scan2scanDesc;
+}
+
+
+std::map<int, std::string> analyzeAlternatingMS2CIDExperiment(OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment)
+{
+    std::map<double, int> mz2count;
+    std::map<int, std::string> scan2scanDesc;
+
+    for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex)
+    {
+        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
+
+        if (currentSpectrum.getMSLevel() == 2)
+        {
+            double mz = currentSpectrum.getPrecursors()[0].getMZ();
+            std::string scanDesc = (++mz2count[mz] % 2 == 1) ? "CID 30" : "CID 25";
+            scan2scanDesc[specIndex] = scanDesc;
+        }
+    }
+
+    return scan2scanDesc;
+}
+
+std::map<int, std::string> analyzeAlternatingMS2HCDExperiment(OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment)
+{
+    std::map<double, int> mz2count;
+    std::map<int, std::string> scan2scanDesc;
+
+    for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex)
+    {
+        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
+
+        if (currentSpectrum.getMSLevel() == 2)
+        {
+            double mz = currentSpectrum.getPrecursors()[0].getMZ();
+            std::string scanDesc = (++mz2count[mz] % 2 == 1) ? "HCD 30" : "HCD 25";
+            scan2scanDesc[specIndex] = scanDesc;
+        }
+    }
+
+    return scan2scanDesc;
+}
+
+
+std::map<int, std::string> analyzeAlternatingMS2IsoExperiment(OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment)
+{
+    std::map<int, std::string> scan2scanDesc;
+
+    for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex)
+    {
+        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
+
+        if (currentSpectrum.getMSLevel() == 2)
+        {
+            bool isQuad = currentSpectrum.getInstrumentSettings().getScanWindows()[0].begin >= 200;
+            std::string scanDesc = isQuad ? "Quadrupole isolation" : "Ion Trap isolation";
+            scan2scanDesc[specIndex] = scanDesc;
+        }
+    }
+
+    return scan2scanDesc;
+}
+
+
+void analyzeMS2Experiment(OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment,
+                          double offset, std::ofstream &distributionScoreFile,
+                          std::ofstream &isotopeScoreFile, std::string expType)
+{
+    //reporting variables
+    int numPeptideHits = 0;
+    int numPeptideHitsBelowFDR = 0;
+
+    std::cout << "Searching for isotope distributions..." << std::endl;
+
+
+    //Loop through all spectra
+    for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex) {
+        //get copy of current spectrum
+        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
+
+        //sort spectrum by mz
+        currentSpectrum.sortByPosition();
+
+        //get peptide identifications
+        const std::vector<OpenMS::PeptideIdentification> pepIDs = currentSpectrum.getPeptideIdentifications();
+
+        //Loop through each peptide identification (PSM)
+        for (int pepIDIndex = 0; pepIDIndex < pepIDs.size(); ++pepIDIndex) {
+            //get peptide hits
+            const std::vector<OpenMS::PeptideHit> pepHits = pepIDs[pepIDIndex].getHits();
+
+
+            //check for more than one precursor
+            if (currentSpectrum.getPrecursors().size() > 1) {
+                std::cout << "Warning: more than one precursor!" << std::endl;
+            }
+            //get precursor information
+            OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
+
+            //loop through each peptide hit
+            for (int pepHitIndex = 0; pepHitIndex < pepHits.size(); ++pepHitIndex) {
+                ++numPeptideHits;
+
+                //if peptide score is above FDR threshold, skip to next peptide
+                if (pepHits[pepHitIndex].getScore() >= FDR_THRESHOLD) {
+                    continue;
+                }
+
+                ++numPeptideHitsBelowFDR;
+
+                //get AASequence and charge from peptide hit for precursor ion
+                Ion precursorIon = Ion(pepHits[pepHitIndex].getSequence(),
+                                             OpenMS::Residue::Full,
+                                             pepHits[pepHitIndex].getCharge());
+                //check for precursor matching PSM peptide information
+                if (precursorInfo.getCharge() != precursorIon.charge) {
+                    //std::cout << "Warning: precursor target charge does not match PSM charge!" << std::endl;
+                }
+                if (std::abs(precursorInfo.getMZ() - precursorIon.monoMz) >
+                    (precursorIon.monoMz * SpectrumUtilities::ERROR_PPM)) {
+                    //std::cout << "Warning: precursor target mz does not match PSM mz! Possible offset!" << std::endl;
+                }
+
+                calcDistributions(precursorIon, currentSpectrum, precursorInfo, offset, distributionScoreFile, isotopeScoreFile, 0, 3000, expType);
+
+            }//peptide hit loop
+        }//PSM loop
+    }//spectrum loop
+}
+
+void analyzeAlternatingMS2Experiment(OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment,
+                                     double offset, std::ofstream &distributionScoreFile, std::ofstream &isotopeScoreFile,
+                                     std::map<int, std::string> &scan2scanDesc, std::map<std::string, bool> &scanDesc2doSeq,
+                                     double minMz, double maxMz)
+{
     std::map<int, OpenMS::Precursor> scan2info;
     std::set<int> matchedScans;
-
     std::map<int, std::pair<Ion, std::set<Ion> > > scan2ions;
-
-    int numSIM = 0, numNotSIM = 0;
 
     for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex)
     {
@@ -416,10 +445,11 @@ void analyzeAlternatingMS2SIMExperiment(OpenMS::MzMLFile &mzMLDataFile, OpenMS::
 
             currentSpectrum.sortByPosition();
 
-            bool isSIM = currentSpectrum.getInstrumentSettings().getScanWindows()[0].begin >= minMz;
-            scan2isSIM[specIndex] = isSIM;
+            double mz = currentSpectrum.getPrecursors()[0].getMZ();
+            std::string scanDesc = scan2scanDesc[specIndex];
+            bool doSeq = scanDesc2doSeq[scanDesc];
 
-            if (!isSIM) {
+            if (doSeq) {
 
                 const OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
                 const std::vector<OpenMS::PeptideIdentification> pepIDs = currentSpectrum.getPeptideIdentifications();
@@ -453,9 +483,12 @@ void analyzeAlternatingMS2SIMExperiment(OpenMS::MzMLFile &mzMLDataFile, OpenMS::
 
         if (currentSpectrum.getMSLevel() == 2) {
 
-            if (scan2isSIM[specIndex]) {
+            std::string scanDesc = scan2scanDesc[specIndex];
+            bool doSeq = scanDesc2doSeq[scanDesc];
 
-                const OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
+            if (!doSeq) {
+
+                OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
 
                 bool found = false;
 
@@ -472,7 +505,7 @@ void analyzeAlternatingMS2SIMExperiment(OpenMS::MzMLFile &mzMLDataFile, OpenMS::
 
                         if (scan2ions.find(specIndexFull) != scan2ions.end()) {
 
-                            const Ion precursorIon = scan2ions[specIndexFull].first;
+                            Ion precursorIon = scan2ions[specIndexFull].first;
 
                             std::set<Ion> frags2 = scan2ions[specIndexFull].second;
 
@@ -490,7 +523,7 @@ void analyzeAlternatingMS2SIMExperiment(OpenMS::MzMLFile &mzMLDataFile, OpenMS::
                             if (intersection.size() > 0) {
                                 calcDistributions(precursorIon, currentSpectrum, precursorInfo, offset,
                                                   distributionScoreFile,
-                                                  isotopeScoreFile, true, intersection);
+                                                  isotopeScoreFile, scanDesc, intersection);
                             }
                         }
                         break;
@@ -506,10 +539,8 @@ void analyzeAlternatingMS2SIMExperiment(OpenMS::MzMLFile &mzMLDataFile, OpenMS::
         }
     }
 
-    std::cout << numfound << "\t" << numnotFound << std::endl;
-
-
-
+    std::cout << "Found: " << numfound << std::endl;
+    std::cout << "Not Found: " << numnotFound << std::endl;
 
 
     for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex) {
@@ -517,233 +548,22 @@ void analyzeAlternatingMS2SIMExperiment(OpenMS::MzMLFile &mzMLDataFile, OpenMS::
 
         if (currentSpectrum.getMSLevel() == 2) {
 
-
             if (scan2ions.find(specIndex) != scan2ions.end()) {
 
-                const OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
+                OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
 
-                bool isSIM = scan2isSIM[specIndex];
+                std::string scanDesc = scan2scanDesc[specIndex];
 
-                const Ion precursorIon = scan2ions[specIndex].first;
+                Ion precursorIon = scan2ions[specIndex].first;
                 std::set<Ion> intersection = scan2ions[specIndex].second;
 
                 if (intersection.size() > 0) {
                     calcDistributions(precursorIon, currentSpectrum, precursorInfo, offset, distributionScoreFile,
-                                      isotopeScoreFile, isSIM, intersection);
+                                      isotopeScoreFile, scanDesc, intersection);
                 }
             }
         }
     }
-}
-
-void analyzeAlternatingMS2IsoExperiment(OpenMS::MzMLFile &mzMLDataFile, OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment,
-                                        double offset, std::ofstream &distributionScoreFile,
-                                        std::ofstream &isotopeScoreFile)
-{
-
-    std::map<int, bool> scan2isQuad;
-    std::map<int, OpenMS::Precursor> scan2info;
-    std::set<int> matchedScans;
-
-    std::map<int, std::pair<Ion, std::set<Ion> > > scan2ions;
-
-    int numQuad = 0, numIT = 0;
-
-    for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex)
-    {
-        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
-
-        if (currentSpectrum.getMSLevel() == 2) {
-
-            currentSpectrum.sortByPosition();
-
-            bool isQuad = currentSpectrum.getInstrumentSettings().getScanWindows()[0].begin >= 200;
-            scan2isQuad[specIndex] = isQuad;
-
-            if (isQuad) {
-                numQuad++;
-
-                const OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
-                const std::vector<OpenMS::PeptideIdentification> pepIDs = currentSpectrum.getPeptideIdentifications();
-
-                scan2info[specIndex] = precursorInfo;
-
-                for (int pepIDIndex = 0; pepIDIndex < pepIDs.size() && pepIDIndex < 1; ++pepIDIndex) {
-                    for (int pepHitIndex = 0; pepHitIndex < pepIDs[pepIDIndex].getHits().size(); ++pepHitIndex) {
-                        if (pepIDs[pepIDIndex].getHits()[pepHitIndex].getScore() <= FDR_THRESHOLD) {
-                            Ion precursorIon = Ion(pepIDs[pepIDIndex].getHits()[pepIDIndex].getSequence(),
-                                                   OpenMS::Residue::Full,
-                                                   pepIDs[pepIDIndex].getHits()[pepIDIndex].getCharge());
-
-                            std::set<Ion> frags = getCompleteFragmentIons(precursorIon, currentSpectrum, precursorInfo, offset, 0, 10000);
-
-                            scan2ions[specIndex] = std::pair<Ion, std::set<Ion> >(precursorIon, frags);
-
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    int numfound = 0, numnotFound = 0;
-
-    for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex) {
-        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
-
-        if (currentSpectrum.getMSLevel() == 2) {
-
-            if (!scan2isQuad[specIndex]) {
-                numIT++;
-                const OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
-
-                bool found = false;
-
-                for (int specIndexFull = std::max(0, specIndex-10); specIndexFull < std::min(specIndex+10, (int)msExperiment.getNrSpectra()); ++specIndexFull)
-                {
-                    OpenMS::MSSpectrum<OpenMS::Peak1D> fullSpectrum = msExperiment.getSpectrum(specIndexFull);
-
-                    if (matchedScans.find(specIndexFull) == matchedScans.end()
-                        && scan2info.find(specIndexFull) != scan2info.end()
-                        && fullSpectrum.getPrecursors()[0].getMZ() == precursorInfo.getMZ())
-                    {
-                        found = true;
-                        matchedScans.insert(specIndexFull);
-
-                        if (scan2ions.find(specIndexFull) != scan2ions.end()) {
-
-                            const Ion precursorIon = scan2ions[specIndexFull].first;
-
-                            std::set<Ion> frags2 = scan2ions[specIndexFull].second;
-
-                            std::set<Ion> frags = getCompleteFragmentIons(precursorIon, currentSpectrum, precursorInfo,
-                                                                          offset, 0, 10000);
-
-
-                            std::set<Ion> intersection;
-                            std::set_intersection(frags2.begin(), frags2.end(),
-                                                  frags.begin(), frags.end(),
-                                                  std::inserter(intersection, intersection.end()));
-
-                            scan2ions[specIndexFull] = std::pair<Ion, std::set<Ion> >(precursorIon, intersection);
-
-                            if (intersection.size() > 0) {
-                                calcDistributions(precursorIon, currentSpectrum, precursorInfo, offset,
-                                                  distributionScoreFile,
-                                                  isotopeScoreFile, false, intersection);
-                            }
-                        }
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    numnotFound++;
-                } else {
-                    numfound++;
-                }
-            }
-        }
-    }
-
-
-    std::cout << numQuad << "\t" << numIT << std::endl;
-    std::cout << numfound << "\t" << numnotFound << std::endl;
-
-
-
-
-
-    for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex) {
-        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
-
-        if (currentSpectrum.getMSLevel() == 2) {
-
-
-            if (scan2ions.find(specIndex) != scan2ions.end()) {
-
-                const OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
-
-                bool isQuad = scan2isQuad[specIndex];
-
-                const Ion precursorIon = scan2ions[specIndex].first;
-                std::set<Ion> intersection = scan2ions[specIndex].second;
-
-                if (intersection.size() > 0) {
-                    calcDistributions(precursorIon, currentSpectrum, precursorInfo, offset, distributionScoreFile,
-                                      isotopeScoreFile, isQuad, intersection);
-                }
-            }
-        }
-    }
-}
-
-void analyzeMS2Experiment(OpenMS::MzMLFile &mzMLDataFile, OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment,
-                          double offset, std::ofstream &distributionScoreFile,
-                          std::ofstream &isotopeScoreFile)
-{
-    //reporting variables
-    int numPeptideHits = 0;
-    int numPeptideHitsBelowFDR = 0;
-
-    std::cout << "Searching for isotope distributions..." << std::endl;
-
-
-    //Loop through all spectra
-    for (int specIndex = 0; specIndex < msExperiment.getNrSpectra(); ++specIndex) {
-        //get copy of current spectrum
-        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrum = msExperiment.getSpectrum(specIndex);
-
-        //sort spectrum by mz
-        currentSpectrum.sortByPosition();
-
-        //get peptide identifications
-        const std::vector<OpenMS::PeptideIdentification> pepIDs = currentSpectrum.getPeptideIdentifications();
-
-        //Loop through each peptide identification (PSM)
-        for (int pepIDIndex = 0; pepIDIndex < pepIDs.size(); ++pepIDIndex) {
-            //get peptide hits
-            const std::vector<OpenMS::PeptideHit> pepHits = pepIDs[pepIDIndex].getHits();
-
-
-            //check for more than one precursor
-            if (currentSpectrum.getPrecursors().size() > 1) {
-                std::cout << "Warning: more than one precursor!" << std::endl;
-            }
-            //get precursor information
-            const OpenMS::Precursor precursorInfo = currentSpectrum.getPrecursors()[0];
-
-            //loop through each peptide hit
-            for (int pepHitIndex = 0; pepHitIndex < pepHits.size(); ++pepHitIndex) {
-                ++numPeptideHits;
-
-                //if peptide score is above FDR threshold, skip to next peptide
-                if (pepHits[pepHitIndex].getScore() >= FDR_THRESHOLD) {
-                    continue;
-                }
-
-                ++numPeptideHitsBelowFDR;
-
-                //get AASequence and charge from peptide hit for precursor ion
-                const Ion precursorIon = Ion(pepHits[pepHitIndex].getSequence(),
-                                             OpenMS::Residue::Full,
-                                             pepHits[pepHitIndex].getCharge());
-                //check for precursor matching PSM peptide information
-                if (precursorInfo.getCharge() != precursorIon.charge) {
-                    //std::cout << "Warning: precursor target charge does not match PSM charge!" << std::endl;
-                }
-                if (std::abs(precursorInfo.getMZ() - precursorIon.monoMz) >
-                    (precursorIon.monoMz * SpectrumUtilities::ERROR_PPM)) {
-                    //std::cout << "Warning: precursor target mz does not match PSM mz! Possible offset!" << std::endl;
-                }
-
-                calcDistributions(precursorIon, currentSpectrum, precursorInfo, offset, distributionScoreFile, isotopeScoreFile, 0, 3000, false);
-
-            }//peptide hit loop
-        }//PSM loop
-    }//spectrum loop
 }
 
 void analyzeMS1Data(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS::Peak1D> &ms1Spectrum)
@@ -785,13 +605,22 @@ void analyzeMS1Data(const Ion &precursorIon, const OpenMS::MSSpectrum<OpenMS::Pe
     }*/
 }
 
+void countScanDesc(std::map<int, std::string> &scan2scanDesc)
+{
+    std::map<std::string, int> scanDesc2count;
+
+    for (auto itr : scan2scanDesc) scanDesc2count[itr.second]++;
+    for (auto itr : scanDesc2count) std::cout << itr.first << "\t" << scanDesc2count[itr.first] << std::endl;
+}
+
 void writeFileHeaders(std::ofstream &distributionScoreFile, std::ofstream &isotopeScoreFile)
 {
-    isotopeScoreFile << "isSIM\t";
+    isotopeScoreFile << "scanDesc\t";
     isotopeScoreFile << "searchDepth\t";
     isotopeScoreFile << "isotope\t";
     isotopeScoreFile << "monoMz\t";
     isotopeScoreFile << "monoMass\t";
+    isotopeScoreFile << "precursorMass\t";
     isotopeScoreFile << "intensity\t";
     isotopeScoreFile << "residualExactFragment\t";
     isotopeScoreFile << "residualAveragineFragment\t";
@@ -801,7 +630,7 @@ void writeFileHeaders(std::ofstream &distributionScoreFile, std::ofstream &isoto
 
 
     //headers for distribution score output file
-    distributionScoreFile << "isSIM\t";
+    distributionScoreFile << "scanDesc\t";
     distributionScoreFile << "ionID\t";                       //ion ID of monoisotopic ion
     distributionScoreFile << "distributionValid\t";           //check for valid distribution
     distributionScoreFile << "precursorMonoWeight\t";
@@ -822,7 +651,9 @@ void writeFileHeaders(std::ofstream &distributionScoreFile, std::ofstream &isoto
     distributionScoreFile << "approxFragmentFromWeightX2\t";
     distributionScoreFile << "approxFragmentFromWeightAndSX2\t";
     distributionScoreFile << "exactPrecursorX2\t";
-    distributionScoreFile << "approxPrecursorX2\n";
+    distributionScoreFile << "approxPrecursorX2\t";
+    distributionScoreFile << "approxFragmentSplineFromWeightX2\t";
+    distributionScoreFile << "approxFragmentSplineFromWeightAndSulfurX2\n";
 }
 
 int main(int argc, char * argv[])
@@ -899,20 +730,69 @@ int main(int argc, char * argv[])
         return 0;
     }
 
-    std::string expType = argv[5];
+    std::string alternating = argv[5];
+    std::string msLevel = argv[6];
+    std::string expType = argv[7];
 
     writeFileHeaders(distributionScoreFile, isotopeScoreFile);
+    std::cout << "Searching for isotope distributions..." << std::endl;
 
-    if (expType == "alternatingMS2SIM") {
-        std::cout << "Searching for isotope distributions..." << std::endl;
-        double minMz = std::atof(argv[6]);
-        double maxMz = std::atof(argv[7]);
-        analyzeAlternatingMS2SIMExperiment(mzMLDataFile, msExperiment, offset, minMz, maxMz, distributionScoreFile, isotopeScoreFile);
-    } else if (expType == "MS2") {
-        analyzeMS2Experiment(mzMLDataFile, msExperiment, offset, distributionScoreFile, isotopeScoreFile);
-    } else if (expType == "alternatingMS2Iso") {
-        analyzeAlternatingMS2IsoExperiment(mzMLDataFile, msExperiment, offset, distributionScoreFile, isotopeScoreFile);
+    double minMz = 0, maxMz = 10000;
+
+    if (alternating == "alternating")
+    {
+        std::map<int, std::string> scan2scanDesc;
+        std::map<std::string, bool> scanDesc2doSeq;
+
+        if (msLevel == "MS2")
+        {
+            if (expType == "SIM_vs_Full") {
+                minMz = std::atof(argv[8]);
+                maxMz = std::atof(argv[9]);
+                scan2scanDesc = analyzeAlternatingMS2SIMExperiment(msExperiment, minMz, maxMz);
+                scanDesc2doSeq["SIM"] = false;
+                scanDesc2doSeq["Full"] = true;
+            } else if (expType == "Quad_vs_IT") {
+                scan2scanDesc = analyzeAlternatingMS2IsoExperiment(msExperiment);
+                scanDesc2doSeq["Quadrupole isolation"] = true;
+                scanDesc2doSeq["Ion Trap isolation"] = false;
+            } else if (expType == "HCD_vs_CID") {
+                scan2scanDesc = analyzeAlternatingMS2FragExperiment(msExperiment);
+                scanDesc2doSeq["CID"] = false;
+                scanDesc2doSeq["HCD"] = true;
+            } else if (expType == "CID30_vs_CID25") {
+                scan2scanDesc = analyzeAlternatingMS2CIDExperiment(msExperiment);
+                scanDesc2doSeq["CID 30"] = true;
+                scanDesc2doSeq["CID 25"] = false;
+            } else if (expType == "HCD30_vs_HCD25") {
+                scan2scanDesc = analyzeAlternatingMS2HCDExperiment(msExperiment);
+                scanDesc2doSeq["HCD 30"] = true;
+                scanDesc2doSeq["HCD 25"] = false;
+            }
+
+            countScanDesc(scan2scanDesc);
+
+            analyzeAlternatingMS2Experiment(msExperiment, offset, distributionScoreFile, isotopeScoreFile,
+                                            scan2scanDesc, scanDesc2doSeq, minMz, maxMz);
+
+        } else {
+
+        }
     }
+    else
+    {
+        if (msLevel == "MS2") {
+            analyzeMS2Experiment(msExperiment, offset, distributionScoreFile, isotopeScoreFile, "HCD 35");
+        } else {
+
+        }
+    }
+
+
+
+
+
+
 
     //close output files
     std::cout << "Distribution comparison scorefile written to: " + scoreFileName << std::endl;

@@ -25,7 +25,7 @@ distData <- read.table(infile1, header=T, sep="\t")
 distData <- distData[which(distData$distributionValid == 1), ]
 
 #Chi-squared file headers
-X2headers <- c("exactCondFragmentX2","approxFragmentFromWeightX2","approxFragmentFromWeightAndSX2","exactPrecursorX2","approxPrecursorX2")
+X2headers <- c("exactCondFragmentX2","approxFragmentFromWeightX2","approxFragmentFromWeightAndSX2","exactPrecursorX2","approxPrecursorX2","approxFragmentSplineFromWeightX2","approxFragmentSplineFromWeightAndSulfurX2")
 
 #loop through each search depth
 for (searchDepth in 2:3) {
@@ -35,11 +35,11 @@ for (searchDepth in 2:3) {
   distAtDepthComplete <- distAtDepth[which(distAtDepth$completeFlag == 1),]
   distAtDepth <- distAtDepth[which(distAtDepth$completeFlag == 0),]
   distAtDepth <- distAtDepth[which(distAtDepth$searchDepth == searchDepth+1),]
-  
+
   #melt for chi squared data
-  meltedX2_AtDepth <- melt(distAtDepth, id.vars=c("ionID","isSIM","distributionMonoWeight","precursorMonoWeight"), measure.vars=X2headers)
-  meltedX2_Complete <- melt(distAtDepthComplete, id.vars=c("ionID","isSIM","distributionMonoWeight","precursorMonoWeight"), measure.vars=X2headers)
-  
+  meltedX2_AtDepth <- melt(distAtDepth, id.vars=c("ionID","scanDesc","distributionMonoWeight","precursorMonoWeight"), measure.vars=X2headers)
+  meltedX2_Complete <- melt(distAtDepthComplete, id.vars=c("ionID","scanDesc","distributionMonoWeight","precursorMonoWeight"), measure.vars=X2headers)
+
   #rename melted factors for Chi Squared data
   meltedX2_AtDepth$variable <- as.character(meltedX2_AtDepth$variable)
   meltedX2_Complete$variable <- as.character(meltedX2_Complete$variable)
@@ -59,6 +59,12 @@ for (searchDepth in 2:3) {
   meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "approxPrecursorX2"] <- "ApproxPrecursor"
   meltedX2_Complete$variable[meltedX2_Complete$variable == "approxPrecursorX2"] <- "ApproxPrecursor"
 
+  meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "approxFragmentSplineFromWeightX2"] <- "splineFragment"
+  meltedX2_Complete$variable[meltedX2_Complete$variable == "approxFragmentSplineFromWeightX2"] <- "splineFragment"
+
+  meltedX2_AtDepth$variable[meltedX2_AtDepth$variable == "approxFragmentSplineFromWeightAndSulfurX2"] <- "splineFragmentSulf"
+  meltedX2_Complete$variable[meltedX2_Complete$variable == "approxFragmentSplineFromWeightAndSulfurX2"] <- "splineFragmentSulf"
+
   meltedX2_AtDepth$variable <- as.factor(meltedX2_AtDepth$variable)
   meltedX2_Complete$variable <- as.factor(meltedX2_Complete$variable)
   #plot chi squared density
@@ -77,7 +83,7 @@ for (searchDepth in 2:3) {
   #plot chi squared density
   plotX2_Complete <- ggplot(data = meltedX2_Complete, mapping = aes(x=value, color=variable)) +
     geom_density() +
-    facet_wrap(~ isSIM) +#, scales="free_y") +
+    facet_wrap(~ scanDesc) +#, scales="free_y") +
     scale_x_log10() +
     theme(legend.position = "right",
           legend.text = element_text(size = 10),
@@ -86,14 +92,14 @@ for (searchDepth in 2:3) {
     ggtitle(paste("Chi-Squared Complete at Depth: ", searchDepth, sep = "")) +
     ylab("Density") +
     xlab(expression(X^{2}))
-  
+
   #plot chi squared density
   data.subset <- subset(meltedX2_Complete, meltedX2_Complete$variable == "ExactFragment")
   plotX2_Complete_vs_mass <- ggplot(data = data.subset, mapping = aes(y=value, x=precursorMonoWeight-distributionMonoWeight)) +
     #geom_point(alpha = 0.01) +
-    geom_smooth(method="gam") + 
+    geom_smooth(method="gam") +
     #scale_y_log10() +
-    facet_wrap(~ isSIM) +#, scales="free_y") +
+    facet_wrap(~ scanDesc) +#, scales="free_y") +
     theme(legend.position = "right",
           legend.text = element_text(size = 10),
           axis.title = element_text(size=12),
@@ -101,7 +107,7 @@ for (searchDepth in 2:3) {
     ggtitle(paste("Chi-Squared Complete at Depth: ", searchDepth, sep = "")) +
     xlab("Mass") +
     ylab(expression(X^{2}))
-  
+
   savePlot(plotX2_Complete_vs_mass, paste(outPath,sep = "", "/chi-squared_complete_vs_mass_",searchDepth, ".pdf"))
 
   savePlot(plotX2_atDepth, paste(outPath,sep = "", "/chi-squared_incomplete_",searchDepth, ".pdf"))

@@ -27,6 +27,10 @@ set(my_sources
         Stats.h
         Ion.h
         Ion.cpp
+        CalibrationModel.h
+        CalibrationModel.cpp
+        IsotopeDistributions.cpp
+        IsotopeDistributions.h
         FASTAParser.cpp
         FASTAParser.h
         ProcessCalibration.cpp
@@ -36,7 +40,7 @@ set(my_sources
 find_package(OpenMS PATHS "/Users/dennisg/OpenMS/dev-OpenMS/")
 ## if the above fails you can try calling cmake with -D OpenMS_DIR=/path/to/OpenMS/
 ## or modify the find_package() call accordingly
-##find_package(OpenMS PATHS "/Users/dennisg/OpenMS/OpenMS/")
+#find_package(OpenMS PATHS "/Users/dennisg/OpenMS/OpenMS/")
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-extensions")

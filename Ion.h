@@ -29,6 +29,10 @@ public:
      */
     Ion(OpenMS::AASequence seq, OpenMS::Residue::ResidueType type, OpenMS::Int charge);
 
+    std::string getIonType();
+
+    std::string getIonName();
+
     /**
      * Generates a list of fragment y- and b-ions from an input peptide sequence and charge and addes them
      * to a vector of Ion objects. Ions will be created of charge 1 and all charges up to and including the
@@ -37,8 +41,7 @@ public:
      * @param pepSeq the amino acid sequence of the precursor peptide to generate fragment ions from
      * @param pepCharge the charge of the precursor peptide
      */
-    static void generateFragmentIons(std::vector<Ion> &ionList, const OpenMS::AASequence pepSeq,
-                                     const OpenMS::Int pepCharge, double minMz, double maxMz);
+    std::vector<Ion> generateFragmentIons(double minMz, double maxMz);
 
     /**
      * Function to send an ion to standard output stream. All ion members reported in addition

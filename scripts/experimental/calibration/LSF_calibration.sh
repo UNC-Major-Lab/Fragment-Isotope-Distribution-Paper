@@ -22,7 +22,7 @@ ${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/OT_QuadIsolation.mzML" ${DATA_DIR}"
 Rscript PlotCalibration.R ${OUT_DIR}"/OT_Quad.out" ${OUT_DIR}"/OT_Quad.pdf"
 
 
-${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/IT_QuadIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"IT_Quad.out" 2000
+${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/IT_QuadIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"IT_Quad.out" 1000
 Rscript PlotCalibration.R ${OUT_DIR}"/IT_Quad.out" ${OUT_DIR}"/IT_Quad.pdf"
 
 
@@ -30,7 +30,7 @@ ${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/OT_ITIsolation.mzML" ${DATA_DIR}"/c
 Rscript PlotCalibration.R ${OUT_DIR}"/OT_IT.out" ${OUT_DIR}"/OT_IT.pdf"
 
 
-${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/IT_ITIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"IT_IT.out" 2000
+${BUILD_DIR}/ProcessCalibration ${DATA_DIR}"/IT_ITIsolation.mzML" ${DATA_DIR}"/cal.txt" ${OUT_DIR}"IT_IT.out" 1000
 Rscript PlotCalibration.R ${OUT_DIR}"/IT_IT.out" ${OUT_DIR}"/IT_IT.pdf"
 
 

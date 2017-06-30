@@ -11,6 +11,7 @@
 #include <OpenMS/MATH/MISC/MathFunctions.h>
 
 #include "Ion.h"
+#include "CalibrationModel.h"
 
 
 
@@ -20,23 +21,28 @@ namespace SpectrumUtilities {
 
     static const OpenMS::ElementDB* ELEMENTS = OpenMS::ElementDB::getInstance();   //element database
 
-    static void whichPrecursorIsotopes(std::set<OpenMS::UInt> &precursorIsotopes, const OpenMS::Precursor precursorInfo,
-                                       const Ion precursorIon, const double offset) {
+    std::set<OpenMS::UInt> whichPrecursorIsotopes(const OpenMS::Precursor &precursorInfo,
+                                       const Ion &precursorIon, const double offset) {
+        std::set<OpenMS::UInt> precursorIsotopes;
         //isolation window lower cutoff
         double lowerCutoff = precursorInfo.getMZ() - precursorInfo.getIsolationWindowLowerOffset() + offset;
         //isolation window upper cutoff
         double upperCutoff = precursorInfo.getMZ() + precursorInfo.getIsolationWindowUpperOffset() + offset;
 
         //distance between isotope peaks
-        double isotopeStep = OpenMS::Constants::NEUTRON_MASS_U / precursorIon.charge;
+        double isotopeStep = OpenMS::Constants::C13C12_MASSDIFF_U / precursorIon.charge;
 
         int smallestIsotope = std::max(0, int(std::ceil((lowerCutoff - precursorIon.monoMz) / isotopeStep)));
-        int largestIsotope = std::max(0, int(std::floor((upperCutoff - precursorIon.monoMz) / isotopeStep)));
+        int largestIsotope = int(std::floor((upperCutoff - precursorIon.monoMz) / isotopeStep));
 
         //loop through each isotope of precursor ion
-        for (OpenMS::UInt m = smallestIsotope; m <= largestIsotope; ++m) {
-            precursorIsotopes.insert(m);
+        if (largestIsotope >= 0) {
+            for (OpenMS::UInt m = smallestIsotope; m <= largestIsotope; ++m) {
+                precursorIsotopes.insert(m);
+            }
         }
+
+        return precursorIsotopes;
     }
 
     /**
@@ -85,18 +91,21 @@ namespace SpectrumUtilities {
      * <double, double> the first being the mz of each isotope, the second being the raw intensity of the peak.
      * Vector will be modified to contain scaled intensity values instead of raw intensity values.
      */
-    static void scaleDistribution(std::vector<std::pair<double, double> > &obsDist)
+    std::vector<std::pair<double, double> > scaleDistribution(std::vector<std::pair<double, double> > &obsDist)
     {
+        std::vector<std::pair<double, double> > scaled = obsDist;
         //sum intensities across distribution
         double totalIntensity = 0;
-        for (int i = 0; i < obsDist.size(); ++i) {
-            totalIntensity += obsDist[i].second;
+        for (int i = 0; i < scaled.size(); ++i) {
+            totalIntensity += scaled[i].second;
         }
 
         //compute scaled intensity and replace value
-        for (int j = 0; j < obsDist.size(); ++j) {
-            obsDist[j].second = obsDist[j].second / totalIntensity;
+        for (int j = 0; j < scaled.size(); ++j) {
+            scaled[j].second = scaled[j].second / totalIntensity;
         }
+
+        return scaled;
     }
 
     /**
@@ -133,13 +142,65 @@ namespace SpectrumUtilities {
         for (int i = 0; i < condPeakList.size(); ++i) {
 
             //compute mz of isotope peak
-            double isoMZ = ionMZ + ( OpenMS::Constants::NEUTRON_MASS_U / ion.charge ) * i;
+            double isoMZ = ionMZ + ( OpenMS::Constants::C13C12_MASSDIFF_U / ion.charge ) * i;
 
             //set theoretical distribution pair
             std::pair<double, double> theo;
             theo.first = isoMZ;
             theo.second = condPeakList[i].second;
             condDist.push_back(theo);
+        }
+    }
+
+
+    static void calibratedExactConditionalFragmentIsotopeDist(std::vector<std::pair<double, double> > &condDist,
+                                                              OpenMS::Precursor &precursorInfo, double width,
+                                                    const std::set<OpenMS::UInt> &precursorIsotopes,
+                                                    const Ion &ion,
+                                                    const Ion &precursorIon,
+                                                              CalibrationModel &calModel)
+    {
+        //clear vector for distribution
+        condDist.clear();
+
+
+        OpenMS::UInt tMinIsotope = *std::min_element(precursorIsotopes.begin(), precursorIsotopes.end());
+        OpenMS::UInt tMaxIsotope = *std::max_element(precursorIsotopes.begin(), precursorIsotopes.end());
+
+        OpenMS::UInt minIsotope = std::max(0, (int)tMinIsotope-3);
+        OpenMS::UInt maxIsotope = tMaxIsotope+3;
+
+
+        //compute conditional isotopic distribution and get vector of isotope peaks
+        OpenMS::EmpiricalFormula precursorFormula = precursorIon.sequence.getFormula(OpenMS::Residue::Full, precursorIon.charge);
+
+        double ionMZ = precursorIon.monoWeight / precursorIon.charge;
+
+        for (int i = 0; i <= tMaxIsotope; ++i) {
+            double fragIsoMZ = (ion.monoWeight / ion.charge) + ( OpenMS::Constants::C13C12_MASSDIFF_U / ion.charge ) * i;
+            condDist.push_back(std::make_pair(fragIsoMZ, 0));
+        }
+
+        OpenMS::IsotopeDistribution prec_id = precursorIon.formula.getIsotopeDistribution(maxIsotope);
+        prec_id.renormalize();
+
+        for (int isotope = minIsotope; isotope <= maxIsotope; isotope++)
+        {
+            std::set<OpenMS::UInt> isotopes;
+            isotopes.insert(isotope);
+            OpenMS::IsotopeDistribution id = ion.formula.getConditionalFragmentIsotopeDist(precursorFormula, isotopes);
+            id.renormalize();
+            std::vector<std::pair<OpenMS::Size, double> > condPeakList = id.getContainer();
+
+            double isoMZ = ionMZ + ( OpenMS::Constants::C13C12_MASSDIFF_U / precursorIon.charge ) * isotope;
+            double offset = isoMZ - precursorInfo.getMZ();
+            double efficiency = calModel.getEfficiency(width, offset) * prec_id.getContainer()[isotope].second;
+
+            for (int i = 0; i < condPeakList.size() && i <= tMaxIsotope; ++i)
+            {
+                double calibratedIntensity = condPeakList[i].second * efficiency;
+                condDist[i].second += calibratedIntensity;
+            }
         }
     }
 
@@ -169,7 +230,7 @@ namespace SpectrumUtilities {
         for (int i = 0; i < isotopePeaks.size(); ++i) {
 
             //compute mz of isotope peak
-            double isoMZ = ionMZ + ( OpenMS::Constants::NEUTRON_MASS_U / fragmentIon.charge ) * i;
+            double isoMZ = ionMZ + ( OpenMS::Constants::C13C12_MASSDIFF_U / fragmentIon.charge ) * i;
 
             //set distribution pair
             std::pair<double, double> theo;
@@ -211,7 +272,7 @@ namespace SpectrumUtilities {
         for (int i = 0; i < isotopePeaks.size(); ++i) {
 
             //compute mz of isotope peak
-            double isoMZ = ionMZ + ( OpenMS::Constants::NEUTRON_MASS_U / fragmentIon.charge ) * i;
+            double isoMZ = ionMZ + ( OpenMS::Constants::C13C12_MASSDIFF_U / fragmentIon.charge ) * i;
 
             //set distribution pair
             std::pair<double, double> theo;
@@ -260,7 +321,7 @@ namespace SpectrumUtilities {
         for (int i = 0; i < isotopePeaks.size(); ++i) {
 
             //compute mz of isotope peak
-            double isoMZ = ionMZ + ( OpenMS::Constants::NEUTRON_MASS_U / fragmentIon.charge ) * i;
+            double isoMZ = ionMZ + ( OpenMS::Constants::C13C12_MASSDIFF_U / fragmentIon.charge ) * i;
 
             //set distribution pair
             std::pair<double, double> theo;
@@ -303,7 +364,7 @@ namespace SpectrumUtilities {
         for (int i = 0; i < isotopePeaks.size(); ++i) {
 
             //compute mz of isotope peak
-            double isoMZ = ionMZ + ( OpenMS::Constants::NEUTRON_MASS_U / fragmentIon.charge ) * i;
+            double isoMZ = ionMZ + ( OpenMS::Constants::C13C12_MASSDIFF_U / fragmentIon.charge ) * i;
 
             //set distribution pair
             std::pair<double, double> theo;
@@ -353,7 +414,7 @@ namespace SpectrumUtilities {
         for (int i = 0; i < isotopePeaks.size(); ++i) {
 
             //compute mz of isotope peak
-            double isoMZ = ionMZ + ( OpenMS::Constants::NEUTRON_MASS_U / fragmentIon.charge ) * i;
+            double isoMZ = ionMZ + ( OpenMS::Constants::C13C12_MASSDIFF_U / fragmentIon.charge ) * i;
 
             //set distribution pair
             std::pair<double, double> theo;
@@ -394,7 +455,7 @@ namespace SpectrumUtilities {
         for (int i = 0; i < theoPeakList.size(); ++i) {
 
             //compute mz of isotope peak
-            double isoMZ = ionMZ + ( OpenMS::Constants::NEUTRON_MASS_U / ion.charge ) * i;
+            double isoMZ = ionMZ + ( OpenMS::Constants::C13C12_MASSDIFF_U / ion.charge ) * i;
 
             //set theoretical distribution pair
             std::pair<double, double> theo;
@@ -411,7 +472,7 @@ namespace SpectrumUtilities {
      */
     static bool scaledDistributionValid(const std::vector<std::pair<double, double> > &dist)
     {
-        return true;
+        //return true;
         //distribution values decreasing flag
         bool valuesDecreasing = false;
 
