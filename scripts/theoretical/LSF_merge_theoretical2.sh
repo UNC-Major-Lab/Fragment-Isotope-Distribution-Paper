@@ -21,6 +21,9 @@ python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "residuals_pr
 python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "scores_fragment_" T > ${IN_DIR}"/fragment_scores.txt"
 python ${SOURCE_DIR}/scripts/theoretical/mergeHistogram.py $IN_DIR "residuals_fragment_" T > ${IN_DIR}"/fragment_residuals.txt"
 
+python ${SOURCE_DIR}/scripts/theoretical/mergeStats.py $IN_DIR "stats_fragment_" T > ${IN_DIR}"/fragment_stats.txt"
+python ${SOURCE_DIR}/scripts/theoretical/mergeStats.py $IN_DIR "stats_precrusor_" F > ${IN_DIR}"/precursor_stats.txt"
+
 Rscript plotComparisons.R ${IN_DIR}"/precursor_residuals.txt" ${IN_DIR}"/precursor_residuals.eps" ${BIN_SIZE_RESIDUAL} F
 Rscript plotComparisons.R ${IN_DIR}"/precursor_scores.txt" ${IN_DIR}"/precursor_chisquared.eps" ${BIN_SIZE_CHISQUARE} F
 
