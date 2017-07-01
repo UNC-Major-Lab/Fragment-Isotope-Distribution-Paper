@@ -23,10 +23,10 @@ for f in os.listdir(root_dir):
         for line in infile:
             if do_iso == "F":
                 [count, mean, min_v, q1, median, q3, max_v, method, stat] = line.strip().split("\t")
-                label = method +"\t"+stat
+                label = method + "\t" + stat
             else:
                 [count, mean, min_v, q1, median, q3, max_v, iso, method, stat] = line.strip().split("\t")
-            label = iso + "\t" + method +"\t"+stat
+                label = iso + "\t" + method + "\t" + stat
 
             count = float(count)
             mean = float(mean)
