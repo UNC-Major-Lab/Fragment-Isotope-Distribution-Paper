@@ -58,4 +58,4 @@ for method in method2stats:
     q3 =  method2stats[method][5] / fileCount
     max_v =  method2stats[method][6]
 
-    print mean + "\t" + min_v + "\t" + q1 + "\t" + median + "\t" + q3 + "\t" + max_v
+    print "\t".join([str(mean), str(min_v), str(q1), str(median), str(q3), str(max_v)])
