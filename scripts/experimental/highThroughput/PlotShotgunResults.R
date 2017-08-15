@@ -11,9 +11,9 @@ savePlot <- function(myplot, outfile) {
   dev.off()
 }
 
-args = c("/Users/dennisg/Downloads/distributionScores.out",
-         "/Users/dennisg/Downloads/")
-#args = commandArgs(trailingOnly=TRUE)
+#args = c("/Users/dennisg/Downloads/distributionScores.out",
+#         "/Users/dennisg/Downloads/")
+args = commandArgs(trailingOnly=TRUE)
 infile1 <- args[1]
 outPath <- args[2]
 
@@ -23,6 +23,8 @@ outPath <- args[2]
 distData <- read.table(infile1, header=T, sep="\t")
 #only distributions flagged as valid
 distData <- distData[which(distData$distributionValid == 1), ]
+
+sum(distData$precursorSulfurs > 0) / nrow(distData)
 
 #Chi-squared file headers
 X2headers <- c("exactCondFragmentX2","approxFragmentFromWeightX2","approxFragmentFromWeightAndSX2","exactPrecursorX2","approxPrecursorX2","approxFragmentSplineFromWeightX2","approxFragmentSplineFromWeightAndSulfurX2")
