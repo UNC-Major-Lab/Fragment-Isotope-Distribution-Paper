@@ -90,6 +90,17 @@ void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &cu
                        OpenMS::Precursor &precursorInfo, double offset, std::ofstream &distributionScoreFile,
                        std::ofstream &isotopeScoreFile, double minMz, double maxMz, std::string scanDesc)
 {
+    static int num_sulfur_peptides = 0;
+    static int total_peptides = 0;
+
+    if (precursorIon.sequence.getFormula(OpenMS::Residue::Full, precursorIon.charge).
+            getNumberOf(ELEMENTS->getElement("Sulfur")) > 0) {
+        num_sulfur_peptides++;
+    }
+    total_peptides++;
+
+    std::cout << num_sulfur_peptides << " " << total_peptides << std::endl;
+
     CalibrationModel noModel;
     int ionID = 0;
     //create list of b and y ions
@@ -179,6 +190,19 @@ void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &cu
                        OpenMS::Precursor &precursorInfo, double offset, std::ofstream &distributionScoreFile,
                        std::ofstream &isotopeScoreFile, std::string scanDesc, std::set<Ion> &ionList)
 {
+    static int num_sulfur_peptides = 0;
+    static int total_peptides = 0;
+
+    if (precursorIon.sequence.getFormula(OpenMS::Residue::Full, precursorIon.charge).
+            getNumberOf(ELEMENTS->getElement("Sulfur")) > 0) {
+        num_sulfur_peptides++;
+    }
+    total_peptides++;
+
+    std::cout << num_sulfur_peptides << " " << total_peptides << std::endl;
+
+
+
     CalibrationModel noModel;
     double width = precursorInfo.getIsolationWindowLowerOffset() + precursorInfo.getIsolationWindowUpperOffset();
     int ionID = 0;
