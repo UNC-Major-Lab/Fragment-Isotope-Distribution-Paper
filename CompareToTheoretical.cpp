@@ -164,6 +164,9 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     scores = calculateScores(exact_fragment_prob, approx_fragment_splineS_prob);
     fragment_method2iso2val["Sulfur-specific spline"][label].first.push_back(scores[2]);
 
+    scores = calculateScores(exact_fragment_prob, approx_precursor_prob);
+    fragment_method2iso2val["Averagine precursor"][label].first.push_back(scores[2]);
+
     //Residuals
     //scores = calculateResiduals(exact_fragment_prob, approx_precursor_prob);
     //for (int i = 0; i < scores.size(); ++i) out_residual << scores[i] << "\t" << label << "\t" << "p" << std::endl;
@@ -179,6 +182,10 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_splineS_prob);
     for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Sulfur-specific spline"][label].second.push_back(scores[i]);
+
+    scores = calculateResiduals(exact_fragment_prob, approx_precursor_prob);
+    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Averagine precursor"][label].second.push_back(scores[i]);
+
 }
 
 void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& precursor, EmpiricalFormula& fragment)
@@ -475,11 +482,13 @@ void init(bool doFragments)
             fragment_method2iso2val["Sulfur-specific averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
             fragment_method2iso2val["Spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
             fragment_method2iso2val["Sulfur-specific spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+            fragment_method2iso2val["Averagine precursor"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
             label = std::to_string(i);
             fragment_method2iso2val["Averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
             fragment_method2iso2val["Sulfur-specific averagine"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
             fragment_method2iso2val["Spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
             fragment_method2iso2val["Sulfur-specific spline"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
+            fragment_method2iso2val["Averagine precursor"][label] = std::make_pair(std::vector<double>(), std::vector<double>());
         }
     } else
     {
