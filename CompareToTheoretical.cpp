@@ -376,7 +376,9 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
 
                 for (int i = 0; i < chi.size(); ++i)
                 {
-                    double bin = std::log10(chi[i]);// std::floor(chi[i]/bin_size_chi)*bin_size_chi;
+                    double bin = std::floor(std::log10(chi[i]));// std::floor(chi[i]/bin_size_chi)*bin_size_chi;
+                    if (std::isinf(bin)) bin = -10;
+                    std::cout << bin << std::endl;
                     fragment_method2iso2bin2count_chi[key][iso][bin] += 1;
                 }
 
