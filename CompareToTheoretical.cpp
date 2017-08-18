@@ -156,7 +156,7 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     fragment_method2iso2val["Averagine"][label].first.push_back(scores[2]);
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_S_prob);
-    fragment_method2iso2val["Sulfur-specific Averagine"][label].first.push_back(scores[2]);
+    fragment_method2iso2val["Sulfur-specific averagine"][label].first.push_back(scores[2]);
 
     scores = calculateScores(exact_fragment_prob, approx_fragment_spline_prob);
     fragment_method2iso2val["Spline"][label].first.push_back(scores[2]);
@@ -172,7 +172,7 @@ void testTheoreticalIsolation(EmpiricalFormula& precursor, EmpiricalFormula& fra
     for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Averagine"][label].second.push_back(scores[i]);
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_S_prob);
-    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Sulfur-specific Averagine"][label].second.push_back(scores[i]);
+    for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Sulfur-specific averagine"][label].second.push_back(scores[i]);
 
     scores = calculateResiduals(exact_fragment_prob, approx_fragment_spline_prob);
     for (int i = 0; i < scores.size(); ++i) fragment_method2iso2val["Spline"][label].second.push_back(scores[i]);
@@ -359,7 +359,7 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
                 std::vector<double> results_res = getStats(res);
 
 
-                /*out_stats << results_chi[0] << "\t" << results_chi[1] << "\t" << results_chi[2] << "\t"
+                out_stats << results_chi[0] << "\t" << results_chi[1] << "\t" << results_chi[2] << "\t"
                           << results_chi[3] << "\t" << results_chi[4] << "\t" << results_chi[5] << "\t"
                           << results_chi[6] << "\t" << iso << "\t" << key << "\t" << "chi" << std::endl;
 
@@ -377,11 +377,11 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
                 {
                     double bin = std::floor(iso_itr.second.second[i]/bin_size_res)*bin_size_res;
                     fragment_method2iso2bin2count_res[key][iso][bin] += 1;
-                }*/
+                }
             }
         }
 
-        /*for (auto const &method_itr : fragment_method2iso2bin2count_chi)
+        for (auto const &method_itr : fragment_method2iso2bin2count_chi)
         {
             for (auto const &iso_itr : fragment_method2iso2bin2count_chi[method_itr.first])
             {
@@ -401,7 +401,7 @@ void writeResults(std::string path_residual, std::string path_chisquared, std::s
                     out_residual << method_itr.first << "\t" << iso_itr.first << "\t" << bin_itr.first << "\t" << bin_itr.second << std::endl;
                 }
             }
-        }*/
+        }
 
     } else
     {
