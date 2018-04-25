@@ -10,7 +10,6 @@
 #include <OpenMS/KERNEL/MSSpectrum.h>
 #include "SpectrumUtilities.h"
 #include "Stats.h"
-#include "CalibrationModel.h"
 
 class IsotopeDistributions {
 
@@ -20,7 +19,7 @@ public :
     IsotopeDistributions(std::set<OpenMS::UInt> precursorIsotopes, Ion precursorIon,
                          const OpenMS::IsotopeSplineDB* isotopeDB,
                          OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrumCentroid,
-                         CalibrationModel &calModel, double width, OpenMS::Precursor &precursorInfo)
+                         double width, OpenMS::Precursor &precursorInfo)
     {
         if (precursorIsotopes.size() > 0) {
             OpenMS::UInt minIsotope = *std::min_element(precursorIsotopes.begin(), precursorIsotopes.end());
@@ -32,28 +31,21 @@ public :
             for (int i = minIsotope; i < id.size(); ++i) {
                 double isoMZ = ionMZ + ( OpenMS::Constants::C13C12_MASSDIFF_U / precursorIon.charge ) * i;
                 exactPrecursorDist.push_back(std::make_pair(isoMZ, id.getContainer()[i].second));
-
-                double offset = isoMZ - precursorInfo.getMZ();
-                double efficiency = calModel.getEfficiency(width, offset);
-                double calibratedIntensity = exactPrecursorDist.back().second * efficiency;
-                calibratedExactPrecursorDist.push_back(std::make_pair(isoMZ, calibratedIntensity));
             }
             exactPrecursorDist = SpectrumUtilities::scaleDistribution(exactPrecursorDist);
-            calibratedExactPrecursorDist = SpectrumUtilities::scaleDistribution(calibratedExactPrecursorDist);
 
             SpectrumUtilities::observedDistribution(observedDist, exactPrecursorDist, currentSpectrumCentroid);
             scaledObservedDist = SpectrumUtilities::scaleDistribution(observedDist);
         }
 
         exactPrecursorX2 = Stats::computeX2(scaledObservedDist, exactPrecursorDist);
-        calibratedExactPrecursorX2 = Stats::computeX2(scaledObservedDist, calibratedExactPrecursorDist);
     }
 
 
     // Fragment distributions
     IsotopeDistributions(std::set<OpenMS::UInt> precursorIsotopes, Ion ion, Ion precursorIon,
                          const OpenMS::IsotopeSplineDB* isotopeDB, OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrumCentroid,
-                         CalibrationModel &calModel, OpenMS::Precursor &precursorInfo, double width)
+                         OpenMS::Precursor &precursorInfo, double width)
     {
 
         SpectrumUtilities::exactConditionalFragmentIsotopeDist(exactConditionalFragmentDist,
@@ -113,7 +105,7 @@ public :
             }
         }
 
-        isValid = SpectrumUtilities::scaledDistributionValid(scaledObservedDist) && completeAtDepth > 1;
+        isValid = true; //SpectrumUtilities::scaledDistributionValid(scaledObservedDist) && completeAtDepth > 1;
 
         //compute chi-squared with observed to Conditional
         exactCondFragmentX2 = Stats::computeX2(scaledObservedDist, exactConditionalFragmentDist);
@@ -123,20 +115,6 @@ public :
         approxFragmentSplineFromWeightAndSulfurX2 = Stats::computeX2(scaledObservedDist, approxFragmentSplineFromWeightAndSulfurDist);
         exactPrecursorX2 = Stats::computeX2(scaledObservedDist, exactPrecursorDist);
         approxPrecursorX2 = Stats::computeX2(scaledObservedDist, approxPrecursorFromWeightDist);
-
-        if (calModel.width2offset2efficiency.size() > 0) {
-            SpectrumUtilities::calibratedExactConditionalFragmentIsotopeDist(calibratedExactConditionalFragmentDist,
-                                                                             precursorInfo, width,
-                                                                             precursorIsotopes,
-                                                                             ion,
-                                                                             precursorIon,
-                                                                             calModel);
-            calibratedExactConditionalFragmentDist = SpectrumUtilities::scaleDistribution(
-                    calibratedExactConditionalFragmentDist);
-            calibratedExactFragmentX2 = Stats::computeX2(scaledObservedDist, calibratedExactConditionalFragmentDist);
-        }
-
-
 
     }
 
@@ -150,7 +128,6 @@ public :
     std::vector<std::pair<double, double> > approxPrecursorFromWeightAndSulfurDist;
     std::vector<std::pair<double, double> > approxPrecursorSplineFromWeightDist;
     std::vector<std::pair<double, double> > approxPrecursorSplineFromWeightAndSulfurDist;
-    std::vector<std::pair<double, double> > calibratedExactPrecursorDist;
 
     // Fragment
     std::vector<std::pair<double, double> > approxFragmentFromWeightDist;
@@ -158,7 +135,6 @@ public :
     std::vector<std::pair<double, double> > approxFragmentSplineFromWeightDist;
     std::vector<std::pair<double, double> > approxFragmentSplineFromWeightAndSulfurDist;
     std::vector<std::pair<double, double> > exactConditionalFragmentDist;
-    std::vector<std::pair<double, double> > calibratedExactConditionalFragmentDist;
 
 
     // Precursor or fragment
@@ -169,7 +145,6 @@ public :
     double approxPrecursorAndSulfurX2;
     double approxPrecursorSplineX2;
     double approxPrecursorSplineAndSulfurX2;
-    double calibratedExactPrecursorX2;
 
     // Fragment
     double exactCondFragmentX2;
@@ -177,7 +152,6 @@ public :
     double approxFragmentFromWeightAndSulfurX2;
     double approxFragmentSplineFromWeightX2;
     double approxFragmentSplineFromWeightAndSulfurX2;
-    double calibratedExactFragmentX2;
 
 
     bool completeFlag;

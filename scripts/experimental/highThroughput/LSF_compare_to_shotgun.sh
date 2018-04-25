@@ -11,6 +11,10 @@ module load r/3.2.2
 
 source ../../config.sh
 
+set OUT_DIR = ${ROOT_OUT_DIR}"/compare_to_experimental/HT_HELA_16_QuadIso_OT_Full_MS2"
+mkdir -p $OUT_DIR
+${BUILD_DIR}/CompareToShotgun ${DATA_DIR}"/HELA_2017-10-25_CID25_OT.mzML" ${DATA_DIR}"/HELA_2017-10-25_CID25_OT.idXML" 0.0 $OUT_DIR MS2 MS2 CID_25
+
 #################
 # MS2 comparisons
 ########################################################################################################################
@@ -74,11 +78,11 @@ source ../../config.sh
 ########################################################################################################################
 
 ########################################################################################################################
-set OUT_DIR = ${ROOT_OUT_DIR}"/compare_to_experimental/HT_HELA_16_QuadIso_OT_AlternatingFrag_MS2"
-mkdir -p $OUT_DIR
+#set OUT_DIR = ${ROOT_OUT_DIR}"/compare_to_experimental/HT_HELA_16_QuadIso_OT_AlternatingFrag_MS2"
+#mkdir -p $OUT_DIR
 
-${BUILD_DIR}/CompareToShotgun ${DATA_DIR}"/HELA_2017-06-05_62_alternating_frag.mzML" ${DATA_DIR}"/HELA_2017-06-05_62_alternating_frag.idXML" 0.0 $OUT_DIR "alternating MS2 HCD_vs_CID" 400 900
-Rscript PlotShotgunResults.R ${OUT_DIR}"/distributionScores.out" $OUT_DIR
+#${BUILD_DIR}/CompareToShotgun ${DATA_DIR}"/HELA_2017-06-05_62_alternating_frag.mzML" ${DATA_DIR}"/HELA_2017-06-05_62_alternating_frag.idXML" 0.0 $OUT_DIR "alternating MS2 HCD_vs_CID" 400 900
+#Rscript PlotShotgunResults.R ${OUT_DIR}"/distributionScores.out" $OUT_DIR
 ########################################################################################################################
 
 

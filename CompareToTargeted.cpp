@@ -13,7 +13,6 @@
 #include "SpectrumUtilities.h"
 #include "Stats.h"
 #include "IsotopeDistributions.h"
-#include "CalibrationModel.h"
 
 static const OpenMS::IsotopeSplineDB* isotopeDB = OpenMS::IsotopeSplineDB::getInstance();
 const OpenMS::ElementDB* ELEMENTS = OpenMS::ElementDB::getInstance();   //element database
@@ -53,23 +52,8 @@ void usage()
 }
 
 void writeFileHeaders(std::ofstream &out, std::ofstream &calc_out, std::ofstream &scores_out,
-                      std::ofstream &distributionScoreFile, std::ofstream &isotopeScoreFile,
-                      std::ofstream &distributionScoreMS1File, std::ofstream &isotopeScoreMS1File)
+                      std::ofstream &distributionScoreFile, std::ofstream &isotopeScoreFile)
 {
-
-    isotopeScoreMS1File << "width\t";
-    isotopeScoreMS1File << "offset\t";
-    isotopeScoreMS1File << "isotope\t";
-    isotopeScoreMS1File << "residualExactPrecursor\t";
-    isotopeScoreMS1File << "residualCalibratedExactPrecursor\n";
-
-    distributionScoreMS1File << "width\t";
-    distributionScoreMS1File << "offset\t";
-    distributionScoreMS1File << "exactPrecursorX2\t";
-    distributionScoreMS1File << "calibratedExactPrecursorX2\n";
-
-
-
     out << "isotope.range" << "\t";
     out << "ion.name" << "\t";
     out << "mz" << "\t";
@@ -100,7 +84,7 @@ void writeFileHeaders(std::ofstream &out, std::ofstream &calc_out, std::ofstream
     isotopeScoreFile << "residualAveragineSulfurFragment\t";
     isotopeScoreFile << "residualExactPrecursor\t";
     isotopeScoreFile << "residualSplineFragment\t";
-    isotopeScoreFile << "residualCalibratedExactFragment\t";
+    isotopeScoreFile << "residualApproxPrecursor\t";
     isotopeScoreFile << "residualSplineSulfurFragment\n";
 
 
@@ -128,7 +112,7 @@ void writeFileHeaders(std::ofstream &out, std::ofstream &calc_out, std::ofstream
     distributionScoreFile << "exactPrecursorX2\t";
     distributionScoreFile << "approxPrecursorX2\t";
     distributionScoreFile << "splineFragmentX2\t";
-    distributionScoreFile << "calibratedExactFragmentX2\t";
+    distributionScoreFile << "approxPrecursorX2\t";
     distributionScoreFile << "splineSulfurFragmentX2\n";
 }
 
@@ -137,7 +121,7 @@ void calcDistributions(const Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1
                        OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrumProfile,
                        OpenMS::Precursor &precursorInfo,
                        std::ofstream &distributionScoreFile, std::ofstream &isotopeScoreFile, std::string scanDesc,
-                       std::vector<Ion> &ionList, CalibrationModel &calModel)
+                       std::vector<Ion> &ionList)
 {
     double isotopeStep = OpenMS::Constants::C13C12_MASSDIFF_U / precursorIon.charge;
 
@@ -165,7 +149,7 @@ void calcDistributions(const Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1
         // peak not found
         if (peakIndex == -1) continue;
 
-        IsotopeDistributions isotopeDistributions(precursorIsotopes, ion, precursorIon, isotopeDB, currentSpectrumCentroid, calModel, precursorInfo, width);
+        IsotopeDistributions isotopeDistributions(precursorIsotopes, ion, precursorIon, isotopeDB, currentSpectrumCentroid, precursorInfo, width);
 
 
         std::string isotope_range = std::to_string(minIsotope);
@@ -177,10 +161,6 @@ void calcDistributions(const Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1
 
         if (!isotopeDistributions.isValid) continue;
 
-        if (isotopeDistributions.calibratedExactFragmentX2 - isotopeDistributions.exactCondFragmentX2 > 0.2) {
-            int x = 1;
-        }
-
         //for (int i = 0; i < observedDist.size(); ++i)
         for (int i = 0; i < isotopeDistributions.completeAtDepth; ++i)
         {
@@ -191,7 +171,7 @@ void calcDistributions(const Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1
             double resExactPrecursor = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.exactPrecursorDist[i].second;
             double resSplineFragment = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.approxFragmentSplineFromWeightDist[i].second;
             double resSplineSulfurFragment = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.approxFragmentSplineFromWeightAndSulfurDist[i].second;
-            double resCalibratedExactFragment = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.calibratedExactConditionalFragmentDist[i].second;
+            double resApproxPrecursor = isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.approxPrecursorFromWeightDist[i].second;
 
 
             isotopeScoreFile << scanDesc << "\t" << isotopeDistributions.completeAtDepth << "\t" << i << "\t"
@@ -200,7 +180,7 @@ void calcDistributions(const Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1
                              << isotopeDistributions.observedDist[i].second << "\t"
                              << resExactFragment << "\t" << resAveragineFragment << "\t"
                              << resAveragineSulfurFragment << "\t" << resExactPrecursor << "\t"
-                             << resSplineFragment << "\t" << resCalibratedExactFragment << "\t"
+                             << resSplineFragment << "\t" << resApproxPrecursor << "\t"
                              << resSplineSulfurFragment << std::endl;
         }
 
@@ -233,7 +213,7 @@ void calcDistributions(const Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1
         distributionScoreFile << isotopeDistributions.approxFragmentFromWeightAndSulfurX2 << "\t";
         distributionScoreFile << isotopeDistributions.exactPrecursorX2 << "\t";
         distributionScoreFile << isotopeDistributions.approxFragmentSplineFromWeightX2 << "\t";
-        distributionScoreFile << isotopeDistributions.calibratedExactFragmentX2 << "\t";
+        distributionScoreFile << isotopeDistributions.approxPrecursorX2 << "\t";
         distributionScoreFile << isotopeDistributions.approxFragmentSplineFromWeightAndSulfurX2 << "\n";
     }
 }
@@ -244,8 +224,7 @@ void calcSpectrumIonDistribution(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::P
                                  OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrumProfile,
                                  OpenMS::Precursor &precursorInfo,
                                  std::ofstream &exp_out, std::ofstream &theo_out,
-                                 std::ofstream &scores_out, std::vector<Ion> ionsToPlot,
-                                 CalibrationModel &calModel)
+                                 std::ofstream &scores_out, std::vector<Ion> ionsToPlot)
 {
     double isotopeStep = OpenMS::Constants::C13C12_MASSDIFF_U / precursorIon.charge;
 
@@ -270,7 +249,7 @@ void calcSpectrumIonDistribution(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::P
         if (peakIndex == -1) return;
 
         IsotopeDistributions isotopeDistributions(precursorIsotopes, ion, precursorIon, isotopeDB,
-                                                  currentSpectrumCentroid, calModel, precursorInfo, width);
+                                                  currentSpectrumCentroid, precursorInfo, width);
 
         std::string isotope_range = std::to_string(minIsotope);
         if (precursorIsotopes.size() > 1) isotope_range += "-" + std::to_string(maxIsotope);
@@ -306,6 +285,7 @@ void calcSpectrumIonDistribution(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::P
         normalizeDist(isotopeDistributions.approxFragmentFromWeightAndSulfurDist);
         normalizeDist(isotopeDistributions.approxFragmentSplineFromWeightDist);
         normalizeDist(isotopeDistributions.approxFragmentSplineFromWeightAndSulfurDist);
+        normalizeDist(isotopeDistributions.approxPrecursorFromWeightDist);
 
         outputDist(theo_out, isotopeDistributions.exactConditionalFragmentDist, ion_name, isotope_range, "Exact");
         outputDist(theo_out, isotopeDistributions.approxFragmentFromWeightDist, ion_name, isotope_range, "Averagine");
@@ -315,12 +295,15 @@ void calcSpectrumIonDistribution(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::P
                    "Spline");
         outputDist(theo_out, isotopeDistributions.approxFragmentSplineFromWeightAndSulfurDist, ion_name, isotope_range,
                    "Sulfur-specific spline");
+        outputDist(theo_out, isotopeDistributions.approxPrecursorFromWeightDist, ion_name, isotope_range,
+                   "Precursor Averagine");
 
         outputScores(scores_out, ion_name, isotope_range, "Exact", isotopeDistributions.exactCondFragmentX2, minMz, 1.0);
         outputScores(scores_out, ion_name, isotope_range, "Averagine", isotopeDistributions.approxFragmentFromWeightX2, minMz, 0.8);
         outputScores(scores_out, ion_name, isotope_range, "Sulfur-specific Averagine", isotopeDistributions.approxFragmentFromWeightAndSulfurX2, minMz, 0.6);
         outputScores(scores_out, ion_name, isotope_range, "Spline", isotopeDistributions.approxFragmentSplineFromWeightX2, minMz, 0.4);
         outputScores(scores_out, ion_name, isotope_range, "Sulfur-specific spline", isotopeDistributions.approxFragmentSplineFromWeightAndSulfurX2, minMz, 0.2);
+        outputScores(scores_out, ion_name, isotope_range, "Precursor Averagine", isotopeDistributions.approxPrecursorX2, minMz, 0.1);
     }
 }
 
@@ -346,59 +329,6 @@ std::set<int> getRepresentativeScanIndexes()
 
 }
 
-void getCalibrationModel(OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrumCentroid, OpenMS::Precursor &precursorInfo,
-                         Ion &precursorIon, CalibrationModel &calModel)
-{
-    double tol = OpenMS::Math::ppmToMass(20.0, precursorIon.monoMz);
-    int peakIndex = currentSpectrumCentroid.findNearest(precursorIon.monoMz, tol);
-    double intensity = peakIndex == -1 ? 0 : currentSpectrumCentroid[peakIndex].getIntensity();
-
-    double width = precursorInfo.getIsolationWindowLowerOffset() + precursorInfo.getIsolationWindowUpperOffset();
-    double offset = precursorInfo.getMZ() - precursorIon.monoMz;
-
-    calModel.addCalibrationPoint(width, offset, intensity);
-}
-
-void calcMS1Distributions(OpenMS::MSSpectrum<OpenMS::Peak1D> &currentSpectrumCentroid, OpenMS::Precursor &precursorInfo,
-                         Ion &precursorIon, CalibrationModel &calModel, std::ofstream &distributionScoreFile,
-                          std::ofstream &isotopeScoreFile)
-{
-    double width = precursorInfo.getIsolationWindowLowerOffset() + precursorInfo.getIsolationWindowUpperOffset();
-    double offset = precursorInfo.getMZ() - precursorIon.monoMz;
-
-
-
-    std::set<OpenMS::UInt> precursorIsotopes = SpectrumUtilities::whichPrecursorIsotopes(precursorInfo, precursorIon, 0.0);
-
-    if (precursorIsotopes.size() <= 1) return;
-
-    OpenMS::UInt minIsotope = *std::min_element(precursorIsotopes.begin(), precursorIsotopes.end());
-
-    IsotopeDistributions isotopeDistributions(precursorIsotopes, precursorIon, isotopeDB, currentSpectrumCentroid, calModel, width, precursorInfo);
-
-    for (int i = 0; i < isotopeDistributions.exactPrecursorDist.size(); ++i)
-    {
-        double resExactPrecursor = (isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.exactPrecursorDist[i].second) / isotopeDistributions.scaledObservedDist[i].second;
-        double resCalibratedExactPrecursor = (isotopeDistributions.scaledObservedDist[i].second - isotopeDistributions.calibratedExactPrecursorDist[i].second) / isotopeDistributions.scaledObservedDist[i].second;
-
-        /*if (std::isnan(resExactPrecursor)) {
-            int x = 1;
-        }
-
-        if (std::abs(width-2.4) < 0.02 && std::abs(offset+0.85) < 0.02) {
-            int x = 1;
-        }*/
-
-        isotopeScoreFile << width << "\t" << offset << "\t" << minIsotope+i << "\t"
-                         << resExactPrecursor << "\t"
-                         << resCalibratedExactPrecursor << std::endl;
-    }
-
-    distributionScoreFile << width << "\t" << offset << "\t"
-                          << isotopeDistributions.exactPrecursorX2 << "\t"
-                          << isotopeDistributions.calibratedExactPrecursorX2 << std::endl;
-
-}
 
 
 int main(int argc, char * argv[])
@@ -415,11 +345,8 @@ int main(int argc, char * argv[])
     std::ofstream scores_out(argv[5]);
     std::ofstream distributionScoreFile(argv[6]);
     std::ofstream isotopeScoreFile(argv[7]);
-    // MS1
-    std::ofstream distributionScoreMS1File(argv[8]);
-    std::ofstream isotopeScoreMS1File(argv[9]);
 
-    writeFileHeaders(exp_out, theo_out, scores_out, distributionScoreFile, isotopeScoreFile, distributionScoreMS1File, isotopeScoreMS1File);
+    writeFileHeaders(exp_out, theo_out, scores_out, distributionScoreFile, isotopeScoreFile);
 
     Ion precursorIon = Ion(OpenMS::AASequence::fromString("DRVYIHPFHL"), OpenMS::Residue::Full, 3);
 
@@ -435,27 +362,6 @@ int main(int argc, char * argv[])
 
     std::set<int> representativeScanIndexes = getRepresentativeScanIndexes();
 
-    CalibrationModel calModel;
-
-    //Loop through all spectra
-    for (int specIndex = 0; specIndex < msExperimentCentroid.getNrSpectra(); ++specIndex)
-    {
-        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrumCentroid = msExperimentCentroid.getSpectrum(specIndex);
-        OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrumProfile = msExperimentProfile.getSpectrum(specIndex);
-
-        OpenMS::Precursor precursorInfo = currentSpectrumCentroid.getPrecursors()[0];
-
-        double scanRange = currentSpectrumCentroid.getInstrumentSettings().getScanWindows()[0].end -
-                currentSpectrumCentroid.getInstrumentSettings().getScanWindows()[0].begin;
-
-        if (scanRange < 1000) {
-            currentSpectrumCentroid.sortByPosition();
-            getCalibrationModel(currentSpectrumCentroid, precursorInfo, precursorIon, calModel);
-        }
-    }
-
-    calModel.finishCalibation();
-
     for (int specIndex = 0; specIndex < msExperimentCentroid.getNrSpectra(); ++specIndex)
     {
         OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrumCentroid = msExperimentCentroid.getSpectrum(specIndex);
@@ -466,21 +372,17 @@ int main(int argc, char * argv[])
         double scanRange = currentSpectrumCentroid.getInstrumentSettings().getScanWindows()[0].end -
                            currentSpectrumCentroid.getInstrumentSettings().getScanWindows()[0].begin;
 
-        if (scanRange < 1000) {
-            calcMS1Distributions(currentSpectrumCentroid, precursorInfo, precursorIon, calModel,
-                                 distributionScoreMS1File, isotopeScoreMS1File);
-        }
-        else if (scanRange > 1000) {
+        if (scanRange > 1000) {
             currentSpectrumCentroid.sortByPosition();
 
             if (representativeScanIndexes.find(specIndex) != representativeScanIndexes.end()) {
 
                 calcSpectrumIonDistribution(precursorIon, currentSpectrumCentroid, currentSpectrumProfile,
-                                            precursorInfo, exp_out, theo_out, scores_out, ionsToPlot, calModel);
+                                            precursorInfo, exp_out, theo_out, scores_out, ionsToPlot);
             }
 
             calcDistributions(precursorIon, currentSpectrumCentroid, currentSpectrumProfile,
-                              precursorInfo, distributionScoreFile, isotopeScoreFile, "test", ionsToPlot , calModel); //ionsToPlot
+                              precursorInfo, distributionScoreFile, isotopeScoreFile, "test", ionsToPlot); //ionsToPlot
         }
     }
 
@@ -489,8 +391,6 @@ int main(int argc, char * argv[])
     scores_out.close();
     distributionScoreFile.close();
     isotopeScoreFile.close();
-    distributionScoreMS1File.close();
-    isotopeScoreMS1File.close();
 
     return 0;
 }

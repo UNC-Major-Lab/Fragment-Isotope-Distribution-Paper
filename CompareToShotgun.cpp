@@ -90,7 +90,8 @@ void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &cu
                        OpenMS::Precursor &precursorInfo, double offset, std::ofstream &distributionScoreFile,
                        std::ofstream &isotopeScoreFile, double minMz, double maxMz, std::string scanDesc)
 {
-    static int num_sulfur_peptides = 0;
+    //if (precursorIon.charge != 3) return;
+    /*static int num_sulfur_peptides = 0;
     static int total_peptides = 0;
 
     if (precursorIon.sequence.getFormula(OpenMS::Residue::Full, precursorIon.charge).
@@ -99,13 +100,14 @@ void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &cu
     }
     total_peptides++;
 
-    std::cout << num_sulfur_peptides << " " << total_peptides << std::endl;
+    std::cout << num_sulfur_peptides << " " << total_peptides << std::endl;*/
 
-    CalibrationModel noModel;
     int ionID = 0;
     //create list of b and y ions
     std::vector<Ion> ionList = precursorIon.generateFragmentIons(minMz, maxMz);
     double width = precursorInfo.getIsolationWindowLowerOffset() + precursorInfo.getIsolationWindowUpperOffset();
+
+    //std::cout << precursorIon.charge << " " << precursorIon.sequence << std::endl;
 
     //loop through each ion
     for (int ionIndex = 0; ionIndex < ionList.size(); ++ionIndex) {
@@ -113,6 +115,7 @@ void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &cu
         //compute search peak matching tolerance
         double tol = OpenMS::Math::ppmToMass(SpectrumUtilities::ERROR_PPM, ionList[ionIndex].monoMz);
 
+        double ion_mz = ionList[ionIndex].monoMz;
         //find nearest peak to ion mz within tolerance
         OpenMS::Int peakIndex = currentSpectrum.findNearest(ionList[ionIndex].monoMz, tol);
 
@@ -122,7 +125,7 @@ void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &cu
                                                                                                  precursorIon,
                                                                                                  offset);
 
-            IsotopeDistributions isotopeDistributions(precursorIsotopes, ionList[ionIndex], precursorIon, isotopeDB, currentSpectrum, noModel, precursorInfo, width);
+            IsotopeDistributions isotopeDistributions(precursorIsotopes, ionList[ionIndex], precursorIon, isotopeDB, currentSpectrum, precursorInfo, width);
 
             //OpenMS::UInt max_isotope = *std::max_element(precursorIsotopes.begin(), precursorIsotopes.end());
             //double nextMass = (ionList[ionIndex].monoWeight + (max_isotope+1)*OpenMS::Constants::C13C12_MASSDIFF_U) / ionList[ionIndex].charge;
@@ -131,7 +134,7 @@ void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &cu
 
             if (!isotopeDistributions.isValid) continue;
             //if (!isotopeDistributions.completeFlag) continue;
-            if (isotopeDistributions.completeAtDepth >= 2 && isotopeDistributions.completeAtDepth <= 4)
+            if (isotopeDistributions.completeAtDepth >= 1 && isotopeDistributions.completeAtDepth <= 5)
             {
                 for (int i = 0; i < isotopeDistributions.scaledObservedDist.size(); ++i)
                 {
@@ -201,9 +204,6 @@ void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &cu
 
     std::cout << num_sulfur_peptides << " " << total_peptides << std::endl;
 
-
-
-    CalibrationModel noModel;
     double width = precursorInfo.getIsolationWindowLowerOffset() + precursorInfo.getIsolationWindowUpperOffset();
     int ionID = 0;
     //loop through each ion
@@ -218,7 +218,7 @@ void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &cu
         if (peakIndex != -1) {
             std::set<OpenMS::UInt> precursorIsotopes = SpectrumUtilities::whichPrecursorIsotopes(precursorInfo, precursorIon, offset);
 
-            IsotopeDistributions isotopeDistributions(precursorIsotopes, ion, precursorIon, isotopeDB, currentSpectrum, noModel, precursorInfo, width);
+            IsotopeDistributions isotopeDistributions(precursorIsotopes, ion, precursorIon, isotopeDB, currentSpectrum, precursorInfo, width);
 
 
             //OpenMS::UInt max_isotope = *std::max_element(precursorIsotopes.begin(), precursorIsotopes.end());
@@ -229,7 +229,7 @@ void calcDistributions(Ion &precursorIon, OpenMS::MSSpectrum<OpenMS::Peak1D> &cu
 
             if (!isotopeDistributions.isValid) continue;
             //if (completeFlag && completeAtDepth > 1)
-            if (isotopeDistributions.completeAtDepth > 1)
+            if (isotopeDistributions.completeAtDepth >= 1)
             {
                 //for (int i = 0; i < observedDist.size(); ++i)
                 for (int i = 0; i < isotopeDistributions.completeAtDepth; ++i)
@@ -436,6 +436,13 @@ void analyzeMS2Experiment(OpenMS::MSExperiment<OpenMS::Peak1D> &msExperiment,
                 Ion precursorIon = Ion(pepHits[pepHitIndex].getSequence(),
                                              OpenMS::Residue::Full,
                                              pepHits[pepHitIndex].getCharge());
+
+                //std::cout << precursorIon.charge << " " << precursorIon.sequence << std::endl;
+
+                precursorIon.generateFragmentIons(0, 3000);
+
+
+
                 //check for precursor matching PSM peptide information
                 if (precursorInfo.getCharge() != precursorIon.charge) {
                     //std::cout << "Warning: precursor target charge does not match PSM charge!" << std::endl;
@@ -740,9 +747,14 @@ int main(int argc, char * argv[])
         return 0;
     }
 
+    int numPepIDs = 0;
+    for (OpenMS::PeptideIdentification &pepID : pepIDs) {
+        numPepIDs += (pepID.getHits()[0].getScore() < FDR_THRESHOLD);
+    }
+
     //Report spectra loaded and PSMs loaded
     std::cout << "Number of spectra loaded: " << msExperiment.getNrSpectra() << std::endl;
-    std::cout << "Number of peptide identifications (PSMs): " << pepIDs.size() << std::endl;
+    std::cout << "Number of peptide identifications (PSMs): " << numPepIDs << std::endl;
 
     //Map peptide identifications with spectra
     std::cout << "Mapping PSMs to associated spectra..." << std::endl;
@@ -806,7 +818,7 @@ int main(int argc, char * argv[])
     else
     {
         if (msLevel == "MS2") {
-            analyzeMS2Experiment(msExperiment, offset, distributionScoreFile, isotopeScoreFile, "HCD 35");
+            analyzeMS2Experiment(msExperiment, offset, distributionScoreFile, isotopeScoreFile, expType);
         } else {
 
         }

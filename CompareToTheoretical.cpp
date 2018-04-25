@@ -199,6 +199,20 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
     double frag_mass = fragment.getAverageWeight();
 
     std::set<UInt> isolated_precursor_isotopes;
+    for (UInt start = 0; start <= MAX_ISOTOPE; ++start)
+    {
+        isolated_precursor_isotopes.clear();
+        for (UInt i = start; i <= MAX_ISOTOPE; ++i)
+        {
+            if (start == 0 && i == 0) continue;
+
+            isolated_precursor_isotopes.insert(i);
+            std::string label = std::to_string(start)+"-"+std::to_string(i);
+            testTheoreticalIsolation(precursor, fragment, isolated_precursor_isotopes, pep_mass, frag_mass, num_s_prec, num_s_frag, i+1, label);
+        }
+    }
+/*
+    std::set<UInt> isolated_precursor_isotopes;
     for (UInt i = 1; i <= MAX_ISOTOPE; ++i) {
         isolated_precursor_isotopes.insert(i);
         std::string label = "0-"+std::to_string(i);
@@ -210,6 +224,7 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
         isolated_precursor_isotopes.insert(i);
         testTheoreticalIsolation(precursor, fragment, isolated_precursor_isotopes, pep_mass, frag_mass, num_s_prec, num_s_frag, i+1, std::to_string(i));
     }
+    */
 }
 
 void testTheoreticalPeptideDistribution(EmpiricalFormula &p)

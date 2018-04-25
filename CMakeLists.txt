@@ -27,8 +27,7 @@ set(my_sources
         Stats.h
         Ion.h
         Ion.cpp
-        CalibrationModel.h
-        CalibrationModel.cpp
+        SpectrumUtilities.h
         IsotopeDistributions.cpp
         IsotopeDistributions.h
         FASTAParser.cpp

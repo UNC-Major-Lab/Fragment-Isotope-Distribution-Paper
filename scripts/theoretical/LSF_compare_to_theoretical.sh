@@ -14,7 +14,7 @@ source ../config.sh
 set OUT_DIR = ${ROOT_OUT_DIR}"/compare_to_theoretical"
 
 set BIN_SIZE_RESIDUAL = 0.0025
-set BIN_SIZE_CHISQUARE = 0.025
+set BIN_SIZE_CHISQUARE = 0.1
 
 mkdir -p $OUT_DIR
 

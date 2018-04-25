@@ -19,9 +19,9 @@ std::vector<Ion> Ion::generateFragmentIons(double minMz, double maxMz) {
     std::vector<Ion> ionList;
     //generate b-ions
     //loop through each b-ion
-    for (int i = 1; i <= sequence.size() - 1; ++i) {
+    for (int i = 1; i <= sequence.size(); ++i) {
         //loop through each charge
-        for (int z = 1; z <= charge; ++z) {
+        for (int z = 1; z < charge; ++z) {
             //add b-ion to list
             double mz = sequence.getPrefix(i).getMonoWeight(OpenMS::Residue::BIon, z) / z;
             if (mz >= minMz && mz <= maxMz) {
@@ -33,9 +33,9 @@ std::vector<Ion> Ion::generateFragmentIons(double minMz, double maxMz) {
     //loop through each y-ion
     for (int i = 1; i <= sequence.size() - 1; ++i) {
         //loop through each charge
-        for (int z = 1; z <= charge; ++z) {
-            //add b-ion to list
-            double mz = sequence.getPrefix(i).getMonoWeight(OpenMS::Residue::YIon, z) / z;
+        for (int z = 1; z < charge; ++z) {
+            //add y-ion to list
+            double mz = sequence.getSuffix(i).getMonoWeight(OpenMS::Residue::YIon, z) / z;
             if (mz >= minMz && mz <= maxMz) {
                 ionList.push_back(Ion(sequence.getSuffix(i), OpenMS::Residue::YIon, z));
             }

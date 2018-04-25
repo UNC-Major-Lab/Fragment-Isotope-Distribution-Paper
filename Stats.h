@@ -48,21 +48,17 @@ public:
         //vector to hold theoretical proportions
         std::vector<double> theoProp;
 
-
-        //check they are both the same size
-        //if (obsDist.size() != theoDist.size()) {
-        //    return -1;
-        //}
-
         //fill proportions vectors from distribution parameters
-        for (int i = 0; i < obsDist.size(); ++i) {
+        for (int i = 0; i < obsDist.size() && i < theoDist.size(); ++i) {
             obsProp.push_back(obsDist[i].second);
             theoProp.push_back(theoDist[i].second);
         }
-        for (int i = obsDist.size(); i < theoDist.size(); i++) {
+        for (int i = obsProp.size(); i < theoDist.size(); i++) {
             obsProp.push_back(0);
+            theoProp.push_back(theoDist[i].second);
         }
-        for (int i = theoDist.size(); i < obsDist.size(); i++) {
+        for (int i = obsProp.size(); i < obsDist.size(); i++) {
+            obsProp.push_back(obsDist[i].second);
             theoProp.push_back(0);
         }
 

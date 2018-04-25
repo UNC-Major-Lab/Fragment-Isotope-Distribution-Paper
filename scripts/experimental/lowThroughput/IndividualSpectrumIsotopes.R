@@ -16,6 +16,10 @@ data <- read.table(infile1, sep="\t", header=T)
 data.calc <- read.table(infile2, sep="\t", header=T)
 data.scores <- read.table(infile3, sep="\t", header=T)
 
+#data <- subset(data, data$ion.name == "B9++ DRVYIHPFH")
+#data.calc <- subset(data.calc, data.calc$ion.name == "B9++ DRVYIHPFH")
+#data.calc <- subset(data.calc, data.calc$method == "Averagine")
+
 p <- ggplot(data=data, aes(x=mz,y=int))
 
 setEPS()
@@ -24,11 +28,12 @@ postscript(outfile, width=8.5, height=11)
 print(
   p
   + geom_line()
-  + geom_point(data=data.calc, aes(group=method, color=method), size=3, shape=1)
+  + geom_point(data=data.calc, aes(group=method, color=method, shape=method), size=3)
+  + scale_shape_discrete(solid=F)
   + facet_grid(isotope.range ~ ion.name, scale="free")
   + ylab("Intensity normalized to base peak")
   + xlab("m/z")
-  + geom_text(data=data.scores, aes(group=method, color=method, x=x, y=y, label=label), size=2.2)
+  #+ geom_text(data=data.scores, aes(group=method, color=method, x=x, y=y, label=label), size=2.2)
 )
 
 dev.off()

@@ -2,6 +2,7 @@
 library(ggplot2)
 library(reshape2)
 library(plyr)
+library(xtable)
 
 savePlot <- function(myplot, outfile) {
   #setEPS()
@@ -11,9 +12,9 @@ savePlot <- function(myplot, outfile) {
   dev.off()
 }
 
-#args = c("/Users/dennisg/Downloads/distributionScores.out",
-#         "/Users/dennisg/Downloads/")
-args = commandArgs(trailingOnly=TRUE)
+args = c("/Users/dennisg/Downloads/distributionScores.out",
+         "/Users/dennisg/Downloads/")
+#args = commandArgs(trailingOnly=TRUE)
 infile1 <- args[1]
 outPath <- args[2]
 
@@ -24,19 +25,18 @@ distData <- read.table(infile1, header=T, sep="\t")
 #only distributions flagged as valid
 distData <- distData[which(distData$distributionValid == 1), ]
 
-sum(distData$precursorSulfurs > 0) / nrow(distData)
-
 #Chi-squared file headers
 X2headers <- c("exactCondFragmentX2","approxFragmentFromWeightX2","approxFragmentFromWeightAndSX2","exactPrecursorX2","approxPrecursorX2","approxFragmentSplineFromWeightX2","approxFragmentSplineFromWeightAndSulfurX2")
 
 #loop through each search depth
-for (searchDepth in 2:3) {
+for (searchDepth in 2:4) {
   #truncate to distributions at search depth
   distAtDepth <- distData[which(distData$completeAtDepth == searchDepth),]
   #truncate to distributions at search depth but have complete distributions
   distAtDepthComplete <- distAtDepth[which(distAtDepth$completeFlag == 1),]
-  distAtDepth <- distAtDepth[which(distAtDepth$completeFlag == 0),]
-  distAtDepth <- distAtDepth[which(distAtDepth$searchDepth == searchDepth+1),]
+  #distAtDepth <- distAtDepth[which(distAtDepth$completeFlag == 0),]
+  #distAtDepth <- distAtDepth[which(distAtDepth$searchDepth == searchDepth+1),]
+  distAtDepth <- distData[which(distData$searchDepth == searchDepth),]
 
   #melt for chi squared data
   meltedX2_AtDepth <- melt(distAtDepth, id.vars=c("ionID","scanDesc","distributionMonoWeight","precursorMonoWeight"), measure.vars=X2headers)
@@ -71,7 +71,8 @@ for (searchDepth in 2:3) {
   meltedX2_Complete$variable <- as.factor(meltedX2_Complete$variable)
   #plot chi squared density
   plotX2_atDepth <- ggplot(data = meltedX2_AtDepth, mapping = aes(x=value, color=variable)) +
-    geom_density() +
+    geom_density(adjust = 3) +
+    #scale_x_log10(limits=c(1e-30,1e10)) +
     scale_x_log10() +
     theme(legend.position = "right",
           legend.text = element_text(size = 10),
@@ -114,8 +115,21 @@ for (searchDepth in 2:3) {
 
   savePlot(plotX2_atDepth, paste(outPath,sep = "", "/chi-squared_incomplete_",searchDepth, ".pdf"))
   out.table <- ddply(meltedX2_AtDepth, "variable", summarize, median=median(value), min=min(value), max=max(value), sd=sd(value), count=length(value))
-  write.table(out.table, sep="\t", file=paste(outPath, sep = "", "/chi-squared_incomplete_",searchDepth, ".tab"))
+  #write.table(out.table, sep="\t", file=paste(outPath, sep = "", "/chi-squared_incomplete_",searchDepth, ".tab"))
+  print(xtable(out.table))
+
   savePlot(plotX2_Complete, paste(outPath, sep = "", "/chi-squared_complete_",searchDepth, ".pdf"))
-  out.table <- ddply(meltedX2_Complete, "variable", summarize, median=median(value), min=min(value), max=max(value), sd=sd(value), count=length(value))
-  write.table(out.table, sep="\t", file=paste(outPath, sep = "", "/chi-squared_complete_",searchDepth, ".tab"))
+
+  CID.data <- subset(meltedX2_AtDepth, meltedX2_AtDepth$scanDesc == "CID_25")
+  #CID.data <- subset(meltedX2_Complete, meltedX2_Complete$scanDesc == "CID_25")
+  out.table <- ddply(CID.data, "variable", summarize, median=median(value), mean=mean(value), count=length(value))
+  #write.table(out.table, sep="\t", file=paste(outPath, sep = "", "/chi-squared_complete_",searchDepth, ".tab"))
+  #print(xtable(out.table, digits=4))
+
+  #HCD.data <- subset(meltedX2_Complete, meltedX2_Complete$scanDesc == "HCD")
+  #out.table <- ddply(HCD.data, "variable", summarize, median=median(value), mean=mean(value), count=length(value))
+  #write.table(out.table, sep="\t", file=paste(outPath, sep = "", "/chi-squared_complete_",searchDepth, ".tab"))
+  #print(xtable(out.table, digits=4))
+
+
 }
