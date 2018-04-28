@@ -146,7 +146,7 @@ $ Rscript ../scripts/theoretical/plotComparisons.R out/scores_fragment.out out/f
 
 Figure 2 is out/fragment_chisquared.eps
 
-The file out/stats_fragment_1.txt contains the results used for Table S1.
+The file out/stats_fragment.out contains the results used for Table S1.
 
 ### Figure 3
 
