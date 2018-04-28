@@ -62,7 +62,7 @@ $ ./GenerateTrainingData ../data/human_sp_112816.fasta out/Average_Spline/data/ 
 $ ./GenerateTrainingData ../data/human_sp_112816.fasta out/S0/data/ 10000 5 1 0 300
 ```
 
-The above generates the training data for the first 5 isotopes for the average spline up to 10kDa and the sulfur-specific spline with 0 sulfurs. Repeat for the last command with different values of S for other sulfur-specific models.
+The above generates the training data for the first 5 isotopes for the average spline up to 10kDa and the sulfur-specific spline with 0 sulfurs. Repeat for the last command with different values of S for other sulfur-specific models. For publication we did the first 100 isotopes.
 
 ### Generate splines
 Open MATLAB
