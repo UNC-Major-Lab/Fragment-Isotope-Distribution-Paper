@@ -63,7 +63,7 @@ Navigate to scripts/training folder
 
 Call the IsotopeSpline function:
 
-Usage: IsotopeSpline(knot_spacing, num_sulfurs, isotope, path_to_training_data, out_path_histogram, out_path_scatter_plot, out_path_residual_plot, out_path_GOF_stats, out_path_xml, out_path_predictions_for_future_figures)  
+Usage: IsotopeSpline(knot_spacing, num_sulfurs, isotope, path_to_training_data, out_path_histogram, out_path_scatter_plot, out_path_residual_plot, out_path_GOF_stats, out_path_xml, out_path_spline_eval_for_figure1)  
 
 To create the model for the monoisotope and peptides containing any number of sulfurs:
 ```Matlab
@@ -77,22 +77,39 @@ To create the model for the monoisotope and peptides containing 0 sulfurs:
 ```Matlab
 IsotopeSpline(1000,'0','0','out/Precursor0.txt','out/hist.pdf','out/scatter.pdf','out/res.pdf','out/gof.txt','out/model.xml','out/eval.tab')
 ```
-The previous commands each create separate spline model .xml file. Use this command to merge them into a singe .xml file.
+The previous commands create separate spline model .xml files. Use this command to merge them into a singe .xml file.
 
 Usage: combineModels.py path_to_spline_xmls max_isotope_depth max_sulfur
 ```ShellSession
 $ python ../scripts/training/combineModels.py out/ 5 5 > out/IsotopeSplines.xml
 ```
 
-### Figure 1
-#GenerateTrainingData $FASTA ${OUT_DIR}/proteome/ $MAX_SAMPLED_MASS_SULFUR $MAX_ISOTOPE_DEPTH $MONO
-#Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE -1 ${OUT_DIR}"Average_precursor"${PRECURSOR_ISOTOPE}"_model.eps" 100000
+### Figures S-1 and S-2
 
+USAGE: plotModel.R path_to_eval_data data_dir isotope num_sulfur out_path_for_figure max_mass
 
+Plot average spline for the monoisotope
 ```ShellSession
-$ ./GenerateTrainingData data/human_sp_112816.fasta out/proteome/ 10000 5 1
-$ Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE -1 ${OUT_DIR}"Average_precursor"${PRECURSOR_ISOTOPE}"_model.eps" 100000
+$ Rscript ../scripts/Training/plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} 0 -1 Average_precursor0_model.eps 10000
 ```
+Plot average spline for the M+1 isotope
+```ShellSession
+$ Rscript ../scripts/Training/plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} 1 -1 Average_precursor1_model.eps 10000
+```
+Plot sulfur-specific spline for the monoisotope and 0 sulfurs
+```ShellSession
+$ Rscript ../scripts/Training/plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} 0 0 precursor0_model.eps 10000
+```
+
+### Figure S-3
+
+USAGE: SpeedTest min_mass max_mass max_sulfurs num_tests
+```ShellSession
+$ ./SpeedTest 400 9500 5 1e5 > out/runtimes.out
+$ Rscript ../scripts/theoretical/plotRuntimeComparisons.R out/runtimes.out out/runtimes.eps
+```
+
+### Figure 1
 
 ### Figure 2
 #${BUILD_DIR}/CompareToTheoretical $FASTA $LSB_JOBINDEX 100 1 ${OUT_DIR}"/residuals_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/scores_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/stats_fragment_"${LSB_JOBINDEX}".out" $BIN_SIZE_CHISQUARE $BIN_SIZE_RESIDUAL
@@ -122,9 +139,4 @@ $ Rscript IndividualSpectrumIsotopes.R out/out04.tab out/calc_out04.tab out/scor
 $ ./CompareToShotgun data/HELA_2017-10-25_CID25_OT.mzML data/HELA_2017-10-25_CID25_OT.idXML 0.0 out/ MS2 MS2 CID_25
 ```
 
-### Supplemental speed comparison
 
-```ShellSession
-$ ./SpeedTest 400 9500 5 1e5 > out/runtimes.out
-$ Rscript plotRuntimeComparisons.R out/runtimes.out out/runtimes.eps
-```
