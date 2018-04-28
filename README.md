@@ -60,7 +60,10 @@ $ ./GenerateTrainingData data/human_sp_112816.fasta out/ 10000 5 1 Average_Splin
 ### Generate splines
 Open MATLAB
 Navigate to scripts/training folder
-#IsotopeSpline("${SPLINE_BREAKS_SIZE}",'"${S}"','"${precursor}"','"${file}"','"${out_res_hist}"','"${out_scatter}"','"${out_res}"','"${out_gof}"','"${out_models}"','"${out_spline_eval}"')
+
+Call the IsotopeSpline function:
+
+Usage: IsotopeSpline(knot_spacing, num_sulfurs, isotope, path_to_training_data, out_path_histogram, out_path_scatter_plot, out_path_residual_plot, out_path_GOF_stats, out_path_xml, out_path_predictions_for_future_figures)  
 
 To create the model for the monoisotope and peptides containing any number of sulfurs:
 ```Matlab
@@ -75,7 +78,8 @@ To create the model for the monoisotope and peptides containing 0 sulfurs:
 IsotopeSpline(1000,'0','0','out/Precursor0.txt','out/hist.pdf','out/scatter.pdf','out/res.pdf','out/gof.txt','out/model.xml','out/eval.tab')
 ```
 The previous commands each create separate spline model .xml file. Use this command to merge them into a singe .xml file.
-Usage: PATH_WITH_SPLINE_XML_FILES MAX_ISOTOPE_DEPTH MAX_SULFUR
+
+Usage: combineModels.py path_to_spline_xmls max_isotope_depth max_sulfur
 ```ShellSession
 $ python ../scripts/training/combineModels.py out/ 5 5 > out/IsotopeSplines.xml
 ```
