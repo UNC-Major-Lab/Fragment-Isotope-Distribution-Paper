@@ -98,18 +98,18 @@ USAGE: plotModel.R path_to_eval_data data_dir isotope num_sulfur out_path_for_fi
 
 Plot average spline for the monoisotope
 ```ShellSession
-$ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 0 -1 Average_precursor0_model.eps 10000
+$ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 0 -1 out/Average_precursor0_model.eps 10000
 ```
 Plot average spline for the M+1 isotope
 ```ShellSession
-$ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 1 -1 Average_precursor1_model.eps 10000
+$ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 1 -1 out/Average_precursor1_model.eps 10000
 ```
 Plot sulfur-specific spline for the monoisotope and 0 sulfurs
 ```ShellSession
-$ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 0 0 precursor0_model.eps 10000
+$ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 0 0 out/precursor0_model.eps 10000
 ```
 
-The figures are Average_precursor0_model.eps, etc.
+The figures are out/Average_precursor0_model.eps, etc.
 
 ### Figure S-3
 
