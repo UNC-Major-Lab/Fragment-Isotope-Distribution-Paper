@@ -153,7 +153,7 @@ $ Rscript ../scripts/experimental/lowThroughput/IndividualSpectrumIsotopes.R out
 ```
 Figure 3 is out/low_throughput.eps
 
-### Figure 4 and Table 1
+### Figure 4 and Table 2
 
 ```ShellSession
 $ ./CompareToShotgun data/HELA_2017-10-25_CID25_OT.mzML data/HELA_2017-10-25_CID25_OT.idXML 0.0 out/ MS2 MS2 CID_25
