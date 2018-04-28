@@ -96,16 +96,18 @@ USAGE: plotModel.R path_to_eval_data data_dir isotope num_sulfur out_path_for_fi
 
 Plot average spline for the monoisotope
 ```ShellSession
-$ Rscript ../scripts/Training/plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} 0 -1 Average_precursor0_model.eps 10000
+$ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 0 -1 Average_precursor0_model.eps 10000
 ```
 Plot average spline for the M+1 isotope
 ```ShellSession
-$ Rscript ../scripts/Training/plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} 1 -1 Average_precursor1_model.eps 10000
+$ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 1 -1 Average_precursor1_model.eps 10000
 ```
 Plot sulfur-specific spline for the monoisotope and 0 sulfurs
 ```ShellSession
-$ Rscript ../scripts/Training/plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} 0 0 precursor0_model.eps 10000
+$ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 0 0 precursor0_model.eps 10000
 ```
+
+The figures are Average_precursor0_model.eps, etc.
 
 ### Figure S-3
 
@@ -115,38 +117,50 @@ $ ./SpeedTest 400 9500 5 1e5 > out/runtimes.out
 $ Rscript ../scripts/theoretical/plotRuntimeComparisons.R out/runtimes.out out/runtimes.eps
 ```
 
+Figure S-3 is out/runtimes.eps
+
 ### Figure 1
 
+USAGE: plotModelToProteome.R path_to_spline_evals out_path/ isotope max_sulfurs out_path_for_figure max_mass
 ```ShellSession
 $ ./GenerateTrainingData data/human_sp_112816.fasta out/proteome/ 10000 5 1
+$ Rscript ../scripts/theoretical/plotModelToProteome.R out/spline_eval/ out/ 0 1 out/spline_comparison_0_model.eps 10000
 ```
 
-### Figure 2
-#${BUILD_DIR}/CompareToTheoretical $FASTA $LSB_JOBINDEX 100 1 ${OUT_DIR}"/residuals_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/scores_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/stats_fragment_"${LSB_JOBINDEX}".out" $BIN_SIZE_CHISQUARE $BIN_SIZE_RESIDUAL
-#Rscript plotComparisons.R ${IN_DIR}"/fragment_scores.txt" ${IN_DIR}"/fragment_chisquared.eps" ${BIN_SIZE_CHISQUARE} T
+Figure 1 is out/spline_comparison_0_model.eps
 
+### Figure 2 and Table S1
+
+Here we're only going to perform 1/1000 of the simulated fragments because it takes a long time otherwise. We split it on a compute cluster for the publication.
 
 ```ShellSession
-$ ./CompareToTheoretical data/human_sp_112816.fasta 1 100 1 out/residuals_fragment".out" out/scores_fragment.out" out/stats_fragment.out" 0.1 0.0025
-$ Rscript plotComparisons.R out/fragment_scores.txt out/fragment_chisquared.eps 0.1 T
+$ ./CompareToTheoretical
+USAGE: CompareToTheoretical fasta_path job_id num_jobs do_frag residual_file score_file stats_file bin_size_chi bin_size_res
+
+$ ./CompareToTheoretical data/human_sp_112816.fasta 1 1000 1 out/residuals_fragment".out" out/scores_fragment.out" out/stats_fragment.out" 0.1 0.0025
+$ Rscript ../scripts/theoretical/plotComparisons.R out/fragment_scores.txt out/fragment_chisquared.eps 0.1 T
 ```
+
+Figure 2 is out/fragment_chisquared.eps
+
+The file out/stats_fragment_1.txt contains the results used for Table S1.
 
 ### Figure 3
 
-#${BUILD_DIR}/CompareToTargeted ${DATA_DIR}"/Neuro_04.mzML" ${DATA_DIR}"/Neuro_04_centroid.mzML" ${OUT_DIR}"/out04.tab" ${OUT_DIR}"/calc_out04.tab" ${OUT_DIR}"/scores_out04.tab"
-#Rscript IndividualSpectrumIsotopes.R ${OUT_DIR}"/out04.tab" ${OUT_DIR}"/calc_out04.tab" ${OUT_DIR}"/scores_out04.tab" ${OUT_DIR}"/low_throughput.eps"
-
-
 ```ShellSession
 $ ./CompareToTargeted data/Neuro_04.mzML data/Neuro_04_centroid.mzML out/out04.tab out/calc_out04.tab out/scores_out04.tab
-$ Rscript IndividualSpectrumIsotopes.R out/out04.tab out/calc_out04.tab out/scores_out04.tab out/low_throughput.eps
+$ Rscript ../scripts/experimental/lowThroughput/IndividualSpectrumIsotopes.R out/out04.tab out/calc_out04.tab out/scores_out04.tab out/low_throughput.eps
 ```
+Figure 3 is out/low_throughput.eps
 
 ### Figure 4 and Table 1
 
 #CompareToShotgun ${DATA_DIR}"/HELA_2017-10-25_CID25_OT.mzML" ${DATA_DIR}"/HELA_2017-10-25_CID25_OT.idXML" 0.0 $OUT_DIR MS2 MS2 CID_25
 ```ShellSession
 $ ./CompareToShotgun data/HELA_2017-10-25_CID25_OT.mzML data/HELA_2017-10-25_CID25_OT.idXML 0.0 out/ MS2 MS2 CID_25
+$ Rscript ../scripts/experimental/highThroughput/plotShotgunResults.R out/distributionScores.out out/
 ```
 
+Figure 4 is out/chi-squared_incomplete_2.pdf and out/chi-squared_incomplete_3.pdf
 
+The values for Table 1 are printed to the console.
