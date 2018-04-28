@@ -367,6 +367,8 @@ int main(int argc, char * argv[])
         OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrumCentroid = msExperimentCentroid.getSpectrum(specIndex);
         OpenMS::MSSpectrum<OpenMS::Peak1D> currentSpectrumProfile = msExperimentProfile.getSpectrum(specIndex);
 
+        if (currentSpectrumCentroid.getMSLevel() == 1) continue;
+
         OpenMS::Precursor precursorInfo = currentSpectrumCentroid.getPrecursors()[0];
 
         double scanRange = currentSpectrumCentroid.getInstrumentSettings().getScanWindows()[0].end -
