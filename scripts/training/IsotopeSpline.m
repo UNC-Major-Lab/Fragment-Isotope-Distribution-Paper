@@ -1,6 +1,4 @@
-% Describe what it does
-% Describe the input
-% Describe the output
+% Trains a spline model to fit isotopes probabilities
 function IsotopeSpline(breakSteps, S, precursor_isotope, infile, outfile_res_hist, outfile_scatter, outfile_res, outfile_gof, outfile_model, outfile_spline_eval)
 	% For orientation:
 	% M(:,1) = probabilities = Y-axis
@@ -93,7 +91,7 @@ function [RMSD meanD Rsq residuals] = goodnessOfFitStatistics(M, sp_pp)
 	Rsq = 1 - (SSres/SStot);	
 end
 
-% Takes a tensor-product spline model in pp form and writes a partial XML file to disk.
+% Takes a spline model in pp form and writes a partial XML file to disk.
 % This will write the information for a single <model> tag.
 function writeModelXML(outfile_path, sp_pp, S, precursor_isotope)
 	% Open our output file for writing
