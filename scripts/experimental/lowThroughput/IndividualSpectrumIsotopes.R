@@ -1,11 +1,11 @@
 #!/usr/bin/env Rscript
 library(ggplot2)
 
-args = c("/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/LT/Angiotensin_z3_CID_experimental.tab",
-"/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/LT/Angiotensin_z3_CID_theoretical.tab",
-"/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/LT/Angiotensin_z3_CID_scores.tab",
-"/Users/dennisg/Downloads/low_throughput.eps")
-#args = commandArgs(trailingOnly=TRUE)
+#args = c("/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/LT/Angiotensin_z3_CID_experimental.tab",
+#"/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/LT/Angiotensin_z3_CID_theoretical.tab",
+#"/Users/dennisg/Documents/Manuscripts/FragmentIsotopicDistribution/data/LT/Angiotensin_z3_CID_scores.tab",
+#"/Users/dennisg/Downloads/low_throughput.eps")
+args = commandArgs(trailingOnly=TRUE)
 
 infile1 <- args[1]
 infile2 <- args[2]
