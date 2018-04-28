@@ -377,7 +377,13 @@ int main(int argc, char * argv[])
         if (scanRange > 1000) {
             currentSpectrumCentroid.sortByPosition();
 
-            if (representativeScanIndexes.find(specIndex) != representativeScanIndexes.end()) {
+            std::vector<OpenMS::String> tokens;
+            OpenMS::String delimiter = "=";
+            currentSpectrumCentroid.getNativeID().split(delimiter, tokens);
+
+            int scanID = tokens[tokens.size()-1].toInt()+1;
+            
+            if (representativeScanIndexes.find(scanID) != representativeScanIndexes.end()) {
 
                 calcSpectrumIonDistribution(precursorIon, currentSpectrumCentroid, currentSpectrumProfile,
                                             precursorInfo, exp_out, theo_out, scores_out, ionsToPlot);
