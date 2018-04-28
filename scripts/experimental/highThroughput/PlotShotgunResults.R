@@ -12,9 +12,7 @@ savePlot <- function(myplot, outfile) {
   dev.off()
 }
 
-args = c("/Users/dennisg/Downloads/distributionScores.out",
-         "/Users/dennisg/Downloads/")
-#args = commandArgs(trailingOnly=TRUE)
+args = commandArgs(trailingOnly=TRUE)
 infile1 <- args[1]
 outPath <- args[2]
 

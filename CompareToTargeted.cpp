@@ -371,16 +371,21 @@ int main(int argc, char * argv[])
 
         OpenMS::Precursor precursorInfo = currentSpectrumCentroid.getPrecursors()[0];
 
-        currentSpectrumCentroid.sortByPosition();
+        double scanRange = currentSpectrumCentroid.getInstrumentSettings().getScanWindows()[0].end -
+                           currentSpectrumCentroid.getInstrumentSettings().getScanWindows()[0].begin;
 
-        if (representativeScanIndexes.find(specIndex) != representativeScanIndexes.end()) {
+        if (scanRange > 1000) {
+            currentSpectrumCentroid.sortByPosition();
 
-            calcSpectrumIonDistribution(precursorIon, currentSpectrumCentroid, currentSpectrumProfile,
-                                        precursorInfo, exp_out, theo_out, scores_out, ionsToPlot);
+            if (representativeScanIndexes.find(specIndex) != representativeScanIndexes.end()) {
+
+                calcSpectrumIonDistribution(precursorIon, currentSpectrumCentroid, currentSpectrumProfile,
+                                            precursorInfo, exp_out, theo_out, scores_out, ionsToPlot);
+            }
+
+            calcDistributions(precursorIon, currentSpectrumCentroid, currentSpectrumProfile,
+                              precursorInfo, distributionScoreFile, isotopeScoreFile, "test", ionsToPlot); //ionsToPlot
         }
-
-        calcDistributions(precursorIon, currentSpectrumCentroid, currentSpectrumProfile,
-                          precursorInfo, distributionScoreFile, isotopeScoreFile, "test", ionsToPlot); //ionsToPlot
     }
 
     exp_out.close();
