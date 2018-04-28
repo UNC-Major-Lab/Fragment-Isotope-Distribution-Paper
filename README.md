@@ -134,13 +134,13 @@ Figure 1 is out/spline_comparison_0_model.eps. Repeat for other isotopes by chan
 
 ### Figure 2 and Table S1
 
-Here we're only going to perform 1/1000 of the simulated fragments because it takes a long time otherwise. We split it on a compute cluster for the publication. To perform the full comparison, call CompareToTheoretical with job_id set to 1 to 1000, then merge the results.
+Here we're only going to perform 1/2000 of the simulated fragments because it takes a long time otherwise. We split it on a compute cluster for the publication. To perform the full comparison, call CompareToTheoretical with job_id set to 1 to 2000, then merge the results.
 
 ```ShellSession
 $ ./CompareToTheoretical
 USAGE: CompareToTheoretical fasta_path job_id num_jobs do_frag residual_file score_file stats_file bin_size_chi bin_size_res
 
-$ ./CompareToTheoretical ../data/human_sp_112816.fasta 1 1000 1 out/residuals_fragment.out out/scores_fragment.out out/stats_fragment.out 0.1 0.0025
+$ ./CompareToTheoretical ../data/human_sp_112816.fasta 1 2000 1 out/residuals_fragment.out out/scores_fragment.out out/stats_fragment.out 0.1 0.0025
 $ Rscript ../scripts/theoretical/plotComparisons.R out/fragment_scores.txt out/fragment_chisquared.eps 0.1 T
 ```
 
