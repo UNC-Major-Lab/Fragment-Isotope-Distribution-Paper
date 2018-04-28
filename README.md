@@ -125,7 +125,7 @@ Figure S-3 is out/runtimes.eps
 
 USAGE: plotModelToProteome.R path_to_spline_evals out_path/ isotope max_sulfurs out_path_for_figure max_mass
 ```ShellSession
-$ ./GenerateTrainingData data/human_sp_112816.fasta out/proteome/ 10000 5 1
+$ ./GenerateTrainingData ../data/human_sp_112816.fasta out/proteome/ 10000 5 1
 $ Rscript ../scripts/theoretical/plotModelToProteome.R out/spline_eval/ out/ 0 1 out/spline_comparison_0_model.eps 10000
 ```
 
@@ -139,7 +139,7 @@ Here we're only going to perform 1/1000 of the simulated fragments because it ta
 $ ./CompareToTheoretical
 USAGE: CompareToTheoretical fasta_path job_id num_jobs do_frag residual_file score_file stats_file bin_size_chi bin_size_res
 
-$ ./CompareToTheoretical data/human_sp_112816.fasta 1 1000 1 out/residuals_fragment.out out/scores_fragment.out out/stats_fragment.out 0.1 0.0025
+$ ./CompareToTheoretical ../data/human_sp_112816.fasta 1 1000 1 out/residuals_fragment.out out/scores_fragment.out out/stats_fragment.out 0.1 0.0025
 $ Rscript ../scripts/theoretical/plotComparisons.R out/fragment_scores.txt out/fragment_chisquared.eps 0.1 T
 ```
 
@@ -150,7 +150,7 @@ The file out/stats_fragment_1.txt contains the results used for Table S1.
 ### Figure 3
 
 ```ShellSession
-$ ./CompareToTargeted data/Neuro_04.mzML data/Neuro_04_centroid.mzML out/out04.tab out/calc_out04.tab out/scores_out04.tab
+$ ./CompareToTargeted ../data/Neuro_04.mzML ../data/Neuro_04_centroid.mzML out/out04.tab out/calc_out04.tab out/scores_out04.tab
 $ Rscript ../scripts/experimental/lowThroughput/IndividualSpectrumIsotopes.R out/out04.tab out/calc_out04.tab out/scores_out04.tab out/low_throughput.eps
 ```
 Figure 3 is out/low_throughput.eps
