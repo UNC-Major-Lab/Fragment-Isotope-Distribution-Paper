@@ -44,6 +44,7 @@ $ make
 
 ### Generate Training data
 ```ShellSession
+$ ../scripts/make_dirs.sh
 $ ./GenerateTrainingData 
  USAGE: GenerateTrainingData fasta_path out_path max_mass max_depth mono S num_samples 
  or 
