@@ -32,11 +32,12 @@ if (fragments == "F") {
     p <- ggplot(data=data, aes(x=V3, y=V4, group=V1, fill=factor(V1)))
 
     setEPS()
-    postscript(outfile, width=18, height=18)
+    postscript(outfile, width=18, height=9)
 
     print(p
-        + geom_bar(stat='identity')
-        + facet_wrap(V2 ~ V1, scale="free")
+        #+ geom_bar(stat='identity')
+        + geom_line()
+        + facet_wrap(~ V2, scale="free_y")
         + scale_x_continuous(expand=c(0,0))
         + xlab("residual")
         + ylab("frequency")
