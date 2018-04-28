@@ -44,7 +44,9 @@ $ make
 ### Generate Training data
 ```ShellSession
 $ ./GenerateTrainingData 
- USAGE: GenerateTrainingData fasta_path out_path max_mass S num_samples max_depth mono
+ USAGE: GenerateTrainingData fasta_path out_path max_mass max_depth mono S num_samples 
+ or 
+ GenerateTrainingData fasta_path out_path max_mass max_depth mono
  
  fasta_path: The path to the fasta file to train the splines on.
  out_path: The path to the directory that will store the training data, e.g. ~/data/
@@ -54,8 +56,11 @@ $ ./GenerateTrainingData
  S: number of sulfurs that should be in the fragment ion. Use -1 for all (e.g. 0,1,2..)
  num_samples: number of random peptides to make for each peptide length
  
-$ ./GenerateTrainingData data/human_sp_112816.fasta out/ 10000 5 1 Average_Spline 300
+$ ./GenerateTrainingData data/human_sp_112816.fasta out/Average_Spline/data/ 10000 5 1 -1 300
+$ ./GenerateTrainingData data/human_sp_112816.fasta out/S0/data/ 10000 5 1 0 300
 ```
+
+The above generates the training data for the first 5 isotopes for the average spline up to 10kDa and the sulfur-specific spline with 0 sulfurs. Repeat for the last command with different values of S for other sulfur-specific models.
 
 ### Generate splines
 Open MATLAB
@@ -67,15 +72,15 @@ Usage: IsotopeSpline(knot_spacing, num_sulfurs, isotope, path_to_training_data, 
 
 To create the model for the monoisotope and peptides containing any number of sulfurs:
 ```Matlab
-IsotopeSpline(1000,'Average_spline','0','out/Precursor0.txt','out/hist.pdf','out/scatter.pdf','out/res.pdf','out/gof.txt','out/model.xml','out/eval.tab')
+IsotopeSpline(1000,'Average_spline','0','out/Average_Spline/data/Precursor0.txt','out/Average_Spline/spline/hist/Precursor0.pdf','out/Average_Spline/spline/scatter/Precursor0.pdf','out/Average_Spline/spline/res/Precursor0.pdf','out/Average_Spline/spline/gof/Precursor0.txt','out/Average_Spline/spline/model/Precursor0.xml','out/Average_Spline/spline/eval/Precursor0.tab')
 ```
 To create the model for the M+1 isotope and peptides containing any number of sulfurs:
 ```Matlab
-IsotopeSpline(1000,'Average_spline','1','out/Precursor0.txt','out/hist.pdf','out/scatter.pdf','out/res.pdf','out/gof.txt','out/model.xml','out/eval.tab')
+IsotopeSpline(1000,'Average_spline','1','out/Average_Spline/data/Precursor1.txt','out/Average_Spline/spline/hist/Precursor1.pdf','out/Average_Spline/spline/scatter/Precursor1.pdf','out/Average_Spline/spline/res/Precursor1.pdf','out/Average_Spline/spline/gof/Precursor1.txt','out/Average_Spline/spline/model/Precursor1.xml','out/Average_Spline/spline/eval/Precursor1.tab')
 ```
 To create the model for the monoisotope and peptides containing 0 sulfurs:
 ```Matlab
-IsotopeSpline(1000,'0','0','out/Precursor0.txt','out/hist.pdf','out/scatter.pdf','out/res.pdf','out/gof.txt','out/model.xml','out/eval.tab')
+IsotopeSpline(1000,'0','0','out/S0/data/Precursor0.txt','out/S0/spline/hist/Precursor0.pdf','out/S0/spline/scatter/Precursor0.pdf','out/S0/spline/res/Precursor0.pdf','out/S0/spline/gof/Precursor0.txt','out/S0/spline/model/Precursor0.xml','out/S0/spline/eval/Precursor0.tab')
 ```
 The previous commands create separate spline model .xml files. Use this command to merge them into a singe .xml file.
 
@@ -111,6 +116,10 @@ $ Rscript ../scripts/theoretical/plotRuntimeComparisons.R out/runtimes.out out/r
 ```
 
 ### Figure 1
+
+```ShellSession
+$ ./GenerateTrainingData data/human_sp_112816.fasta out/proteome/ 10000 5 1
+```
 
 ### Figure 2
 #${BUILD_DIR}/CompareToTheoretical $FASTA $LSB_JOBINDEX 100 1 ${OUT_DIR}"/residuals_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/scores_fragment_"${LSB_JOBINDEX}".out" ${OUT_DIR}"/stats_fragment_"${LSB_JOBINDEX}".out" $BIN_SIZE_CHISQUARE $BIN_SIZE_RESIDUAL
