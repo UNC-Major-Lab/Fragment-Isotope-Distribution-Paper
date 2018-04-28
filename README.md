@@ -10,12 +10,13 @@ It's not neccessary to use these scripts, but they contain examples of how to ex
 and the values we used for various parameters.
 
 ## Requirements
+(other version might work too, but this is what I used)
 1. CMake 2.8.3+
 2. MATLAB R2016a
 3. R 3.2.2
 4. Python 2.7.1
 5. OpenMS 2.1 (our custom fork, that includes the spline models. see below for instructions)
-6. gcc-4.8.1 and g++-4.8.1 (other version might work too, but that's what I used)
+6. gcc-4.8.1 and g++-4.8.1
 
 ## Build Instructions
 1. Build our version of OpenMS 2.1
@@ -125,7 +126,7 @@ Figure S-3 is out/runtimes.eps
 
 USAGE: plotModelToProteome.R path_to_spline_evals out_path isotope max_sulfurs out_path_for_figure max_mass
 ```ShellSession
-$ ./GenerateTrainingData ../data/human_sp_112816.fasta out/proteome/ 3000 5 1
+$ ./GenerateTrainingData ../data/human_sp_112816.fasta out/training/proteome/ 3000 5 1
 $ Rscript ../scripts/theoretical/plotModelToProteome.R out/spline_eval/ out/ 0 1 out/spline_comparison_0_model.eps 3000
 ```
 
