@@ -381,8 +381,10 @@ int main(int argc, char * argv[])
             OpenMS::String delimiter = "=";
             currentSpectrumCentroid.getNativeID().split(delimiter, tokens);
 
-            int scanID = tokens[tokens.size()-1].toInt()+1;
-            
+            int scanID = tokens[tokens.size()-1].toInt()-1;
+
+            //std::cout << scanID << std::endl;
+
             if (representativeScanIndexes.find(scanID) != representativeScanIndexes.end()) {
 
                 calcSpectrumIonDistribution(precursorIon, currentSpectrumCentroid, currentSpectrumProfile,
