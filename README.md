@@ -110,11 +110,6 @@ Plot sulfur-specific spline for the monoisotope and 0 sulfurs
 $ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 0 0 out/precursor0_model.eps 10000
 ```
 
-Plot sulfur-specific spline for the monoisotope and 1 sulfurs
-```ShellSession
-$ Rscript ../scripts/Training/plotModel.R out/spline_eval/ out/ 0 1 out/precursor0_model.eps 10000
-```
-
 The figures are out/Average_precursor0_model.eps, etc.
 
 ### Figure S-3
@@ -132,10 +127,10 @@ Figure S-3 is out/runtimes.eps
 USAGE: plotModelToProteome.R path_to_spline_evals out_path isotope max_sulfurs out_path_for_figure max_mass
 ```ShellSession
 $ ./GenerateTrainingData ../data/human_sp_112816.fasta out/proteome/ 2000 5 1
-$ Rscript ../scripts/theoretical/plotModelToProteome.R out/spline_eval/ out/ 0 1 out/spline_comparison_0_model.eps 2000
+$ Rscript ../scripts/theoretical/plotModelToProteome.R out/spline_eval/ out/ 0 0 out/spline_comparison_0_model.eps 2000
 ```
 
-Figure 1 is out/spline_comparison_0_model.eps. Repeat for other isotopes by changing the isotope parameter. For publication, we plotted up to 10000 Da, but it takes a long time to generate the proteome data so here we went up to 2000 Da. Notice that we set max_sulfurs to 1 for this example. If you created splines for more sulfurs, you need to update that parameter.
+Figure 1 is out/spline_comparison_0_model.eps. Repeat for other isotopes by changing the isotope parameter. For publication, we plotted up to 10000 Da, but it takes a long time to generate the proteome data so here we went up to 2000 Da. Notice that we set max_sulfurs to 0 for this example. If you created sulfur-specific splines for more sulfurs, you need to update that parameter.
 
 ### Figure 2 and Table S1
 
