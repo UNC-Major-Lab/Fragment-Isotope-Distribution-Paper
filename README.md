@@ -125,11 +125,11 @@ Figure S-3 is out/runtimes.eps
 
 USAGE: plotModelToProteome.R path_to_spline_evals out_path isotope max_sulfurs out_path_for_figure max_mass
 ```ShellSession
-$ ./GenerateTrainingData ../data/human_sp_112816.fasta out/proteome/ 10000 5 1
-$ Rscript ../scripts/theoretical/plotModelToProteome.R out/spline_eval/ out/ 0 1 out/spline_comparison_0_model.eps 10000
+$ ./GenerateTrainingData ../data/human_sp_112816.fasta out/proteome/ 3000 5 1
+$ Rscript ../scripts/theoretical/plotModelToProteome.R out/spline_eval/ out/ 0 1 out/spline_comparison_0_model.eps 3000
 ```
 
-Figure 1 is out/spline_comparison_0_model.eps. Repeat for other isotopes by changing the isotope parameter.
+Figure 1 is out/spline_comparison_0_model.eps. Repeat for other isotopes by changing the isotope parameter. For publication, we plotted up to 10000 Da, but it takes a long time to generate the proteome data so here we went up to 3000 Da.
 
 ### Figure 2 and Table S1
 
