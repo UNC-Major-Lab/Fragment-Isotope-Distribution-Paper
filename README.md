@@ -141,12 +141,12 @@ $ ./CompareToTheoretical
 USAGE: CompareToTheoretical fasta_path job_id num_jobs do_frag residual_file score_file stats_file bin_size_chi bin_size_res
 
 $ ./CompareToTheoretical ../data/human_sp_112816.fasta 1 2000 1 out/residuals_fragment.out out/scores_fragment.out out/stats_fragment.out 0.1 0.0025
-$ Rscript ../scripts/theoretical/plotComparisons.R out/fragment_scores.txt out/fragment_chisquared.eps 0.1 T
+$ Rscript ../scripts/theoretical/plotComparisons.R out/scores_fragment.out out/fragment_chisquared.eps 0.1 T
 ```
 
 Figure 2 is out/fragment_chisquared.eps
 
-The file out/stats_fragment_1.txt contains the results used for Table S1.
+The file out/stats_fragment.out contains the results used for Table S1.
 
 ### Figure 3
 
