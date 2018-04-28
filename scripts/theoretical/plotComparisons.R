@@ -29,7 +29,7 @@ if (fragments == "F") {
 
 } else {
 
-    p <- ggplot(data=data, aes(x=V3, y=V4, group=V1, fill=factor(V1)))
+    p <- ggplot(data=data, aes(x=V3, y=V4, group=V1, color=factor(V1)))
 
     setEPS()
     postscript(outfile, width=18, height=9)
