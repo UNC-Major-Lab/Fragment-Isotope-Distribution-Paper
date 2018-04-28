@@ -204,7 +204,7 @@ void testTheoreticalIon(AASequence& pep, AASequence& frag, EmpiricalFormula& pre
         isolated_precursor_isotopes.clear();
         for (UInt i = start; i <= MAX_ISOTOPE; ++i)
         {
-            if (start == 0 && i == 0) continue;
+            //if (start == 0 && i == 0) continue;
 
             isolated_precursor_isotopes.insert(i);
             std::string label = std::to_string(start)+"-"+std::to_string(i);
