@@ -115,7 +115,7 @@ The figures are out/Average_precursor0_model.eps, etc.
 
 USAGE: SpeedTest min_mass max_mass max_sulfurs num_samples
 ```ShellSession
-$ ./SpeedTest 400 9500 5 1e5 > out/runtimes.out
+$ ./SpeedTest 400 9500 5 10000 > out/runtimes.out
 $ Rscript ../scripts/theoretical/plotRuntimeComparisons.R out/runtimes.out out/runtimes.eps
 ```
 
