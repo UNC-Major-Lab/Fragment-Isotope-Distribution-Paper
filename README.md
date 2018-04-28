@@ -126,7 +126,7 @@ Figure S-3 is out/runtimes.eps
 
 USAGE: plotModelToProteome.R path_to_spline_evals out_path isotope max_sulfurs out_path_for_figure max_mass
 ```ShellSession
-$ ./GenerateTrainingData ../data/human_sp_112816.fasta out/proteome/ 2000 5 1
+$ ./GenerateTrainingData ../data/human_sp_112816.fasta out/proteome/ 2000 5 0
 $ Rscript ../scripts/theoretical/plotModelToProteome.R out/spline_eval/ out/ 0 0 out/spline_comparison_0_model.eps 2000
 ```
 
