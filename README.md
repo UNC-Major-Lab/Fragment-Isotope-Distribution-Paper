@@ -104,7 +104,7 @@ $ Rscript ../scripts/Training/plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} 
 
 ### Figure S-3
 
-USAGE: SpeedTest min_mass max_mass max_sulfurs num_tests
+USAGE: SpeedTest min_mass max_mass max_sulfurs num_samples
 ```ShellSession
 $ ./SpeedTest 400 9500 5 1e5 > out/runtimes.out
 $ Rscript ../scripts/theoretical/plotRuntimeComparisons.R out/runtimes.out out/runtimes.eps
