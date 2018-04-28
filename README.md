@@ -45,7 +45,7 @@ $ make
 
 #GenerateTrainingData FASTA_FILE OUT_PATH MAX_SAMPLED_MASS MAX_ISOTOPE_DEPTH MONO_MASS? NUM_SULFURS NUM_SAMPLES
 ```ShellSession
-GenerateTrainingData data/human_sp_112816.fasta out/ 10000 5 1 Average_Spline 300
+./GenerateTrainingData data/human_sp_112816.fasta out/ 10000 5 1 Average_Spline 300
 ```
 
 ### Generate splines
@@ -56,7 +56,7 @@ IsotopeSpline(1000,'Average_spline','0','out/Precursor0.txt','out/hist.pdf','out
 
 #python combineModels.py $SPLINE_OUT_DIR $MAX_ISOTOPE_DEPTH $MAX_SULFUR > ${SPLINE_OUT_DIR}"/IsotopeSplines.xml"
 ```ShellSession
-python combineModels.py out/ 5 5 > out/IsotopeSplines.xml
+$ python combineModels.py out/ 5 5 > out/IsotopeSplines.xml
 ```
 
 ### Figure 1
@@ -65,8 +65,8 @@ python combineModels.py out/ 5 5 > out/IsotopeSplines.xml
 
 
 ```ShellSession
-GenerateTrainingData data/human_sp_112816.fasta out/proteome/ 10000 5 1
-Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE -1 ${OUT_DIR}"Average_precursor"${PRECURSOR_ISOTOPE}"_model.eps" 100000
+$ ./GenerateTrainingData data/human_sp_112816.fasta out/proteome/ 10000 5 1
+$ Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE -1 ${OUT_DIR}"Average_precursor"${PRECURSOR_ISOTOPE}"_model.eps" 100000
 ```
 
 ### Figure 2
@@ -75,8 +75,8 @@ Rscript plotModel.R ${DATA_DIR}"spline_eval/" ${DATA_DIR} $PRECURSOR_ISOTOPE -1 
 
 
 ```ShellSession
-CompareToTheoretical data/human_sp_112816.fasta 1 100 1 out/residuals_fragment".out" out/scores_fragment.out" out/stats_fragment.out" 0.1 0.0025
-Rscript plotComparisons.R out/fragment_scores.txt out/fragment_chisquared.eps 0.1 T
+$ ./CompareToTheoretical data/human_sp_112816.fasta 1 100 1 out/residuals_fragment".out" out/scores_fragment.out" out/stats_fragment.out" 0.1 0.0025
+$ Rscript plotComparisons.R out/fragment_scores.txt out/fragment_chisquared.eps 0.1 T
 ```
 
 ### Figure 3
@@ -86,20 +86,20 @@ Rscript plotComparisons.R out/fragment_scores.txt out/fragment_chisquared.eps 0.
 
 
 ```ShellSession
-${BUILD_DIR}/CompareToTargeted data/Neuro_04.mzML data/Neuro_04_centroid.mzML out/out04.tab out/calc_out04.tab out/scores_out04.tab
-Rscript IndividualSpectrumIsotopes.R out/out04.tab out/calc_out04.tab out/scores_out04.tab out/low_throughput.eps
+$ ./CompareToTargeted data/Neuro_04.mzML data/Neuro_04_centroid.mzML out/out04.tab out/calc_out04.tab out/scores_out04.tab
+$ Rscript IndividualSpectrumIsotopes.R out/out04.tab out/calc_out04.tab out/scores_out04.tab out/low_throughput.eps
 ```
 
 ### Figure 4 and Table 1
 
 #CompareToShotgun ${DATA_DIR}"/HELA_2017-10-25_CID25_OT.mzML" ${DATA_DIR}"/HELA_2017-10-25_CID25_OT.idXML" 0.0 $OUT_DIR MS2 MS2 CID_25
 ```ShellSession
-CompareToShotgun data/HELA_2017-10-25_CID25_OT.mzML data/HELA_2017-10-25_CID25_OT.idXML 0.0 out/ MS2 MS2 CID_25
+$ ./CompareToShotgun data/HELA_2017-10-25_CID25_OT.mzML data/HELA_2017-10-25_CID25_OT.idXML 0.0 out/ MS2 MS2 CID_25
 ```
 
 ### Supplemental speed comparison
 
 ```ShellSession
-SpeedTest 400 9500 5 1e5 > out/runtimes.out
-Rscript plotRuntimeComparisons.R out/runtimes.out out/runtimes.eps
+$ ./SpeedTest 400 9500 5 1e5 > out/runtimes.out
+$ Rscript plotRuntimeComparisons.R out/runtimes.out out/runtimes.eps
 ```
