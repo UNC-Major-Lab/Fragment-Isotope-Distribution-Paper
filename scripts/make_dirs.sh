@@ -1,20 +1,26 @@
-#!/usr/bin/env bash
+#!/bin/csh
 
 mkdir -p out/Average_Spline/spline/model/
-mkdir out/Average_Spline/spline/gof/
-mkdir out/Average_Spline/spline/hist/
-mkdir out/Average_Spline/spline/res/
-mkdir out/Average_Spline/spline/scatter/
-mkdir out/Average_Spline/spline/eval/
+mkdir -p out/Average_Spline/spline/gof/
+mkdir -p out/Average_Spline/spline/hist/
+mkdir -p out/Average_Spline/spline/res/
+mkdir -p out/Average_Spline/spline/scatter/
+mkdir -p out/Average_Spline/spline/eval/
+mkdir -p out/Average_Spline/data/
 
-for S in $(seq 0 5);
-do
-    set dir = "S$S"
-    mkdir -p out/${dir}/spline/model/
-    mkdir out/${dir}/spline/gof/
-    mkdir out/${dir}/spline/hist/
-    mkdir out/${dir}/spline/res/
-    mkdir out/${dir}/spline/scatter/
-    mkdir out/${dir}/spline/eval/
-done
+mkdir -p out/proteome/
+mkdir -p out/proteome/averagine/
+
+set S = 0
+while  ($S <= 5);
+    set out_dir="S${S}"
+    mkdir -p out/${out_dir}/spline/model/
+    mkdir -p out/${out_dir}/spline/gof/
+    mkdir -p out/${out_dir}/spline/hist/
+    mkdir -p out/${out_dir}/spline/res/
+    mkdir -p out/${out_dir}/spline/scatter/
+    mkdir -p out/${out_dir}/spline/eval/
+    mkdir -p out/${out_dir}/data/
+    @ S++
+end
 

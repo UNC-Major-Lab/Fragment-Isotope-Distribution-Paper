@@ -67,7 +67,6 @@ function IsotopeSpline(breakSteps, S, precursor_isotope, infile, outfile_res_his
 	
 	evaluateAndOutputSpline(outfile_spline_eval, sp_pp, min_knot, max_knot);
 	
-	exit;
 end
 
 % This function calculates the residuals, R^2, Root Mean Squared Deviation (RMSD), and average absolute deviation
