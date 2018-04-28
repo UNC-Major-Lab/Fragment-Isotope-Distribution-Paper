@@ -151,8 +151,8 @@ The file out/stats_fragment.out contains the results used for Table S1.
 ### Figure 3
 
 ```ShellSession
-$ ./CompareToTargeted ../data/Neuro_04.mzML ../data/Neuro_04_centroid.mzML out/out04.tab out/calc_out04.tab out/scores_out04.tab
-$ Rscript ../scripts/experimental/lowThroughput/IndividualSpectrumIsotopes.R out/out04.tab out/calc_out04.tab out/scores_out04.tab out/low_throughput.eps
+$ ./CompareToTargeted ../data/Angiotensin_z3_CID_round2_subset.mzML ../data/Angiotensin_z3_CID_round2_centroid_subset.mzML out/target.tab out/calc_target.tab out/scores_target.tab
+$ Rscript ../scripts/experimental/lowThroughput/IndividualSpectrumIsotopes.R out/target.tab out/calc_target.tab out/scores_target.tab out/low_throughput.eps
 ```
 Figure 3 is out/low_throughput.eps
 
