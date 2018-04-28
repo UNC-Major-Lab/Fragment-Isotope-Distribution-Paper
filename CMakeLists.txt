@@ -42,7 +42,7 @@ find_package(OpenMS PATHS "/Users/dennisg/OpenMS/dev-OpenMS/")
 #find_package(OpenMS PATHS "/Users/dennisg/OpenMS/OpenMS/")
 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-extensions")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-c++11-extensions")
 
 # check whether the OpenMS package was found
 if (OpenMS_FOUND)
