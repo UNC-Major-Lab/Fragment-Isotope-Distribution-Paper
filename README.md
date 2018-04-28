@@ -134,7 +134,7 @@ Figure 1 is out/spline_comparison_0_model.eps. Repeat for other isotopes by chan
 
 ### Figure 2 and Table S1
 
-Here we're only going to perform 1/1000 of the simulated fragments because it takes a long time otherwise. We split it on a compute cluster for the publication.
+Here we're only going to perform 1/1000 of the simulated fragments because it takes a long time otherwise. We split it on a compute cluster for the publication. To perform the full comparison, call CompareToTheoretical with job_id set to 1 to 1000, then merge the results.
 
 ```ShellSession
 $ ./CompareToTheoretical
