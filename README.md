@@ -155,7 +155,6 @@ Figure 3 is out/low_throughput.eps
 
 ### Figure 4 and Table 1
 
-#CompareToShotgun ${DATA_DIR}"/HELA_2017-10-25_CID25_OT.mzML" ${DATA_DIR}"/HELA_2017-10-25_CID25_OT.idXML" 0.0 $OUT_DIR MS2 MS2 CID_25
 ```ShellSession
 $ ./CompareToShotgun data/HELA_2017-10-25_CID25_OT.mzML data/HELA_2017-10-25_CID25_OT.idXML 0.0 out/ MS2 MS2 CID_25
 $ Rscript ../scripts/experimental/highThroughput/plotShotgunResults.R out/distributionScores.out out/
