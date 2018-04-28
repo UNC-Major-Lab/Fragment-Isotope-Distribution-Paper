@@ -15,7 +15,7 @@ and the values we used for various parameters.
 2. MATLAB R2016a
 3. R 3.2.2
 4. Python 2.7.1
-5. OpenMS 2.1 (our custom fork, that includes the spline models. see below for instructions)
+5. OpenMS 2.1 (our custom fork that includes the spline models. See below for instructions)
 6. gcc-4.8.1 and g++-4.8.1
 
 ## Build Instructions
