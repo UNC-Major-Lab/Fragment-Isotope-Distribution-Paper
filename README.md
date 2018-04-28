@@ -57,8 +57,8 @@ $ ./GenerateTrainingData
  S: number of sulfurs that should be in the fragment ion. Use -1 for all (e.g. 0,1,2..)
  num_samples: number of random peptides to make for each peptide length
  
-$ ./GenerateTrainingData data/human_sp_112816.fasta out/Average_Spline/data/ 10000 5 1 -1 300
-$ ./GenerateTrainingData data/human_sp_112816.fasta out/S0/data/ 10000 5 1 0 300
+$ ./GenerateTrainingData ../data/human_sp_112816.fasta out/Average_Spline/data/ 10000 5 1 -1 300
+$ ./GenerateTrainingData ../data/human_sp_112816.fasta out/S0/data/ 10000 5 1 0 300
 ```
 
 The above generates the training data for the first 5 isotopes for the average spline up to 10kDa and the sulfur-specific spline with 0 sulfurs. Repeat for the last command with different values of S for other sulfur-specific models.
