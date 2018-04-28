@@ -74,15 +74,15 @@ Usage: IsotopeSpline(knot_spacing, num_sulfurs, isotope, path_to_training_data, 
 
 To create the model for the monoisotope and peptides containing any number of sulfurs:
 ```Matlab
-IsotopeSpline(1000,'Average_spline','0','out/Average_Spline/data/Precursor0.txt','out/Average_Spline/spline/hist/Precursor0.pdf','out/Average_Spline/spline/scatter/Precursor0.pdf','out/Average_Spline/spline/res/Precursor0.pdf','out/Average_Spline/spline/gof/Precursor0.txt','out/Average_Spline/spline/model/Precursor0.xml','out/Average_Spline/spline/eval/Precursor0.tab')
+IsotopeSpline(1000,'Average_spline','0','../../build/out/Average_Spline/data/Precursor0.tab','../../build/out/Average_Spline/spline/hist/Precursor0.pdf','../../build/out/Average_Spline/spline/scatter/Precursor0.pdf','../../build/out/Average_Spline/spline/res/Precursor0.pdf','../../build/out/Average_Spline/spline/gof/Precursor0.txt','../../build/out/Average_Spline/spline/model/Precursor0.xml','../../build/out/Average_Spline/spline/eval/Precursor0.tab')
 ```
 To create the model for the M+1 isotope and peptides containing any number of sulfurs:
 ```Matlab
-IsotopeSpline(1000,'Average_spline','1','out/Average_Spline/data/Precursor1.txt','out/Average_Spline/spline/hist/Precursor1.pdf','out/Average_Spline/spline/scatter/Precursor1.pdf','out/Average_Spline/spline/res/Precursor1.pdf','out/Average_Spline/spline/gof/Precursor1.txt','out/Average_Spline/spline/model/Precursor1.xml','out/Average_Spline/spline/eval/Precursor1.tab')
+IsotopeSpline(1000,'Average_spline','1','../../build/out/Average_Spline/data/Precursor1.tab','../../build/out/Average_Spline/spline/hist/Precursor1.pdf','../../build/out/Average_Spline/spline/scatter/Precursor1.pdf','../../build/out/Average_Spline/spline/res/Precursor1.pdf','../../build/out/Average_Spline/spline/gof/Precursor1.txt','../../build/out/Average_Spline/spline/model/Precursor1.xml','../../build/out/Average_Spline/spline/eval/Precursor1.tab')
 ```
 To create the model for the monoisotope and peptides containing 0 sulfurs:
 ```Matlab
-IsotopeSpline(1000,'0','0','out/S0/data/Precursor0.txt','out/S0/spline/hist/Precursor0.pdf','out/S0/spline/scatter/Precursor0.pdf','out/S0/spline/res/Precursor0.pdf','out/S0/spline/gof/Precursor0.txt','out/S0/spline/model/Precursor0.xml','out/S0/spline/eval/Precursor0.tab')
+IsotopeSpline(1000,'0','0','../../build/out/S0/data/Precursor0.tab','../../build/out/S0/spline/hist/Precursor0.pdf','../../build/out/S0/spline/scatter/Precursor0.pdf','../../build/out/S0/spline/res/Precursor0.pdf','../../build/out/S0/spline/gof/Precursor0.txt','../../build/out/S0/spline/model/Precursor0.xml','../../build/out/S0/spline/eval/Precursor0.tab')
 ```
 The previous commands create separate spline model .xml files. Use this command to merge them into a singe .xml file.
 
