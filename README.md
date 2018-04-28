@@ -5,8 +5,8 @@ This repository contains the source code necessary to reproduce the results from
 It consists of the code to generate the training data for splines, generate the spline models,
 and to compare approximate isotopic distributions to various theoretical and experimental isotopic distributions.
 
-The scripts in the scripts/ directory are tailored to our LSF cluster to perform parallel job execution.
-It's not neccessary to use these scripts, but they contain examples of how to execute the programs
+Some scripts in the scripts/ directory are tailored to our LSF cluster to perform parallel job execution.
+It's not neccessary to use these scripts, but they contain further examples of how to execute the programs
 and the values we used for various parameters.
 
 ## Requirements
@@ -151,8 +151,8 @@ The file out/stats_fragment.out contains the results used for Table S1.
 ### Figure 3
 
 ```ShellSession
-$ ./CompareToTargeted ../data/Neuro_04.mzML ../data/Neuro_04_centroid.mzML out/out04.tab out/calc_out04.tab out/scores_out04.tab
-$ Rscript ../scripts/experimental/lowThroughput/IndividualSpectrumIsotopes.R out/out04.tab out/calc_out04.tab out/scores_out04.tab out/low_throughput.eps
+$ ./CompareToTargeted ../data/Angiotensin_z3_CID_round2_subset.mzML ../data/Angiotensin_z3_CID_round2_centroid_subset.mzML out/target.tab out/calc_target.tab out/scores_target.tab
+$ Rscript ../scripts/experimental/lowThroughput/IndividualSpectrumIsotopes.R out/target.tab out/calc_target.tab out/scores_target.tab out/low_throughput.eps
 ```
 Figure 3 is out/low_throughput.eps
 
