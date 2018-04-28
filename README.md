@@ -83,6 +83,7 @@ Usage: combineModels.py path_to_spline_xmls max_isotope_depth max_sulfur
 ```ShellSession
 $ python ../scripts/training/combineModels.py out/ 5 5 > out/IsotopeSplines.xml
 ```
+The publication version of IsotopeSplines.xml is already included in the IsotopeSplines branch of OpenMS that you checked out earlier. It is also in the misc/ directory.
 
 ### Figures S-1 and S-2
 
