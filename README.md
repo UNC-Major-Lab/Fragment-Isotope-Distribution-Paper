@@ -9,6 +9,8 @@ Some scripts in the scripts/ directory are tailored to our LSF cluster to perfor
 It's not neccessary to use these scripts, but they contain further examples of how to execute the programs
 and the values we used for various parameters.
 
+JavaSplineUsageExample/ provides a java example of parsing, evaluating, and using the isotope splines.
+
 ## Requirements
 (other version might work too, but this is what I used)
 1. CMake 2.8.3+
