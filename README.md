@@ -12,7 +12,7 @@ and the values we used for various parameters.
 JavaSplineUsageExample/ provides a java example of parsing, evaluating, and using the isotope splines.
 
 ## Requirements
-(other version might work too, but this is what I used)
+(other versions might work too, but this is what I used)
 1. CMake 2.8.3+
 2. MATLAB R2016a
 3. R 3.2.2
