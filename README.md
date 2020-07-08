@@ -11,9 +11,14 @@ and the values we used for various parameters.
 
 ## Requirements
 
+OpenMS
+Matlab version
+
 ## Compilation
 
 ## Execution
+
+PeptideFragmentSampler 8500 100 0 0 0 0 5
 
 ### Generate Training data
 
